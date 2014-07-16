@@ -17,6 +17,11 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.cache import never_cache
 from django.conf import settings
 
+#Import Profiling Module Models
+from profiling.models import (Person, University, Department,
+    Degree_Program, Scholarship)
+
+
 class ERDTAdminSite(AdminSite):
     @never_cache
     def index(self, request, extra_context=None):
@@ -33,4 +38,10 @@ class ERDTAdminSite(AdminSite):
 admin_site = ERDTAdminSite()
 
 admin_site.register(User)
+admin_site.register(Person)
+admin_site.register(University)
+admin_site.register(Department)
+admin_site.register(Degree_Program)
+admin_site.register(Scholarship)
+
 

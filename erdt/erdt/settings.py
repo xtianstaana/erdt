@@ -36,7 +36,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'erdt.alpha'
+    'erdt.alpha', #Admin Customization
+    'profiling' #Profiling Module
 )
 
 MIDDLEWARE_CLASSES = (

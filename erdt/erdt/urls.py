@@ -7,5 +7,5 @@ urlpatterns = patterns('',
     # url(r'^$', 'erdt.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
 
-    url(r'^admin/', include(admin_site.urls)),
+    url(r'^', include(admin_site.urls)),
 )
