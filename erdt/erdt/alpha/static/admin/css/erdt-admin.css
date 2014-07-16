@@ -1,0 +1,21 @@
+/**********************************************
+ERDT Admin Base Style
+Author: Christian Sta.Ana
+Date: Fri Jul 11
+**********************************************/
+
+#header {
+	background: #00688B;
+}
+
+#user-profile-box table thead th {
+    border-left: none; 
+}
+
+#user-profile-box table td:first-child, #user-profile-box table th:first-child {
+    width: 20% !important;
+}
+
+#user-profile-box table td:first-child {
+    font-weight: bold;
+}
