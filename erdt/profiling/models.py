@@ -33,7 +33,7 @@ class University(models.Model):
 	member_since = models.DateField()
 	address = models.CharField(max_length=100)
 	email_address = models.EmailField()
-	landline_number = models.CharField(max_length=20, null=True)
+	landline_number = models.CharField(max_length=20, blank=True)
 	no_semester = models.IntegerField(default=2)
 	with_summer = models.BooleanField(default=True)
 
@@ -96,8 +96,6 @@ class Scholarship(models.Model):
 
 	adviser = models.ForeignKey(Person)
 	degree_program = models.ForeignKey(Degree_Program)
-	#sandwich_program = models.ForeignKey(Sandwich_Program)
-
 	adviser_acceptance = models.BooleanField(default=False)
 	scholarship_type = models.CharField(max_length=10, choices=SCHOLARSHIP_TYPE_CHOICES, default=ERDT)
 	scholarship_status = models.CharField(max_length=3, choices=SCHOLARSHIP_STATUS_CHOICES, default=REG_ONGOING)
@@ -110,11 +108,10 @@ class Scholarship(models.Model):
 	ce_schedule = models.DateField(null=True)
 	entry_grad_program = models.DateField()
 	entry_scho_program = models.DateField()
-	start_contract = models.DateField()
-	end_contract = models.DateField()
-
-	# year and number of terms (sem) in grad program?
-	# year and number of terms (sem) in sholarship program?
+	end_scho_program = models.DateField()
+	lateral = models.BooleanField(default=True)
+	no_of_sem_grad_program = models.IntegerField(default=1)
+	no_of_sem_scho_program = models.IntegerField(default=1)
 
 class Profile(models.Model):
 	STUDENT, ADVISER, UNIV_ADMIN, CENTRAL_OFFICE, DOST = 'STU', 'ADV', 'ADMIN', 'CENT', 'DOST'
@@ -165,6 +162,3 @@ class Enrolled_Subject(models.Model):
 	year_taken = models.DateField()
 	sem_taken = models.IntegerField(default=1)
 	eq_grade = models.FloatField(default=0.0)
-
-
-
