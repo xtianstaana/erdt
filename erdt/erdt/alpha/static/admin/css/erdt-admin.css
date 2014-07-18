@@ -1,21 +1,12 @@
 /**********************************************
-ERDT Admin Base Style
+ERDT Admin Style
 Author: Christian Sta.Ana
 Date: Fri Jul 11
 **********************************************/
 
-#header {
-	background: #00688B;
-}
+@import url("erdt/general.css");
 
-#user-profile-box table thead th {
-    border-left: none; 
-}
+@import url("erdt/login.css");
 
-#user-profile-box table td:first-child, #user-profile-box table th:first-child {
-    width: 20% !important;
-}
+@import url("erdt/profile-page.css");
 
-#user-profile-box table td:first-child {
-    font-weight: bold;
-}

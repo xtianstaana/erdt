@@ -74,7 +74,13 @@
     </div>
     <!-- END Content -->
 
-    {% block footer %}<div id="footer"></div>{% endblock %}
+    {% block footer %}
+        <div id="footer">
+            <div id="credits">
+                &copy; Copyright {% now "Y" %} <a href="{{ external_urls.dost_site }}" target="_blank">Department of Science and Technology, Republic of the Philippines</a>. All rights reserved. 
+            </div>
+        </div>
+    {% endblock %}
 </div>
 <!-- END Container -->
 

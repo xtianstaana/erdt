@@ -1,0 +1,17 @@
+/**********************************************
+ERDT Profile Page Styles
+Author: Christian Sta.Ana
+Date: Fri Jul 18
+**********************************************/
+
+#user-profile-box table thead th {
+    border-left: none; 
+}
+
+#user-profile-box table td:first-child, #user-profile-box table th:first-child {
+    width: 20% !important;
+}
+
+#user-profile-box table td:first-child {
+    font-weight: bold;
+}
