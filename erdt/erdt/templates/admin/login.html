@@ -27,6 +27,9 @@
 {% endif %}
 
 <div id="content-main">
+
+<img id="erdt-logo" src="{% static "admin/img/erdt/erdt-logo-large.png" %}" />
+
 <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
   <div class="form-row">
     {{ form.username.errors }}
