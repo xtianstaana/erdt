@@ -7,5 +7,6 @@ urlpatterns = patterns('',
     # url(r'^$', 'erdt.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
 
+    # Set our homepage to the admin_site 
     url(r'^', include(admin_site.urls)),
 )
