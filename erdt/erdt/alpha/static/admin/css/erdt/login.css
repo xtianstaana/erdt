@@ -18,3 +18,7 @@ Date: Fri Jul 18
     margin: 20px auto 0;
     display: block;
 }
+
+.login #content {
+    min-height: 300px;
+}
