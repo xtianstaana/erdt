@@ -93,6 +93,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.media",
     "django.contrib.messages.context_processors.messages",
     "erdt.alpha.context_processors.external_urls", 
+    "erdt.alpha.context_processors.constants", 
 )
 
 

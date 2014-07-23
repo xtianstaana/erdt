@@ -37,6 +37,9 @@ class University(models.Model):
 	no_semester = models.IntegerField(default=2)
 	with_summer = models.BooleanField(default=True)
 
+	class Meta:
+		verbose_name_plural = 'Universities'
+
 class Department(models.Model):
 	photo = models.ImageField(upload_to='dept_seal', null=True)
 	name = models.CharField(max_length=50)
@@ -54,6 +57,10 @@ class Degree_Program(models.Model):
 	degree = models.CharField(max_length=3, choices=DEGREE_CHOICES)
 	program = models.CharField(max_length=50)
 	department = models.ForeignKey(Department)
+
+	class Meta:
+		verbose_name = 'Degree Program'
+		verbose_name_plural = 'Degree Programs'
 
 class Scholarship(models.Model):
 	ERDT, DOST, AASTHRD = 'ERDT', 'DOST', 'AASTHRD'
@@ -137,6 +144,10 @@ class Purchased_Item(models.Model):
 	status = models.CharField(max_length=50)
 	accountable = models.ForeignKey(Person)
 	fund_source = models.ForeignKey(Scholarship)
+
+	class Meta:
+		verbose_name = 'Purchased Item'
+		verbose_name_plural = 'Purchased Items'
 	
 class Research_Dissemination(models.Model):
 	profile = models.ForeignKey(Profile)
@@ -145,11 +156,19 @@ class Research_Dissemination(models.Model):
 	conference_loc = models.CharField(max_length=100)
 	conference_date = models.DateField()
 
+	class Meta:
+		verbose_name = 'Research Dissemination'
+		verbose_name_plural = 'Research Disseminations'
+
 class Sandwich_Program(models.Model):
 	budget = models.FloatField(default=0.0)
 	host_university = models.CharField(max_length=50)
 	host_professor = models.CharField(max_length=50)
 	scholarship = models.ForeignKey(Scholarship)
+
+	class Meta:
+		verbose_name = 'Sandwich Program'
+		verbose_name_plural = 'Sandwich Programs'
 
 class Subject(models.Model):
 	university = models.ForeignKey(University)
@@ -162,3 +181,8 @@ class Enrolled_Subject(models.Model):
 	year_taken = models.DateField()
 	sem_taken = models.IntegerField(default=1)
 	eq_grade = models.FloatField(default=0.0)
+
+	class Meta:
+		verbose_name = 'Enrolled Subject'
+		verbose_name_plural = 'Enrolled Subjects'
+
