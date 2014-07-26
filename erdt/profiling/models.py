@@ -89,7 +89,7 @@ class Scholarship(models.Model):
 		(BS, 'Bachelor of Science'),
 		(MS, 'Master of Science'),
 		(MD, 'Doctor of Medicine'),
-		(PHD, 'Doctor of Philisophy'),
+		(PHD, 'Doctor of Philosophy'),
 	)
 
 	PROPOSAL, TOPIC_FINALIZED, PROP_APPROVED, DEFENDED, QUALS, CANDS =  'PR', 'TF', 'PA', 'DF', 'QE', 'CE'
