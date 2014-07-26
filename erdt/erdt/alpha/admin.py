@@ -24,7 +24,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.cache import never_cache
 from django.conf import settings
 
-# Import Profiling Module Models
+# Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
     Degree_Program, Scholarship, Subject, Purchased_Item)
 
