@@ -15,7 +15,7 @@ class Person(models.Model):
 		(MARRIED, 'Married'),
 	)
 
-	photo = models.ImageField(upload_to='img', null=True)
+	photo = models.ImageField(upload_to='img', null=True, blank=True)
 	first_name = models.CharField(max_length=50)
 	middle_name = models.CharField(max_length=50)
 	last_name = models.CharField(max_length=50)
@@ -27,31 +27,40 @@ class Person(models.Model):
 	landline_number = models.CharField(max_length=20, blank=True)
 	mobile_number = models.CharField(max_length=20, blank=True)
 
+	def __unicode__(self):
+		return '%s, %s %s' % (self.last_name, self.first_name, self.middle_name)
+
 class University(models.Model):
-	photo = models.ImageField(upload_to='univ_seal', null=True)
+	photo = models.ImageField(upload_to='univ_seal', null=True, blank=True)
 	name = models.CharField(max_length=50)
 	member_since = models.DateField()
 	address = models.CharField(max_length=100)
 	email_address = models.EmailField()
 	landline_number = models.CharField(max_length=20, blank=True)
-	no_semester = models.IntegerField(default=2)
-	with_summer = models.BooleanField(default=True)
+	no_semester = models.IntegerField(default=2, verbose_name='No of terms per SY')
+	with_summer = models.BooleanField(default=False, verbose_name='With summer term')
 
 	class Meta:
 		verbose_name_plural = 'Universities'
 
+	def __unicode__(self):
+		return self.name
+
 class Department(models.Model):
-	photo = models.ImageField(upload_to='dept_seal', null=True)
+	photo = models.ImageField(upload_to='dept_seal', null=True, blank=True)
 	name = models.CharField(max_length=50)
 	email_address = models.EmailField()
 	landline_number = models.CharField(max_length=20, blank=True)
 	university = models.ForeignKey(University)
 
+	def __unicode__(self):
+		return '%s, %s' % (self.name, self.university)
+
 class Degree_Program(models.Model):
 	MS, PHD = 'MS', 'PHD'
 	DEGREE_CHOICES = (
 		(MS, 'Master of Science'),
-		(PHD, 'Doctor of Philisophy'),
+		(PHD, 'Doctor of Philosophy'),
 	)
 
 	degree = models.CharField(max_length=3, choices=DEGREE_CHOICES)
@@ -61,6 +70,9 @@ class Degree_Program(models.Model):
 	class Meta:
 		verbose_name = 'Degree Program'
 		verbose_name_plural = 'Degree Programs'
+
+	def __unicode__(self):
+		return '%s %s' % (self.degree, self.program)
 
 class Scholarship(models.Model):
 	ERDT, DOST, AASTHRD = 'ERDT', 'DOST', 'AASTHRD'
@@ -103,22 +115,19 @@ class Scholarship(models.Model):
 
 	adviser = models.ForeignKey(Person)
 	degree_program = models.ForeignKey(Degree_Program)
-	adviser_acceptance = models.BooleanField(default=False)
 	scholarship_type = models.CharField(max_length=10, choices=SCHOLARSHIP_TYPE_CHOICES, default=ERDT)
 	scholarship_status = models.CharField(max_length=3, choices=SCHOLARSHIP_STATUS_CHOICES, default=REG_ONGOING)
-	scholarship_detail = models.CharField(max_length=250)
-	high_degree = models.CharField(max_length=3, choices=DEGREE_CHOICES, default=BS)
-	high_degree_univ = models.CharField(max_length=50)
+	scholarship_detail = models.CharField(max_length=250, blank=True)
+	high_degree = models.CharField(max_length=3, choices=DEGREE_CHOICES, default=BS, verbose_name='Highest degree')
+	high_degree_univ = models.CharField(max_length=50, verbose_name="Highest degree's University")
 	thesis_topic = models.CharField(max_length=100, blank=True)
 	thesis_title = models.CharField(max_length=100, blank=True)
 	thesis_status = models.CharField(max_length=2, choices=THESIS_STATUS_CHOICES, default=PROPOSAL)
-	ce_schedule = models.DateField(null=True)
-	entry_grad_program = models.DateField()
-	entry_scho_program = models.DateField()
-	end_scho_program = models.DateField()
-	lateral = models.BooleanField(default=True)
-	no_of_sem_grad_program = models.IntegerField(default=1)
-	no_of_sem_scho_program = models.IntegerField(default=1)
+	ce_schedule = models.DateField(null=True, blank=True, verbose_name='Candidacy Exam schedule')
+	entry_grad_program = models.DateField(verbose_name='Entry to graduate program')
+	entry_scho_program = models.DateField(verbose_name='Start of scholarship contract')
+	end_scho_program = models.DateField(verbose_name='End of scholarship contract')
+	lateral = models.BooleanField(default=False)
 
 class Profile(models.Model):
 	STUDENT, ADVISER, UNIV_ADMIN, CENTRAL_OFFICE, DOST = 'STU', 'ADV', 'ADMIN', 'CENT', 'DOST'
@@ -133,9 +142,12 @@ class Profile(models.Model):
 	role = models.CharField(max_length=5, choices=ROLE_CHOICES, default=STUDENT)
 	person = models.ForeignKey(Person, null=False, blank=False) # for ALL, account holder
 	
-	university = models.ForeignKey(University, null=True) # for ADMIN, else null
-	department = models.ForeignKey(Department, null=True) # from ADV, else null
-	scholarship = models.ForeignKey(Scholarship,null=True) # for STU, else null
+	university = models.ForeignKey(University, null=True, blank=True) # for ADMIN, else null
+	department = models.ForeignKey(Department, null=True, blank=True) # from ADV, else null
+	scholarship = models.ForeignKey(Scholarship,null=True, blank=True) # for STU, else null
+
+	def __unicode__(self):
+		return '%s as %s' % (self.person, self.role)
 
 class Purchased_Item(models.Model):
 	description = models.CharField(max_length=250)
@@ -172,8 +184,11 @@ class Sandwich_Program(models.Model):
 
 class Subject(models.Model):
 	university = models.ForeignKey(University)
-	course_title = models.CharField(max_length=30)
-	course_units = models.FloatField(default=1.0)
+	course_title = models.CharField(max_length=100)
+	course_units = models.FloatField(default=3.0)
+
+	def __unicode__(self):
+		return '%s: %s' % (self.course_title, self.university)
 
 class Enrolled_Subject(models.Model):
 	subject = models.ForeignKey(Subject)

@@ -58,6 +58,29 @@ class ERDTAdminSite(AdminSite):
 
         return erdtIndexTempRes
 
+class ProfileSite(ModelAdmin):
+    list_display = ('person', 'role') 
+    list_filter = ('role',)
+
+class DegreeProgramSite(ModelAdmin):
+    list_display = ('program', 'degree', 'department')
+    list_filter = ('degree', 'department__university__name')
+
+class DepartmentSite(ModelAdmin):
+    list_display = ('name', 'university',)
+    list_filter = ('university',)
+
+class PersonSite(ModelAdmin):
+    list_display = ('__unicode__', 'email_address', 'mobile_number')
+    search_fields = ('first_name', 'middle_name', 'last_name')
+
+class SubjectSite(ModelAdmin):
+    list_display = ('course_title', 'course_units', 'university')
+    list_filter = ('university',)
+
+class UniversitySite(ModelAdmin):
+    list_display = ('name', 'no_semester', 'with_summer', 'email_address', 'landline_number')
+
 # Set the admin_site object as the custom ERDT Admin Site
 admin_site = ERDTAdminSite()
 
@@ -65,13 +88,13 @@ admin_site = ERDTAdminSite()
 admin_site.register(User)
 
 # Register Profiling models
-admin_site.register(Profile)
-admin_site.register(Person)
-admin_site.register(University)
-admin_site.register(Department)
-admin_site.register(Degree_Program)
+admin_site.register(Profile, ProfileSite)
+admin_site.register(Person, PersonSite) 
+admin_site.register(University, UniversitySite)
+admin_site.register(Department, DepartmentSite)
+admin_site.register(Degree_Program, DegreeProgramSite)
 admin_site.register(Scholarship)
-admin_site.register(Subject)
+admin_site.register(Subject, SubjectSite)
 admin_site.register(Purchased_Item)
 
 
