@@ -4,7 +4,6 @@ Date: Wed Jul 23 2014
 Description: Contains Admin Customization functions
 """
 
-
 from django.contrib.admin import AdminSite
 from functools import update_wrapper
 from django.http import Http404, HttpResponseRedirect
