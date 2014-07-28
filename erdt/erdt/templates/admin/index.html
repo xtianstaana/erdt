@@ -14,51 +14,37 @@
 
     <div id="user-profile-box" class="module">
         <table>
-            <caption>User Fields</caption>
+            <caption>{{ constants.site.index_caption }}</caption>
             <thead>
                 <tr>
                     <th></th>
                     <th></th>
-                    <th><a href="{% url 'admin:auth_user_change' current_user.id %}">Edit</a></th>
+                    <th><a href="{% url 'admin:profiling_profile_change' current_user_profile.id %}">Edit</a></th>
                 </tr>
             </thead>
             <tbody>
+                {% for field in user_fields%}
                 <tr>
                     <td>
-                        <label for="username">Username</label>
+                        <label for="{{ field.name }}">{{ field.label }}</label>
                     </td>
                     <td>
-                        <span id="username">{{ current_user.username }}</span>
+                        <span id="{{ field.name }}">{{ field.value }}</span>
                     </td>
                     <td></td>
                 </tr>
+                {% endfor %}
+                {% for field in person_fields%}
                 <tr>
                     <td>
-                        <label for="firstname">First Name</label>
+                        <label for="{{ field.name }}">{{ field.label }}</label>
                     </td>
                     <td>
-                        <span id="firstname">{{ current_user.firstname }}</span>
+                        <span id="{{ field.name }}">{{ field.value }}</span>
                     </td>
                     <td></td>
                 </tr>
-                <tr>
-                    <td>
-                        <label for="lastname">Lastname</label>
-                    </td>
-                    <td>
-                        <span id="lastname">{{ current_user.lastname }}</span>
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="email">Email</label>
-                    </td>
-                    <td>
-                        <span id="email">{{ current_user.email }}</span>
-                    </td>
-                    <td></td>
-                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
