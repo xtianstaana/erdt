@@ -63,6 +63,11 @@ class ERDTAdminSite(AdminSite):
         # get current user data
         currentUser = request.user
 
+        currentUserProfile = None
+        currentUserPerson = None
+        userFields = None
+        personFields = None
+
         try:
             currentUserProfile = Profile.objects.get(user = currentUser.id)
             currentUserPerson = Person.objects.get(id = currentUserProfile.person.id)
@@ -70,17 +75,23 @@ class ERDTAdminSite(AdminSite):
             e = sys.exc_info()[0]
             print("Error: %s" % e)
 
-        erdtIndexTempRes.context_data['current_user'] = currentUser
-        erdtIndexTempRes.context_data['current_user_profile'] = currentUserProfile
-        erdtIndexTempRes.context_data['current_user_person'] = currentUserPerson
-
         #excluded fields list
         user_exclude = ['first_name', 'last_name', 'is_active', 'email', 'is_superuser', 'is_staff', 'groups', 
             'password', 'id', 'date_joined', 'user_permissions']
         person_exclude = ['photo', 'id']
 
-        erdtIndexTempRes.context_data['user_fields'] = turn_form_friendly(model_to_dict(currentUser), user_exclude, {})
-        erdtIndexTempRes.context_data['person_fields'] = turn_form_friendly(model_to_dict(currentUserPerson), person_exclude, {})
+        if(currentUser):
+            userFields = turn_form_friendly(model_to_dict(currentUser), user_exclude, {})
+
+        if(currentUserPerson):
+            personFields = turn_form_friendly(model_to_dict(currentUserPerson), person_exclude, {})
+
+        erdtIndexTempRes.context_data['current_user'] = currentUser
+        erdtIndexTempRes.context_data['current_user_profile'] = currentUserProfile
+        erdtIndexTempRes.context_data['current_user_person'] = currentUserPerson
+
+        erdtIndexTempRes.context_data['user_fields'] = userFields
+        erdtIndexTempRes.context_data['person_fields'] = personFields
 
         return erdtIndexTempRes
 
