@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -141,7 +142,8 @@ class Profile(models.Model):
 
 	role = models.CharField(max_length=5, choices=ROLE_CHOICES, default=STUDENT)
 	person = models.ForeignKey(Person, null=False, blank=False) # for ALL, account holder
-	
+	user = models.ForeignKey(User, null=False, blank=False) # to tie it up with an account 
+
 	university = models.ForeignKey(University, null=True, blank=True) # for ADMIN, else null
 	department = models.ForeignKey(Department, null=True, blank=True) # from ADV, else null
 	scholarship = models.ForeignKey(Scholarship,null=True, blank=True) # for STU, else null

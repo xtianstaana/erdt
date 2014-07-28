@@ -35,11 +35,9 @@ def constants(request):
     constants = {
         'site': {
             'site_title': 'DOST ERDT',
-            'project_title': 'DOST ERDT',
-            'index_title': 'Profile'
-        },
-        'profile': {
-            'username_label': 'Username'
+            'project_title': 'ERDT Scholars Management System',
+            'index_title': 'Profile',
+            'index_caption': 'My Profile'
         }
     }
 
