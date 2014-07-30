@@ -28,21 +28,31 @@ class Person(models.Model):
 	landline_number = models.CharField(max_length=20, blank=True)
 	mobile_number = models.CharField(max_length=20, blank=True)
 
+	def profiles(self):
+		return ' / '.join( sorted([p.get_role_display() for p in Profile.objects.filter(person=self.id)]) )
+	profiles.short_description = 'Profiles Available'
+
 	def __unicode__(self):
 		return '%s, %s %s' % (self.last_name, self.first_name, self.middle_name)
 
 class University(models.Model):
 	photo = models.ImageField(upload_to='univ_seal', null=True, blank=True)
 	name = models.CharField(max_length=50)
-	member_since = models.DateField()
+	member_since = models.DateField(null=True, blank=True)
 	address = models.CharField(max_length=100)
 	email_address = models.EmailField()
 	landline_number = models.CharField(max_length=20, blank=True)
-	no_semester = models.IntegerField(default=2, verbose_name='No of terms per SY')
-	with_summer = models.BooleanField(default=False, verbose_name='With summer term')
+	no_semester = models.IntegerField(default=2, verbose_name='No of semester per SY')
+	with_summer = models.BooleanField(default=False, verbose_name='With summer semester')
 
 	class Meta:
 		verbose_name_plural = 'Universities'
+
+	def is_consortium(self):
+		if self.member_since:
+			return True
+		else:
+			return False
 
 	def __unicode__(self):
 		return self.name
@@ -66,6 +76,7 @@ class Degree_Program(models.Model):
 
 	degree = models.CharField(max_length=3, choices=DEGREE_CHOICES)
 	program = models.CharField(max_length=50)
+	no_semester = models.IntegerField(default=6, verbose_name='No of semester including summer')
 	department = models.ForeignKey(Department)
 
 	class Meta:
@@ -95,7 +106,7 @@ class Scholarship(models.Model):
 
 	PROPOSAL, TOPIC_FINALIZED, PROP_APPROVED, DEFENDED, QUALS, CANDS =  'PR', 'TF', 'PA', 'DF', 'QE', 'CE'
 	THESIS_STATUS_CHOICES = (
-		(PROPOSAL, 'Proposal'),
+		(PROPOSAL, 'Proposal Stage'),
 		(TOPIC_FINALIZED, 'Topic Finalized'),
 		(PROP_APPROVED, 'Proposal Approved'),
 		(DEFENDED, 'Defended'),
@@ -120,7 +131,7 @@ class Scholarship(models.Model):
 	scholarship_status = models.CharField(max_length=3, choices=SCHOLARSHIP_STATUS_CHOICES, default=REG_ONGOING)
 	scholarship_detail = models.CharField(max_length=250, blank=True)
 	high_degree = models.CharField(max_length=3, choices=DEGREE_CHOICES, default=BS, verbose_name='Highest degree')
-	high_degree_univ = models.CharField(max_length=50, verbose_name="Highest degree's University")
+	high_degree_univ = models.ForeignKey(University, verbose_name="Highest degree's University")
 	thesis_topic = models.CharField(max_length=100, blank=True)
 	thesis_title = models.CharField(max_length=100, blank=True)
 	thesis_status = models.CharField(max_length=2, choices=THESIS_STATUS_CHOICES, default=PROPOSAL)
@@ -129,6 +140,18 @@ class Scholarship(models.Model):
 	entry_scho_program = models.DateField(verbose_name='Start of scholarship contract')
 	end_scho_program = models.DateField(verbose_name='End of scholarship contract')
 	lateral = models.BooleanField(default=False)
+
+	def who(self):
+		user = Profile.objects.get(scholarship=self.id).person
+		return user.__unicode__()
+	who.short_description = 'Person'
+
+	def where(self):
+		return self.degree_program.department.__unicode__()
+	where.short_description = 'Department / University'
+
+	def __unicode__(self):
+		return '%s: %s, %s' % (self.who(), self.degree_program, self.where())
 
 class Profile(models.Model):
 	STUDENT, ADVISER, UNIV_ADMIN, CENTRAL_OFFICE, DOST = 'STU', 'ADV', 'ADMIN', 'CENT', 'DOST'
@@ -149,7 +172,19 @@ class Profile(models.Model):
 	scholarship = models.ForeignKey(Scholarship,null=True, blank=True) # for STU, else null
 
 	def __unicode__(self):
-		return '%s as %s' % (self.person, self.role)
+		return '%s as %s' % (self.person, self.get_role_display())
+
+	def affiliation(self):
+		if self.role  == self.STUDENT:
+			return self.scholarship.degree_program.department.__unicode__()
+		elif self.role == self.ADVISER:
+			return self.department.__unicode__()
+		elif self.role == self.UNIV_ADMIN:
+			return self.university.__unicode__()
+		elif self.role in (self.CENTRAL_OFFICE, self.DOST):
+			return 'DOST / ERDT'
+		else:
+			return 'unknown'
 
 class Purchased_Item(models.Model):
 	description = models.CharField(max_length=250)
@@ -196,7 +231,7 @@ class Enrolled_Subject(models.Model):
 	subject = models.ForeignKey(Subject)
 	scholarship = models.ForeignKey(Scholarship)
 	year_taken = models.DateField()
-	sem_taken = models.IntegerField(default=1)
+	sem_taken = models.IntegerField(default=1, verbose_name='Semester taken')
 	eq_grade = models.FloatField(default=0.0)
 
 	class Meta:
