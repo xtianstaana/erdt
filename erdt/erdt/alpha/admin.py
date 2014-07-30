@@ -31,7 +31,7 @@ from views import turn_form_friendly
 
 # Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item)
+    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
 
 # Import Constants
 from context_processors import constants, external_urls
@@ -106,7 +106,7 @@ class UserAdmin(ModelAdmin):
     ]
 
 class ProfileAdmin(ModelAdmin):
-    list_display = ('person', 'role') 
+    list_display = ('person', 'role', 'affiliation') 
     list_filter = ('role',)
 
     fieldsets = [
@@ -123,7 +123,7 @@ class DepartmentAdmin(ModelAdmin):
     list_filter = ('university',)
 
 class PersonAdmin(ModelAdmin):
-    list_display = ('__unicode__', 'email_address', 'mobile_number')
+    list_display = ('__unicode__', 'profiles','email_address', 'mobile_number')
     search_fields = ('first_name', 'middle_name', 'last_name')
 
 class SubjectAdmin(ModelAdmin):
@@ -131,7 +131,11 @@ class SubjectAdmin(ModelAdmin):
     list_filter = ('university',)
 
 class UniversityAdmin(ModelAdmin):
-    list_display = ('name', 'no_semester', 'with_summer', 'email_address', 'landline_number')
+    list_display = ('name', 'no_semester', 'with_summer', 'is_consortium', 'email_address', 'landline_number')
+
+class ScholarshipAdmin(ModelAdmin):
+    list_display = ('who', 'degree_program', 'where', 'scholarship_status')
+    list_filter = ('degree_program__department__university__name', 'scholarship_status')
 
 # Set the admin_site object as the custom ERDT Admin Site
 admin_site = ERDTAdminSite()
@@ -145,8 +149,7 @@ admin_site.register(Person, PersonAdmin)
 admin_site.register(University, UniversityAdmin)
 admin_site.register(Department, DepartmentAdmin)
 admin_site.register(Degree_Program, DegreeProgramAdmin)
-admin_site.register(Scholarship)
+admin_site.register(Scholarship, ScholarshipAdmin)
 admin_site.register(Subject, SubjectAdmin)
 admin_site.register(Purchased_Item)
-
-
+admin_site.register(Enrolled_Subject)
