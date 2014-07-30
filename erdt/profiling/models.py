@@ -25,7 +25,7 @@ class Person(models.Model):
 	civil_status = models.CharField(max_length=1, choices=CIVIL_STATUS_CHOICES, default=SINGLE)
 	address = models.CharField(max_length=100)
 	email_address = models.EmailField()
-	landline_number = models.CharField(max_length=20, blank=True)
+	landline_number = models.CharField(max_length=100, blank=True)
 	mobile_number = models.CharField(max_length=20, blank=True)
 
 	def profiles(self):
@@ -41,7 +41,7 @@ class University(models.Model):
 	member_since = models.DateField(null=True, blank=True)
 	address = models.CharField(max_length=100)
 	email_address = models.EmailField()
-	landline_number = models.CharField(max_length=20, blank=True)
+	landline_number = models.CharField(max_length=100, blank=True)
 	no_semester = models.IntegerField(default=2, verbose_name='No of semester per SY')
 	with_summer = models.BooleanField(default=False, verbose_name='With summer semester')
 
@@ -59,9 +59,9 @@ class University(models.Model):
 
 class Department(models.Model):
 	photo = models.ImageField(upload_to='dept_seal', null=True, blank=True)
-	name = models.CharField(max_length=50)
+	name = models.CharField(max_length=100)
 	email_address = models.EmailField()
-	landline_number = models.CharField(max_length=20, blank=True)
+	landline_number = models.CharField(max_length=100, blank=True)
 	university = models.ForeignKey(University)
 
 	def __unicode__(self):
@@ -75,7 +75,7 @@ class Degree_Program(models.Model):
 	)
 
 	degree = models.CharField(max_length=3, choices=DEGREE_CHOICES)
-	program = models.CharField(max_length=50)
+	program = models.CharField(max_length=100)
 	no_semester = models.IntegerField(default=6, verbose_name='No of semester including summer')
 	department = models.ForeignKey(Department)
 
