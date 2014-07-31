@@ -19,7 +19,7 @@
                 <tr>
                     <th></th>
                     <th></th>
-                    <th>{% if current_user_profile %}<a href="{% url 'admin:profiling_profile_change' current_user_profile.id %}">Edit</a>{% endif %}</th>
+                    <th>{% if current_user_person %}<a href="{% url 'admin:profiling_person_change' current_user_person.id %}">Edit</a>{% endif %}</th>
                 </tr>
             </thead>
             <tbody>
