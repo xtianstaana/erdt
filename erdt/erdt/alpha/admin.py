@@ -162,6 +162,11 @@ class PersonAdmin(ModelAdmin):
         ('Contact Information', {'fields':('address', 'email_address', 'landline_number', 'mobile_number')}),
     )
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return self.readonly_fields + ('user',)
+        return self.readonly_fields
+
 class SubjectAdmin(ModelAdmin):
     list_display = ('course_title', 'course_units', 'university')
     list_filter = ('university',)
