@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import date
 
 # Create your models here.
 
@@ -16,6 +17,7 @@ class Person(models.Model):
 		(MARRIED, 'Married'),
 	)
 
+	user = models.ForeignKey(User, null=False, blank=False, unique=True, verbose_name='User account') # to tie it up with an account 
 	photo = models.ImageField(upload_to='img', null=True, blank=True)
 	first_name = models.CharField(max_length=50)
 	middle_name = models.CharField(max_length=50)
@@ -28,9 +30,9 @@ class Person(models.Model):
 	landline_number = models.CharField(max_length=100, blank=True)
 	mobile_number = models.CharField(max_length=20, blank=True)
 
-	def profiles(self):
-		return ' / '.join( sorted([p.get_role_display() for p in Profile.objects.filter(person=self.id)]) )
-	profiles.short_description = 'Profiles Available'
+	def age(self):
+		today = date.today()
+		return today.year - self.birthdate.year - ((today.month, today.day) < (self.birthdate.month, self.birthdate.day))
 
 	def __unicode__(self):
 		return '%s, %s %s' % (self.last_name, self.first_name, self.middle_name)
@@ -165,7 +167,6 @@ class Profile(models.Model):
 
 	role = models.CharField(max_length=5, choices=ROLE_CHOICES, default=STUDENT)
 	person = models.ForeignKey(Person, null=False, blank=False) # for ALL, account holder
-	user = models.ForeignKey(User, null=False, blank=False) # to tie it up with an account 
 
 	university = models.ForeignKey(University, null=True, blank=True) # for ADMIN, else null
 	department = models.ForeignKey(Department, null=True, blank=True) # from ADV, else null
@@ -185,6 +186,10 @@ class Profile(models.Model):
 			return 'DOST / ERDT'
 		else:
 			return 'unknown'
+
+	def user(self):
+		return self.person.user	
+	user.short_description = 'User'
 
 class Purchased_Item(models.Model):
 	description = models.CharField(max_length=250)

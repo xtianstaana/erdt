@@ -63,14 +63,13 @@ class ERDTAdminSite(AdminSite):
         # get current user data
         currentUser = request.user
 
-        currentUserProfile = None
+        #currentUserProfile = None
         currentUserPerson = None
         userFields = None
         personFields = None
 
         try:
-            currentUserProfile = Profile.objects.get(user = currentUser.id)
-            currentUserPerson = Person.objects.get(id = currentUserProfile.person.id)
+            currentUserPerson = Person.objects.get(user=currentUser.id)
         except:
             e = sys.exc_info()[0]
             print("Error: %s" % e)
@@ -78,16 +77,17 @@ class ERDTAdminSite(AdminSite):
         #excluded fields list
         user_exclude = ['first_name', 'last_name', 'is_active', 'email', 'is_superuser', 'is_staff', 'groups', 
             'password', 'id', 'date_joined', 'user_permissions']
-        person_exclude = ['photo', 'id']
+        person_exclude = ['photo', 'id', 'user']
 
         if(currentUser):
             userFields = turn_form_friendly(model_to_dict(currentUser), user_exclude, {})
 
         if(currentUserPerson):
+            currentUserPerson.sex = currentUserPerson.get_sex_display()
+            currentUserPerson.civil_status = currentUserPerson.get_civil_status_display()
             personFields = turn_form_friendly(model_to_dict(currentUserPerson), person_exclude, {})
 
         erdtIndexTempRes.context_data['current_user'] = currentUser
-        erdtIndexTempRes.context_data['current_user_profile'] = currentUserProfile
         erdtIndexTempRes.context_data['current_user_person'] = currentUserPerson
 
         erdtIndexTempRes.context_data['user_fields'] = userFields
@@ -110,21 +110,57 @@ class ProfileAdmin(ModelAdmin):
     list_filter = ('role',)
 
     fieldsets = [
-        ('Details', {'fields': ['role', 'user', 'person']}),
+        ('Details', {'fields': ['role','person']}),
         ('School Information', {'fields': ['university', 'department', 'scholarship']})
     ]
+
+    def get_queryset(self, request):
+        qs = super(ProfileAdmin, self).queryset(request)
+        person = Person.objects.get(user=request.user.id)
+        profile = Profile.objects.get(person=person.id)
+        
+        if profile.role == Profile.UNIV_ADMIN: # change this to profile active
+            return qs.filter(university=profile.university.id)
+        else:
+            return qs
 
 class DegreeProgramAdmin(ModelAdmin):
     list_display = ('program', 'degree', 'department')
     list_filter = ('degree', 'department__university__name')
 
+    def get_queryset(self, request):
+        qs = super(DegreeProgramAdmin, self).queryset(request)
+        person = Person.objects.get(user=request.user.id)
+        profile = Profile.objects.get(person=person.id)
+
+        if profile.role == Profile.UNIV_ADMIN: # change this to profile active
+            return qs.filter(department__university_id=profile.university.id)
+        else:
+            return qs
+
 class DepartmentAdmin(ModelAdmin):
     list_display = ('name', 'university',)
     list_filter = ('university',)
 
+    def get_queryset(self, request):
+        qs = super(DepartmentAdmin, self).queryset(request)
+        person = Person.objects.get(user=request.user.id)
+        profile = Profile.objects.get(person=person.id)
+
+        if profile.role == Profile.UNIV_ADMIN: # change this to profile active
+            return qs.filter(university=profile.university.id)
+        else:
+            return qs
+
 class PersonAdmin(ModelAdmin):
-    list_display = ('__unicode__', 'profiles','email_address', 'mobile_number')
+    list_display = ('__unicode__', 'email_address', 'mobile_number')
+    readonly_fields = ('age',)
     search_fields = ('first_name', 'middle_name', 'last_name')
+    fieldsets = (
+        ('Personal Information', {'fields': ('photo', 'user', ('first_name', 'middle_name', 'last_name'), 'sex', 
+            ('birthdate', 'age'), 'civil_status')}), 
+        ('Contact Information', {'fields':('address', 'email_address', 'landline_number', 'mobile_number')}),
+    )
 
 class SubjectAdmin(ModelAdmin):
     list_display = ('course_title', 'course_units', 'university')
