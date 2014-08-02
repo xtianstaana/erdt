@@ -25,13 +25,14 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.cache import never_cache
 from django.conf import settings
 from django.forms.models import model_to_dict
+from django.forms import ModelForm
 
 # Utility methods
-from views import turn_form_friendly
+from views import *
 
 # Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
+    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject, Item_Tag)
 
 # Import Constants
 from context_processors import constants, external_urls
@@ -63,7 +64,6 @@ class ERDTAdminSite(AdminSite):
         # get current user data
         currentUser = request.user
 
-        #currentUserProfile = None
         currentUserPerson = None
         userFields = None
         personFields = None
@@ -111,45 +111,56 @@ class ProfileAdmin(ModelAdmin):
 
     fieldsets = [
         ('Details', {'fields': ['role','person']}),
-        ('School Information', {'fields': ['university', 'department', 'scholarship']})
+        ('Affiliation', {'fields': ['university']})
     ]
 
     def get_queryset(self, request):
-        qs = super(ProfileAdmin, self).queryset(request)
+        qs = super(ProfileAdmin, self).get_queryset(request)
+
         person = Person.objects.get(user=request.user.id)
-        profile = Profile.objects.get(person=person.id)
         
-        if profile.role == Profile.UNIV_ADMIN: # change this to profile active
-            return qs.filter(university=profile.university.id)
-        else:
+        try:
+            profile = Profile.objects.get(person=person.id) 
+            if profile.role == Profile.UNIV_ADMIN: # change this to profile active
+                return qs.filter(university=profile.university.id)
+            else:
+                return qs
+        except:
             return qs
 
 class DegreeProgramAdmin(ModelAdmin):
     list_display = ('program', 'degree', 'department')
-    list_filter = ('degree', 'department__university__name')
+    list_filter = ('degree', 'department')
 
     def get_queryset(self, request):
-        qs = super(DegreeProgramAdmin, self).queryset(request)
+        qs = super(DegreeProgramAdmin, self).get_queryset(request)
         person = Person.objects.get(user=request.user.id)
-        profile = Profile.objects.get(person=person.id)
 
-        if profile.role == Profile.UNIV_ADMIN: # change this to profile active
-            return qs.filter(department__university_id=profile.university.id)
-        else:
+        try:
+            profile = Profile.objects.get(person=person.id)
+            if profile.role == Profile.UNIV_ADMIN: # change this to profile active
+                return qs.filter(department__university_id=profile.university.id)
+            else:
+                return qs
+        except:
             return qs
 
 class DepartmentAdmin(ModelAdmin):
     list_display = ('name', 'university',)
     list_filter = ('university',)
 
-    def get_queryset(self, request):
-        qs = super(DepartmentAdmin, self).queryset(request)
-        person = Person.objects.get(user=request.user.id)
-        profile = Profile.objects.get(person=person.id)
 
-        if profile.role == Profile.UNIV_ADMIN: # change this to profile active
-            return qs.filter(university=profile.university.id)
-        else:
+    def get_queryset(self, request):
+        qs = super(DepartmentAdmin, self).get_queryset(request)
+        person = Person.objects.get(user=request.user.id)
+
+        try:
+            profile = Profile.objects.get(person=person.id)
+            if profile.role == Profile.UNIV_ADMIN: # change this to profile active
+                return qs.filter(university=profile.university.id)
+            else:
+                return qs
+        except:
             return qs
 
 class PersonAdmin(ModelAdmin):
@@ -175,7 +186,7 @@ class UniversityAdmin(ModelAdmin):
     list_display = ('name', 'no_semester', 'with_summer', 'is_consortium', 'email_address', 'landline_number')
 
 class ScholarshipAdmin(ModelAdmin):
-    list_display = ('who', 'degree_program', 'where', 'scholarship_status')
+    list_display = ('degree_program', 'where', 'scholarship_status')
     list_filter = ('degree_program__department__university__name', 'scholarship_status')
 
 # Set the admin_site object as the custom ERDT Admin Site
@@ -194,3 +205,4 @@ admin_site.register(Scholarship, ScholarshipAdmin)
 admin_site.register(Subject, SubjectAdmin)
 admin_site.register(Purchased_Item)
 admin_site.register(Enrolled_Subject)
+admin_site.register(Item_Tag)

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from datetime import date
 
 # Create your models here.
@@ -17,7 +18,7 @@ class Person(models.Model):
 		(MARRIED, 'Married'),
 	)
 
-	user = models.ForeignKey(User, null=False, blank=False, unique=True, verbose_name='User account') # to tie it up with an account 
+	user = models.OneToOneField(User, verbose_name='User account') # to tie it up with an account 
 	photo = models.ImageField(upload_to='img', null=True, blank=True)
 	first_name = models.CharField(max_length=50)
 	middle_name = models.CharField(max_length=50)
@@ -28,11 +29,15 @@ class Person(models.Model):
 	address = models.CharField(max_length=100)
 	email_address = models.EmailField()
 	landline_number = models.CharField(max_length=100, blank=True)
-	mobile_number = models.CharField(max_length=20, blank=True)
+	mobile_number = models.CharField(max_length=100, blank=True)
 
 	def age(self):
 		today = date.today()
 		return today.year - self.birthdate.year - ((today.month, today.day) < (self.birthdate.month, self.birthdate.day))
+
+	def clean(self):
+		if self.landline_number.strip() == '' and self.mobile_number.strip() == '':
+			raise ValidationError('Provide at least one contact number.')
 
 	def __unicode__(self):
 		return '%s, %s %s' % (self.last_name, self.first_name, self.middle_name)
@@ -40,21 +45,23 @@ class Person(models.Model):
 class University(models.Model):
 	photo = models.ImageField(upload_to='univ_seal', null=True, blank=True)
 	name = models.CharField(max_length=50)
-	member_since = models.DateField(null=True, blank=True)
+	is_consortium = models.BooleanField(default=False)
+	member_since = models.DateField(null=True, blank=True) 
 	address = models.CharField(max_length=100)
 	email_address = models.EmailField()
 	landline_number = models.CharField(max_length=100, blank=True)
 	no_semester = models.IntegerField(default=2, verbose_name='No of semester per SY')
 	with_summer = models.BooleanField(default=False, verbose_name='With summer semester')
 
+	def clean(self):
+		if not self.is_consortium:
+			self.member_since = None
+		else:
+			if not self.member_since:
+				raise ValidationError('Specify membership date.')
+
 	class Meta:
 		verbose_name_plural = 'Universities'
-
-	def is_consortium(self):
-		if self.member_since:
-			return True
-		else:
-			return False
 
 	def __unicode__(self):
 		return self.name
@@ -64,7 +71,7 @@ class Department(models.Model):
 	name = models.CharField(max_length=100)
 	email_address = models.EmailField()
 	landline_number = models.CharField(max_length=100, blank=True)
-	university = models.ForeignKey(University)
+	university = models.ForeignKey(University, limit_choices_to={'is_consortium': True})
 
 	def __unicode__(self):
 		return '%s, %s' % (self.name, self.university)
@@ -86,7 +93,7 @@ class Degree_Program(models.Model):
 		verbose_name_plural = 'Degree Programs'
 
 	def __unicode__(self):
-		return '%s %s' % (self.degree, self.program)
+		return '%s %s : %s' % (self.degree, self.program, self.department)
 
 class Scholarship(models.Model):
 	ERDT, DOST, AASTHRD = 'ERDT', 'DOST', 'AASTHRD'
@@ -127,7 +134,8 @@ class Scholarship(models.Model):
 		(GRADUATE, 'Graduate'),
 	)
 
-	adviser = models.ForeignKey(Person)
+	adviser = models.ForeignKey(Person, related_name='adviser')
+	scholar = models.ForeignKey(Person, related_name='scholar')
 	degree_program = models.ForeignKey(Degree_Program)
 	scholarship_type = models.CharField(max_length=10, choices=SCHOLARSHIP_TYPE_CHOICES, default=ERDT)
 	scholarship_status = models.CharField(max_length=3, choices=SCHOLARSHIP_STATUS_CHOICES, default=REG_ONGOING)
@@ -143,17 +151,23 @@ class Scholarship(models.Model):
 	end_scho_program = models.DateField(verbose_name='End of scholarship contract')
 	lateral = models.BooleanField(default=False)
 
-	def who(self):
-		user = Profile.objects.get(scholarship=self.id).person
-		return user.__unicode__()
-	who.short_description = 'Person'
-
 	def where(self):
 		return self.degree_program.department.__unicode__()
 	where.short_description = 'Department / University'
 
+	def clean(self):
+		if self.adviser == self.scholar:
+			raise ValidationError('Adviser and scholar fields can not be the same.')
+		if self.entry_scho_program == self.end_scho_program:
+			raise ValidationError('Start and end of contract dates can not be the same.')
+		if self.entry_scho_program == self.entry_grad_program and self.lateral:
+			raise ValidationError('Entry to graduate and scholarship program can not be the same if lateral.')
+		if self.entry_scho_program != self.entry_grad_program and not self.lateral:
+			raise ValidationError('Entry to graduate and scholarship program must be the same if not lateral.')
+
+
 	def __unicode__(self):
-		return '%s: %s, %s' % (self.who(), self.degree_program, self.where())
+		return '%s: %s, %s' % (self.scholar, self.degree_program, self.where())
 
 class Profile(models.Model):
 	STUDENT, ADVISER, UNIV_ADMIN, CENTRAL_OFFICE, DOST = 'STU', 'ADV', 'ADMIN', 'CENT', 'DOST'
@@ -166,45 +180,66 @@ class Profile(models.Model):
 	)
 
 	role = models.CharField(max_length=5, choices=ROLE_CHOICES, default=STUDENT)
-	person = models.ForeignKey(Person, null=False, blank=False) # for ALL, account holder
-
-	university = models.ForeignKey(University, null=True, blank=True) # for ADMIN, else null
-	department = models.ForeignKey(Department, null=True, blank=True) # from ADV, else null
-	scholarship = models.ForeignKey(Scholarship,null=True, blank=True) # for STU, else null
+	person = models.ForeignKey(Person, null=False, blank=False)
+	university = models.ForeignKey(University, limit_choices_to={'is_consortium': True}, help_text='Leave blank for DOST or ERDT Central Office role.', null=True, blank=True) # for ADMIN, else null	
 
 	def __unicode__(self):
 		return '%s as %s' % (self.person, self.get_role_display())
 
 	def affiliation(self):
-		if self.role  == self.STUDENT:
-			return self.scholarship.degree_program.department.__unicode__()
-		elif self.role == self.ADVISER:
-			return self.department.__unicode__()
-		elif self.role == self.UNIV_ADMIN:
+		if self.role  in (self.DOST, self.CENTRAL_OFFICE):
+			return 'DOST / ERDT Central Office'
+		elif self.role in (self.STUDENT, self.ADVISER, self.UNIV_ADMIN):
 			return self.university.__unicode__()
-		elif self.role in (self.CENTRAL_OFFICE, self.DOST):
-			return 'DOST / ERDT'
 		else:
 			return 'unknown'
 
 	def user(self):
 		return self.person.user	
-	user.short_description = 'User'
+
+	def clear(self):
+		if self.role in (self.DOST, self.CENTRAL_OFFICE):
+			self.university = None
+		elif self.role in (self.STUDENT, self.ADVISER, self.UNIV_ADMIN):
+			if self.university == None:
+				raise ValidationError('Indicate University of affiliation.')
+
+class Item_Tag(models.Model):
+	name = models.CharField(max_length=20, unique=True)
+
+	def __unicode__(self):
+		return self.name
+
+	class Meta:
+		verbose_name = 'Item Tag'
+		verbose_name_plural = 'Item Tags'
 
 class Purchased_Item(models.Model):
+	issuance = models.ForeignKey(Person, related_name='issuance', verbose_name='Issued to')
 	description = models.CharField(max_length=250)
+	item_tag = models.ManyToManyField(Item_Tag, null=False, blank=False, related_name='item_tag')
 	location = models.CharField(max_length=100)
 	property_no =  models.CharField(max_length=30)
 	status = models.CharField(max_length=50)
-	accountable = models.ForeignKey(Person)
-	fund_source = models.ForeignKey(Scholarship)
+	consumable = models.BooleanField(default=False)
+	date_procured = models.DateField()
+	accountable = models.ForeignKey(Person, related_name='accountable')
+	fund_source = models.ManyToManyField(Scholarship, null=True, blank=True, related_name='fund_source', help_text='Leave blank if issued through FRDG.')
+
+	def __unicode__(self):
+		return self.description
+
+	def clean(self):
+		if self.accountable.profile_set.filter(role=Profile.ADVISER).count() == 0:
+			raise ValidationError('Accountable person must have a Faculty Adviser profile.')
 
 	class Meta:
 		verbose_name = 'Purchased Item'
 		verbose_name_plural = 'Purchased Items'
+
 	
 class Research_Dissemination(models.Model):
-	profile = models.ForeignKey(Profile)
+	scholarship = models.ForeignKey(Scholarship, null=True, blank=True)
 	paper_title = models.CharField(max_length=100)
 	conference_name = models.CharField(max_length=100)
 	conference_loc = models.CharField(max_length=100)
@@ -218,19 +253,21 @@ class Sandwich_Program(models.Model):
 	budget = models.FloatField(default=0.0)
 	host_university = models.CharField(max_length=50)
 	host_professor = models.CharField(max_length=50)
-	scholarship = models.ForeignKey(Scholarship)
+	person = models.ForeignKey(Person)
 
 	class Meta:
 		verbose_name = 'Sandwich Program'
 		verbose_name_plural = 'Sandwich Programs'
 
 class Subject(models.Model):
-	university = models.ForeignKey(University)
+	university = models.ForeignKey(University, limit_choices_to={'is_consortium': True})
+	course_code = models.CharField(max_length=20)
 	course_title = models.CharField(max_length=100)
+	course_description = models.CharField(max_length=250, blank=True)
 	course_units = models.FloatField(default=3.0)
 
 	def __unicode__(self):
-		return '%s: %s' % (self.course_title, self.university)
+		return '%s: %s (%s)' % (self.course_code, self.course_title, self.university)
 
 class Enrolled_Subject(models.Model):
 	subject = models.ForeignKey(Subject)
@@ -243,3 +280,5 @@ class Enrolled_Subject(models.Model):
 		verbose_name = 'Enrolled Subject'
 		verbose_name_plural = 'Enrolled Subjects'
 
+	def __unicode__(self):
+		return '%s: %s' % (self.subject.course_code, self.scholarship.scholar)
