@@ -1,4 +1,5 @@
-erdt/erdt/local_settings.py
+/erdt/erdt/local_settings.py
 db.sqlite3
-.log
+mm.log
 *.pyc
+/erdt/img/*

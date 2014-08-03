@@ -7,13 +7,14 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('profiling', '0008_enrolled_subject'),
+        ('profiling', '0009_enrolled_subject'),
     ]
 
     operations = [
-        migrations.RenameField(
+        migrations.AddField(
             model_name='profile',
-            old_name='account',
-            new_name='user',
+            name='active',
+            field=models.BooleanField(default=False),
+            preserve_default=True,
         ),
     ]

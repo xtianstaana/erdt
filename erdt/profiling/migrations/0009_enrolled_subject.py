@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('profiling', '0007_sandwich_program_subject'),
+        ('profiling', '0008_research_dissemination_subject'),
     ]
 
     operations = [
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 ('subject', models.ForeignKey(to='profiling.Subject', to_field='id')),
                 ('scholarship', models.ForeignKey(to='profiling.Scholarship', to_field='id')),
                 ('year_taken', models.DateField()),
-                ('sem_taken', models.IntegerField(default=1)),
+                ('sem_taken', models.IntegerField(default=1, verbose_name=b'Semester taken')),
                 ('eq_grade', models.FloatField(default=0.0)),
             ],
             options={

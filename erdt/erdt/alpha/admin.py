@@ -106,11 +106,11 @@ class UserAdmin(ModelAdmin):
     ]
 
 class ProfileAdmin(ModelAdmin):
-    list_display = ('person', 'role', 'affiliation') 
+    list_display = ('person', 'role', 'affiliation', 'active') 
     list_filter = ('role',)
 
     fieldsets = [
-        ('Details', {'fields': ['role','person']}),
+        ('Details', {'fields': ['active' ,'role','person']}),
         ('Affiliation', {'fields': ['university']})
     ]
 

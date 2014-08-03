@@ -1,0 +1,18 @@
+<div id="profile-switcher-container">
+    <div class="overlay"></div>
+    <div id="profile-switcher">
+        <div class="profile-switcher-wrap">
+            <h3>Log in as a different role</h3>
+            <div class="profile-selection">
+                {% if multi_profile.profiles|length > 0 %}
+                <ul>
+                    {% for profile in multi_profile.profiles %}
+                        <li class="{% if profile.active == True %}active{% endif %}"><a href="{% url 'set-active-profile' profile.id %}">{{ profile }}</a></li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            <a href="#" class="cancel-btn">Cancel</a>
+        </div>                        
+    </div>
+</div>

@@ -16,7 +16,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('degree', models.CharField(max_length=3, choices=[(b'MS', b'Master of Science'), (b'PHD', b'Doctor of Philosophy')])),
-                ('program', models.CharField(max_length=50)),
+                ('program', models.CharField(max_length=100)),
+                ('no_semester', models.IntegerField(default=6, verbose_name=b'No of semester including summer')),
                 ('department', models.ForeignKey(to='profiling.Department', to_field='id')),
             ],
             options={
