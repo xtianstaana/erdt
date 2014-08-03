@@ -116,10 +116,9 @@ class ProfileAdmin(ModelAdmin):
 
     def get_queryset(self, request):
         qs = super(ProfileAdmin, self).get_queryset(request)
-
-        person = Person.objects.get(user=request.user.id)
         
         try:
+            person = Person.objects.get(user=request.user.id)
             profile = Profile.objects.get(person=person.id) 
             if profile.role == Profile.UNIV_ADMIN: # change this to profile active
                 return qs.filter(university=profile.university.id)
