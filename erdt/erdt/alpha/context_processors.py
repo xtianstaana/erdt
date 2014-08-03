@@ -6,7 +6,7 @@ Description: Context Processors for ERDT Admin Template
 
 from django.shortcuts import *
 from profiling.models import (Profile, Person)
-
+import sys
 """
 Author: Christian Sta.Ana
 Date: Wed Jul 23 2014
