@@ -182,6 +182,7 @@ class Profile(models.Model):
 	role = models.CharField(max_length=5, choices=ROLE_CHOICES, default=STUDENT)
 	person = models.ForeignKey(Person, null=False, blank=False)
 	university = models.ForeignKey(University, limit_choices_to={'is_consortium': True}, help_text='Leave blank for DOST or ERDT Central Office role.', null=True, blank=True) # for ADMIN, else null	
+	active = models.BooleanField(default=False)
 
 	def __unicode__(self):
 		return '%s as %s' % (self.person, self.get_role_display())
@@ -189,7 +190,7 @@ class Profile(models.Model):
 	def affiliation(self):
 		if self.role  in (self.DOST, self.CENTRAL_OFFICE):
 			return 'DOST / ERDT Central Office'
-		elif self.role in (self.STUDENT, self.ADVISER, self.UNIV_ADMIN):
+		elif self.role in (self.STUDENT, self.ADVISER, self.UNIV_ADMIN) and self.university is not None:
 			return self.university.__unicode__()
 		else:
 			return 'unknown'

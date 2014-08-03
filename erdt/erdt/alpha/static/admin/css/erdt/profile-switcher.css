@@ -1,0 +1,95 @@
+/**********************************************
+ERDT Profile Switcher Styles
+Author: Christian Sta.Ana
+Date: Sat Aug 2 2014
+**********************************************/
+
+#user-tools .active-profile {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#profile-switcher-container {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: none;
+}
+
+#profile-switcher {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 300px;
+    height: 350px;
+    margin-left: -150px;
+    margin-top: -175px;
+    background: #fff;
+    z-index: 9999;
+    -moz-box-shadow: 0 0 5px #888;
+    -webkit-box-shadow: 0 0 5px#888;
+    box-shadow: 0 0 5px #888;
+    color: #000;
+    text-align: left;
+}
+
+#profile-switcher a.cancel-btn {
+    color: #5b80b2;
+    text-align: center;
+    display: block;
+} 
+
+#profile-switcher .profile-switcher-wrap {
+    margin: 20px 15px;
+
+}
+
+#profile-switcher .profile-switcher-wrap h3 {
+    text-align: center;
+}
+
+#profile-switcher .profile-selection {
+    margin: 15px 0 10px;
+    overflow-y: auto;
+    height: 260px;
+    width: 100%;
+    border-top: 1px solid #ddd;
+}
+
+#profile-switcher .profile-selection ul {
+    margin: 0;
+    padding: 0;
+}
+
+#profile-switcher .profile-selection li {
+    list-style: none;
+}
+
+#profile-switcher .profile-selection li.active {
+    background: #5b80b2;
+}
+
+#profile-switcher .profile-selection li a {
+    color: #333 !important;
+    padding: 20px 10px;
+    border-bottom: 1px solid #ddd;
+    font-weight: bold;
+    display: block;
+}
+
+#profile-switcher .profile-selection li.active a {
+    color: #fff !important;
+}
+
+#profile-switcher .profile-selection li:hover {
+    background: #ffc;
+    cursor: pointer;
+}
+
+#profile-switcher .profile-selection li:hover a {
+    text-decoration: none;
+    color: #333 !important;
+}

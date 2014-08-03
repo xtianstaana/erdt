@@ -4,8 +4,47 @@ Author: Christian Sta.Ana
 Date: Fri Jul 18
 **********************************************/
 
+.overlay {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    background: #fff;
+    /* Required for IE 5, 6, 7 */
+    /* ...or something to trigger hasLayout, like zoom: 1; */
+    width: 100%; 
+    height: 100%;
+        
+    /* Theoretically for IE 8 & 9 (more valid) */   
+    /* ...but not required as filter works too */
+    /* should come BEFORE filter */
+    -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+    
+    /* This works in IE 8 & 9 too */
+    /* ... but also 5, 6, 7 */
+    filter: alpha(opacity=70);
+    
+    /* Older than Firefox 0.9 */
+    -moz-opacity:0.7;
+    
+    /* Safari 1.x (pre WebKit!) */
+    -khtml-opacity: 0.7;
+    
+    /* Modern!
+    /* Firefox 0.9+, Safari 2?, Chrome any?
+    /* Opera 9+, IE 9+ */
+    opacity: 0.7;
+    z-index: 1111;
+}
+
 #header {
-    background: #5b80b2;
+    background: rgb(91,128,178); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(91,128,178,1) 0%, rgba(35,83,138,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(91,128,178,1)), color-stop(100%,rgba(35,83,138,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(91,128,178,1) 0%,rgba(35,83,138,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(91,128,178,1) 0%,rgba(35,83,138,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(91,128,178,1) 0%,rgba(35,83,138,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(91,128,178,1) 0%,rgba(35,83,138,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5b80b2', endColorstr='#23538a',GradientType=0 ); /* IE6-9 */
 }
 
 #branding h1 a {
@@ -18,7 +57,7 @@ Date: Fri Jul 18
 }
 
 #user-tools {
-    margin-top: 5px;
+    margin-top: 8px;
 }
 
 #content {

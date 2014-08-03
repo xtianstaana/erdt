@@ -5,6 +5,7 @@ Description: Context Processors for ERDT Admin Template
 """
 
 from django.shortcuts import *
+from profiling.models import (Profile, Person)
 
 """
 Author: Christian Sta.Ana
@@ -44,3 +45,49 @@ def constants(request):
     return {
         'constants': constants
     }
+
+"""
+Author: Christian Sta.Ana
+Date: Sat Aug 2 2014
+Description: For users with mutiple profiles
+Params: HttpRequest request
+Returns: Dictionary containing all profiles and the active profile
+"""
+def multi_profile(request):
+
+    currentUser = request.user
+
+    userProfiles = None
+    activeProfile = None
+
+    try:
+        currentUserPerson = Person.objects.get(user = currentUser.id)
+
+        # Get all profiles of user
+        userProfiles = currentUserPerson.profile_set.all()
+
+        # Get the active profile
+        if(len(userProfiles) > 1):            
+            for profile in userProfiles:
+                if(profile.active == True):
+                    activeProfile = profile    
+        elif(len(userProfiles) == 1):
+            activeProfile = userProfiles[0]
+
+    except:
+        e = sys.exc_info()[0]
+        print("Error: %s" % e)
+
+    multi_profile = {
+        'profiles' : userProfiles,
+        'active_profile' : activeProfile,
+
+    }
+
+    return {
+        'multi_profile' : multi_profile
+
+    }
+
+
+

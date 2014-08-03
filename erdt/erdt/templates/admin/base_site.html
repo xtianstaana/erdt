@@ -5,7 +5,12 @@
 {% block title %}{{constants.site.site_title}}{% endblock %}
 
 {% block extrastyle %}
-<link rel="stylesheet" type="text/css" href="{% static "admin/css/erdt-admin.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/erdt-admin.css' %}" />
+{% endblock %}
+
+{% block extrahead %}
+<script type="text/javascript" src="{% static 'admin/js/jquery-1.11.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'admin/js/profile-switcher.js' %}"></script>
 {% endblock %}
 
 {% block branding %}
