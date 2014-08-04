@@ -1,3 +1,4 @@
 erdt/erdt/local_settings.py
+erdt/profiling/migrations/*
 db.sqlite3
 *.pyc
