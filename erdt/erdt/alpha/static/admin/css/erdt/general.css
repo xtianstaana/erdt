@@ -36,6 +36,10 @@ Date: Fri Jul 18
     z-index: 1111;
 }
 
+.clearfix {
+    clear: both;
+}
+
 #header {
     background: rgb(91,128,178); /* Old browsers */
     background: -moz-linear-gradient(top,  rgba(91,128,178,1) 0%, rgba(35,83,138,1) 100%); /* FF3.6+ */
@@ -47,17 +51,30 @@ Date: Fri Jul 18
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5b80b2', endColorstr='#23538a',GradientType=0 ); /* IE6-9 */
 }
 
-#branding h1 a {
+.header #branding {
+    border-right: 0;
+}
+
+.header #branding a h1 {
     background-image: url(../../img/erdt/erdt-logo-very-small.png);
     background-repeat: no-repeat;
     display: block;
     height: 33px;
     text-indent: 60px;
-    padding-top: 7px;
+    padding-top: 0px;
 }
 
 #user-tools {
-    margin-top: 8px;
+    margin-top: 2px;
+    color: #fff;
+}
+
+.header #user-tools .separator {
+    color: #fff;
+}
+
+.header #user-tools a {
+    color: #FFF68F;
 }
 
 #content {

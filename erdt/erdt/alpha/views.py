@@ -12,33 +12,14 @@ from django.views import generic
 from django.shortcuts import render
 from profiling.models import (Profile, Person)
 from django.contrib.auth.decorators import login_required
+from utils import *
 
+# Import Constants
+from context_processors import constants, external_urls
+constants = constants(None)
+external_urls = external_urls(None)
 
-def turn_form_friendly(dict, exclude_list, label_dict):
-
-    form_friendly_dict = []
-        
-    for label, value in dict.iteritems():
-        
-        if(label not in exclude_list):
-
-            form_friendly_field = {}
-
-            # clean label
-            clean_label = label
-            if(label in label_dict):
-                clean_label = label_dict['label']
-            else:
-                clean_label = label.replace('_', ' ')
-                clean_label = clean_label.capitalize()
-
-            form_friendly_field['name'] = label
-            form_friendly_field['label'] = clean_label
-            form_friendly_field['value'] = value
-
-            form_friendly_dict.append(form_friendly_field)
-
-    return form_friendly_dict
+import sys
 
 @login_required
 def set_active_profile(request, profile_id):
@@ -57,8 +38,10 @@ def set_active_profile(request, profile_id):
         # Set selected as active
         selected_profile.active = True
         selected_profile.save()
-    except:
-        e = sys.exc_info()[0]
-        print("Error: %s" % e)
+
+        # Generate permissions for the user's current role
+        generate_permissions(currentUser.id, selected_profile.role)
+    except Exception as e:
+        print("Error Setting active profile: %s" % e.message)
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

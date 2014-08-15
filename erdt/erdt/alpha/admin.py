@@ -15,6 +15,7 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.models import User
 from django.contrib.contenttypes import views as contenttype_views
 from django.views.decorators.csrf import csrf_protect
+from django.db import models
 from django.db.models.base import ModelBase
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -25,10 +26,10 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.cache import never_cache
 from django.conf import settings
 from django.forms.models import model_to_dict
-from django.forms import ModelForm
+from forms import *
 
 # Utility methods
-from views import *
+from utils import *
 
 # Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
@@ -38,6 +39,20 @@ from profiling.models import (Profile, Person, University, Department,
 from context_processors import constants, external_urls
 constants = constants(None)
 external_urls = external_urls(None)
+
+# Import Custom ModelAdmin
+from custommodeladmin.globals import ERDTModelAdmin
+from custommodeladmin.user import UserAdmin
+from custommodeladmin.person import PersonAdmin
+from custommodeladmin.profile import ProfileAdmin
+from custommodeladmin.university import UniversityAdmin
+from custommodeladmin.department import DepartmentAdmin
+from custommodeladmin.degree_program import DegreeProgramAdmin
+from custommodeladmin.scholarship import ScholarshipAdmin
+from custommodeladmin.subject import SubjectAdmin
+from custommodeladmin.purchased_item import PurchasedItemAdmin
+from custommodeladmin.enrolled_subject import EnrolledSubjectAdmin
+from custommodeladmin.item_tag import ItemTagAdmin
 
 """
 Author: Christian Sta.Ana
@@ -74,7 +89,7 @@ class ERDTAdminSite(AdminSite):
             e = sys.exc_info()[0]
             print("Error: %s" % e)
 
-        #excluded fields list
+        # Excluded fields list
         user_exclude = ['first_name', 'last_name', 'is_active', 'email', 'is_superuser', 'is_staff', 'groups', 
             'password', 'id', 'date_joined', 'user_permissions']
         person_exclude = ['photo', 'id', 'user']
@@ -95,98 +110,6 @@ class ERDTAdminSite(AdminSite):
 
         return erdtIndexTempRes
 
-class UserAdmin(ModelAdmin):
-
-    fieldsets = [
-        ('Authentication', {'fields': ['username', 'password', 'email']}),
-        ('Advanced Information', {
-            'fields': ['is_active', 'is_staff', 'is_superuser', 'user_permissions'],
-            'classes': ['collapse',],
-            })
-    ]
-
-class ProfileAdmin(ModelAdmin):
-    list_display = ('person', 'role', 'affiliation', 'active') 
-    list_filter = ('role',)
-
-    fieldsets = [
-        ('Details', {'fields': ['active' ,'role','person']}),
-        ('Affiliation', {'fields': ['university']})
-    ]
-
-    def get_queryset(self, request):
-        qs = super(ProfileAdmin, self).get_queryset(request)
-        
-        try:
-            person = Person.objects.get(user=request.user.id)
-            profile = Profile.objects.get(person=person.id) 
-            if profile.role == Profile.UNIV_ADMIN: # change this to profile active
-                return qs.filter(university=profile.university.id)
-            else:
-                return qs
-        except:
-            return qs
-
-class DegreeProgramAdmin(ModelAdmin):
-    list_display = ('program', 'degree', 'department')
-    list_filter = ('degree', 'department')
-
-    def get_queryset(self, request):
-        qs = super(DegreeProgramAdmin, self).get_queryset(request)
-
-        try:
-            person = Person.objects.get(user=request.user.id)
-            profile = Profile.objects.get(person=person.id)
-            if profile.role == Profile.UNIV_ADMIN: # change this to profile active
-                return qs.filter(department__university_id=profile.university.id)
-            else:
-                return qs
-        except:
-            return qs
-
-class DepartmentAdmin(ModelAdmin):
-    list_display = ('name', 'university',)
-    list_filter = ('university',)
-
-
-    def get_queryset(self, request):
-        qs = super(DepartmentAdmin, self).get_queryset(request)
-
-        try:
-            person = Person.objects.get(user=request.user.id)
-            profile = Profile.objects.get(person=person.id)
-            if profile.role == Profile.UNIV_ADMIN: # change this to profile active
-                return qs.filter(university=profile.university.id)
-            else:
-                return qs
-        except:
-            return qs
-
-class PersonAdmin(ModelAdmin):
-    list_display = ('__unicode__', 'email_address', 'mobile_number')
-    readonly_fields = ('age',)
-    search_fields = ('first_name', 'middle_name', 'last_name')
-    fieldsets = (
-        ('Personal Information', {'fields': ('photo', 'user', ('first_name', 'middle_name', 'last_name'), 'sex', 
-            ('birthdate', 'age'), 'civil_status')}), 
-        ('Contact Information', {'fields':('address', 'email_address', 'landline_number', 'mobile_number')}),
-    )
-
-    def get_readonly_fields(self, request, obj=None):
-        if obj:
-            return self.readonly_fields + ('user',)
-        return self.readonly_fields
-
-class SubjectAdmin(ModelAdmin):
-    list_display = ('course_title', 'course_units', 'university')
-    list_filter = ('university',)
-
-class UniversityAdmin(ModelAdmin):
-    list_display = ('name', 'no_semester', 'with_summer', 'is_consortium', 'email_address', 'landline_number')
-
-class ScholarshipAdmin(ModelAdmin):
-    list_display = ('degree_program', 'where', 'scholarship_status')
-    list_filter = ('degree_program__department__university__name', 'scholarship_status')
 
 # Set the admin_site object as the custom ERDT Admin Site
 admin_site = ERDTAdminSite()
@@ -196,12 +119,16 @@ admin_site.register(User, UserAdmin)
 
 # Register Profiling models
 admin_site.register(Profile, ProfileAdmin)
+
+# Programatically create permissions
+create_readonly_permissions()
+
 admin_site.register(Person, PersonAdmin) 
 admin_site.register(University, UniversityAdmin)
 admin_site.register(Department, DepartmentAdmin)
 admin_site.register(Degree_Program, DegreeProgramAdmin)
 admin_site.register(Scholarship, ScholarshipAdmin)
 admin_site.register(Subject, SubjectAdmin)
-admin_site.register(Purchased_Item)
-admin_site.register(Enrolled_Subject)
-admin_site.register(Item_Tag)
+admin_site.register(Purchased_Item, PurchasedItemAdmin)
+admin_site.register(Enrolled_Subject, EnrolledSubjectAdmin)
+admin_site.register(Item_Tag, ItemTagAdmin)
