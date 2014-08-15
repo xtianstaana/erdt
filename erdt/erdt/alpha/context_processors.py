@@ -34,11 +34,25 @@ Returns: Dictionary containing constants dictionary
 def constants(request):
 
     constants = {
+        
         'site': {
             'site_title': 'DOST ERDT',
             'project_title': 'ERDT Scholars Management System',
             'index_title': 'Profile',
             'index_caption': 'My Profile'
+        },
+
+        'apps': {
+            'profiling': 'profiling',
+            'authentication': 'auth'
+        },
+ 
+        'profiles': {
+            'student': 'Student',
+            'faculty_adviser': 'Faculty Adviser',
+            'consortium_admin': 'Consortium Administrator',
+            'erdt_central_office': 'ERDT Central Office',
+            'dost_office': 'DOST Office'
         }
     }
 

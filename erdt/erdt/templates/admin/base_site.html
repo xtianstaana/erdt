@@ -1,20 +1,49 @@
 {% extends "admin/base.html" %}
+{% load admin_static %}
 
-{% load staticfiles %}
+{# Additional <head> content here, some extra meta tags or favicon #}
+{#{% block extrahead %}#}
+{#{% endblock %}#}
 
-{% block title %}{{constants.site.site_title}}{% endblock %}
 
+{# Additional CSS includes #}
 {% block extrastyle %}
-<link rel="stylesheet" type="text/css" href="{% static 'admin/css/erdt-admin.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/erdt-admin.css' %}" />
 {% endblock %}
 
-{% block extrahead %}
-<script type="text/javascript" src="{% static 'admin/js/jquery-1.11.1.min.js' %}"></script>
+
+{# Additional JS files in footer, right before </body> #}
+{% block extrajs %}
 <script type="text/javascript" src="{% static 'admin/js/profile-switcher.js' %}"></script>
 {% endblock %}
 
 {% block branding %}
-<h1 id="site-name"><a href="{% url 'admin:index' %}">{{constants.site.project_title}}</a></h1>
+{{constants.site.project_title}}
 {% endblock %}
 
-{% block nav-global %}{% endblock %}
+{# Footer links (left side) #}
+{% block footer_links %}
+{#  <a href="/docs/" class="icon"><i class="icon-question-sign"></i>Documentation</a>#}
+{% endblock %}
+
+{% block header_time %}
+
+{% endblock %}
+
+{# Additional header content like notifications or language switcher #}
+{% block header_content %}
+    {{ block.super }}
+
+    
+{% endblock %}
+
+{# Footer branding name (center) #}
+{% block footer_branding %}
+DOST ERDT
+{% endblock %}
+
+
+{# Footer copyright (right side) #}
+{% block copyright %}
+&copy; Copyright {% now "Y" %} <a href="{{ external_urls.dost_site }}" target="_blank">Department of Science and Technology,<br/> Republic of the Philippines</a>. All rights reserved. 
+{% endblock %}
