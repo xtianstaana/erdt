@@ -26,16 +26,6 @@
               <ul>
                 {% for model in app.models %}
 
-                  {% if model.label == 'Profiles' %}  
-                    {% if request.get_full_path == "/profiling/profile/" %} 
-                    <li class="active"> 
-                    {% else %}
-                    <li>
-                    {% endif %}
-                      <a href="{% url 'admin:profiling_profile_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
-                    </li>
-                  {% endif %}
-
                   {% if model.label == 'Persons' %} 
                     {% if request.get_full_path == "/profiling/person/" %} 
                     <li class="active"> 
@@ -56,16 +46,6 @@
                     </li>
                   {% endif %}
 
-                  {% if model.label == 'Departments' %}  
-                    {% if request.get_full_path == "/profiling/department/" %} 
-                    <li class="active"> 
-                    {% else %}
-                    <li>
-                    {% endif %}
-                    <a href="{% url 'admin:profiling_department_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
-                    </li>
-                  {% endif %}
-
                   {% if model.label == 'Degree Programs' %}  
                     {% if request.get_full_path == "/profiling/degree_program/" %} 
                     <li class="active"> 
@@ -73,26 +53,6 @@
                     <li>
                     {% endif %}
                     <a href="{% url 'admin:profiling_degree_program_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
-                    </li>
-                  {% endif %}
-
-                  {% if model.label == 'Scholarships' %}  
-                    {% if request.get_full_path == "/profiling/scholarship/" %} 
-                    <li class="active"> 
-                    {% else %}
-                    <li>
-                    {% endif %}
-                    <a href="{% url 'admin:profiling_scholarship_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
-                    </li>
-                  {% endif %}
-
-                  {% if model.label == 'Subjects' %}  
-                    {% if request.get_full_path == "/profiling/subject/" %} 
-                    <li class="active"> 
-                    {% else %}
-                    <li>
-                    {% endif %}
-                    <a href="{% url 'admin:profiling_subject_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
                     </li>
                   {% endif %}
 
@@ -113,16 +73,6 @@
                     <li>
                     {% endif %}
                     <a href="{% url 'admin:profiling_purchased_item_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
-                    </li>
-                  {% endif %}
-
-                  {% if model.label == 'Item Tags' %}  
-                    {% if request.get_full_path == "/profiling/item_tag/" %} 
-                    <li class="active"> 
-                    {% else %}
-                    <li>
-                    {% endif %}
-                    <a href="{% url 'admin:profiling_item_tag_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
                     </li>
                   {% endif %}
 

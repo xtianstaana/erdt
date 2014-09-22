@@ -34,7 +34,6 @@ class ScholarshipAdmin(ERDTModelAdmin):
     """
     def get_queryset(self, request):
         qs = super(ScholarshipAdmin, self).get_queryset(request)
-        
         try:
             profile = Profile.objects.get(person__user=request.user.id, active=True) 
             if profile.role == Profile.STUDENT: # If User's profile is STUDENT

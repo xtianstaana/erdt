@@ -18,6 +18,7 @@ from profiling.models import (Profile, Person, University, Department,
 from django.http import HttpResponseRedirect
 
 class EnrolledSubjectAdmin(ERDTModelAdmin):
+    list_filter = []
     readonly_fields = ()
 
     """

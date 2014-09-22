@@ -37,7 +37,7 @@ class UserAdmin(ERDTModelAdmin):
         ('Authentication', {'fields': ['username', 'password', 'email']}),
         ('Advanced Information', {
             'fields': ['is_active', 'is_staff', 'is_superuser', 'user_permissions'],
-            'classes': ['collapse',],
+            'classes': ['collapse', 'wide'],
             })
     ]
 
