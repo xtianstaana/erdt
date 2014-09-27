@@ -19,7 +19,7 @@ from django.http import HttpResponseRedirect
 
 class DegreeProgramAdmin(ERDTModelAdmin):
     list_display = ('program', 'degree', 'department')
-    list_filter = ('degree', 'department')
+    list_filter = ['department__university__name', 'degree', 'department']
 
     formfield_overrides = {
         models.ForeignKey: {'widget': LinkedSelect},

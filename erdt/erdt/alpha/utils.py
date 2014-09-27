@@ -48,6 +48,8 @@ def create_readonly_permissions():
 
         models = get_models(profiling_app)
 
+        print models
+
         # Create permissions for user
         user_content_type = ContentType.objects.get_for_model(User)
         user_permission = Permission.objects.create(codename=('view_user'),
@@ -63,6 +65,7 @@ def create_readonly_permissions():
                                                     content_type=content_type)
 
     except Exception as e:
+        print e
         print("Error Creating ReadOnly Perm: %s" % e.message)
 
         return False

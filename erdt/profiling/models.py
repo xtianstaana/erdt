@@ -138,7 +138,7 @@ class Scholarship(models.Model):
 	scholar = models.ForeignKey(Person, related_name='scholar')
 	degree_program = models.ForeignKey(Degree_Program)
 	scholarship_type = models.CharField(max_length=10, choices=SCHOLARSHIP_TYPE_CHOICES, default=ERDT)
-	scholarship_status = models.CharField(max_length=3, choices=SCHOLARSHIP_STATUS_CHOICES, default=REG_ONGOING)
+	scholarship_status = models.CharField(max_length=5, choices=SCHOLARSHIP_STATUS_CHOICES, default=REG_ONGOING)
 	scholarship_detail = models.CharField(max_length=250, blank=True)
 	high_degree = models.CharField(max_length=3, choices=DEGREE_CHOICES, default=BS, verbose_name='Highest degree')
 	high_degree_univ = models.ForeignKey(University, verbose_name="Highest degree's University")
@@ -167,7 +167,7 @@ class Scholarship(models.Model):
 
 
 	def __unicode__(self):
-		return '%s: %s, %s' % (self.scholar, self.degree_program, self.where())
+		return '(%s) %s %s, %s' % (self.get_scholarship_status_display(), self.degree_program.get_degree_display(), self.degree_program.program, self.degree_program.department.university.name)
 
 class Profile(models.Model):
 	STUDENT, ADVISER, UNIV_ADMIN, CENTRAL_OFFICE, DOST = 'STU', 'ADV', 'ADMIN', 'CENT', 'DOST'
@@ -198,7 +198,7 @@ class Profile(models.Model):
 	def user(self):
 		return self.person.user	
 
-	def clear(self):
+	def clean(self):
 		if self.role in (self.DOST, self.CENTRAL_OFFICE):
 			self.university = None
 		elif self.role in (self.STUDENT, self.ADVISER, self.UNIV_ADMIN):
@@ -268,7 +268,7 @@ class Subject(models.Model):
 	course_units = models.FloatField(default=3.0)
 
 	def __unicode__(self):
-		return '%s: %s (%s)' % (self.course_code, self.course_title, self.university)
+		return '%s: %s' % (self.course_code, self.university)
 
 class Enrolled_Subject(models.Model):
 	subject = models.ForeignKey(Subject)
