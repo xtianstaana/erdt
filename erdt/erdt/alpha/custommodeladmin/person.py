@@ -81,7 +81,7 @@ class PersonAdmin(ERDTModelAdmin):
 
     """
     Author: Christian Sta.Ana
-    Date: Mon Aug 11 2014
+    Date: Sun Sep 28 2014
     Description: Setting row/record-level permissions.      
     Params: default
     Returns: default
@@ -90,8 +90,18 @@ class PersonAdmin(ERDTModelAdmin):
         qs = super(PersonAdmin, self).get_queryset(request)
         try:
             profile = Profile.objects.get(person__user=request.user.id, active=True) 
+            
             if profile.role == Profile.STUDENT: # If User's profile is STUDENT
                 return qs.filter(user = request.user.id)
+            if profile.role == Profile.UNIV_ADMIN: # If User's profile is UNIV_ADMIN
+                output_qs = set()
+                user_person = Person.objects.get(user = request.user.id)
+                output_qs.add(user_person.pk)
+                for qs_person in qs:
+                    for qs_profile in qs_person.profile_set.all():
+                        if(qs_profile.university == profile.university):
+                            output_qs.add(qs_person.pk)
+                return qs.filter(pk__in = output_qs)
             else:
                 return qs
         except:

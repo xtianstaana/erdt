@@ -43,3 +43,33 @@ class UserAdmin(ERDTModelAdmin):
 
     form = UserForm
 
+    """
+    Author: Christian Sta.Ana
+    Date: Sun Sep 28 2014
+    Description: Setting row/record-level permissions.      
+    Params: default
+    Returns: default
+    """
+    def get_queryset(self, request):
+        qs = super(UserAdmin, self).get_queryset(request)
+        try:
+            profile = Profile.objects.get(person__user=request.user.id, active=True) 
+            if profile.role == Profile.UNIV_ADMIN: # If User's profile is CONSORTIUM
+                
+                # Get each user's person record 
+                output_qs = set()
+                for qs_user in qs:
+                    try:
+                        userPerson = Person.objects.get(user = qs_user.pk)
+                        for userProfile in userPerson.profile_set.all():
+                            if(userProfile.university == profile.university):
+                                output_qs.add(qs_user.pk)
+                    except:
+                        print 'Error getting a person in user queryset'
+
+                return qs.filter(pk__in = output_qs)
+            else:
+                return qs
+        except:
+            return qs
+

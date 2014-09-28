@@ -40,7 +40,14 @@ def turn_form_friendly(dict, exclude_list, label_dict):
 
     return form_friendly_dict
 
-
+"""
+Author: Christian Sta.Ana
+Date: Aug 2014
+Description: Creates readonly permissions for this site
+Params: default
+Returns: default
+Revisions:
+"""
 def create_readonly_permissions():
 
     try:
@@ -72,7 +79,14 @@ def create_readonly_permissions():
 
     return True
 
-
+"""
+Author: Christian Sta.Ana
+Date: Aug 2014
+Description: Creates dictionary of permissions object for easy access
+Params: default
+Returns: default
+Revisions:
+"""
 def get_permissions():
 
     try:
@@ -80,7 +94,7 @@ def get_permissions():
         permissions = {
             'user': {
                 'view': Permission.objects.get(codename='view_user'),
-                'edit': Permission.objects.get(codename='change_user'),
+                'change': Permission.objects.get(codename='change_user'),
                 'add': Permission.objects.get(codename='add_user'),
                 'delete': Permission.objects.get(codename='delete_user')
             }
@@ -105,7 +119,14 @@ def get_permissions():
 
         return None
 
-
+"""
+Author: Christian Sta.Ana
+Date: Aug 2014
+Description: Generates permissions for the active profile/role
+Params: default
+Returns: default
+Revisions:
+"""
 def generate_permissions(user_id, role):
 
     try:
@@ -124,9 +145,91 @@ def generate_permissions(user_id, role):
             current_user.user_permissions.add(permissions['profiling_person']['change'])
             current_user.user_permissions.add(permissions['profiling_scholarship']['view'])
             current_user.user_permissions.add(permissions['profiling_enrolled_subject']['view'])
+
+        if(role == Profile.STUDENT): # Give permissions of a ADVISER
+            # Same as STUDENT permissions temporarily
+            current_user.is_superuser = False
+
+            current_user.user_permissions.clear()
+
+            current_user.user_permissions.add(permissions['profiling_person']['view'])
+            current_user.user_permissions.add(permissions['profiling_person']['change'])
+            current_user.user_permissions.add(permissions['profiling_scholarship']['view'])
+            current_user.user_permissions.add(permissions['profiling_enrolled_subject']['view'])
+
+        if(role == Profile.UNIV_ADMIN): # Give permissions of a UNIV_ADMIN
+
+            current_user.is_superuser = False
+
+            current_user.user_permissions.clear()
+
+            current_user.user_permissions.add(permissions['profiling_university']['view'])
+            current_user.user_permissions.add(permissions['profiling_department']['view'])
+            current_user.user_permissions.add(permissions['profiling_degree_program']['view'])
+            current_user.user_permissions.add(permissions['user']['view'])
+            current_user.user_permissions.add(permissions['profiling_person']['view'])
+            current_user.user_permissions.add(permissions['profiling_scholarship']['view'])
+            current_user.user_permissions.add(permissions['profiling_profile']['view'])
+            current_user.user_permissions.add(permissions['profiling_item_tag']['view'])
+            current_user.user_permissions.add(permissions['profiling_purchased_item']['view'])
+            current_user.user_permissions.add(permissions['profiling_subject']['view'])
+            current_user.user_permissions.add(permissions['profiling_enrolled_subject']['view'])
+
+            current_user.user_permissions.add(permissions['profiling_university']['add'])
+            current_user.user_permissions.add(permissions['profiling_department']['add'])
+            current_user.user_permissions.add(permissions['profiling_degree_program']['add'])
+            current_user.user_permissions.add(permissions['user']['add'])
+            current_user.user_permissions.add(permissions['profiling_person']['add'])
+            current_user.user_permissions.add(permissions['profiling_scholarship']['add'])
+            current_user.user_permissions.add(permissions['profiling_profile']['add'])
+            current_user.user_permissions.add(permissions['profiling_item_tag']['add'])
+            current_user.user_permissions.add(permissions['profiling_purchased_item']['add'])
+            current_user.user_permissions.add(permissions['profiling_subject']['add'])
+            current_user.user_permissions.add(permissions['profiling_enrolled_subject']['add'])
+
+            current_user.user_permissions.add(permissions['profiling_university']['change'])
+            current_user.user_permissions.add(permissions['profiling_department']['change'])
+            current_user.user_permissions.add(permissions['profiling_degree_program']['change'])
+            current_user.user_permissions.add(permissions['user']['change'])
+            current_user.user_permissions.add(permissions['profiling_person']['change'])
+            current_user.user_permissions.add(permissions['profiling_scholarship']['change'])
+            current_user.user_permissions.add(permissions['profiling_profile']['change'])
+            current_user.user_permissions.add(permissions['profiling_item_tag']['change'])
+            current_user.user_permissions.add(permissions['profiling_purchased_item']['change'])
+            current_user.user_permissions.add(permissions['profiling_subject']['change'])
+            current_user.user_permissions.add(permissions['profiling_enrolled_subject']['change'])
+
+            current_user.user_permissions.add(permissions['profiling_university']['delete'])
+            current_user.user_permissions.add(permissions['profiling_department']['delete'])
+            current_user.user_permissions.add(permissions['profiling_degree_program']['delete'])
+            current_user.user_permissions.add(permissions['user']['delete'])
+            current_user.user_permissions.add(permissions['profiling_person']['delete'])
+            current_user.user_permissions.add(permissions['profiling_scholarship']['delete'])
+            current_user.user_permissions.add(permissions['profiling_profile']['delete'])
+            current_user.user_permissions.add(permissions['profiling_item_tag']['delete'])
+            current_user.user_permissions.add(permissions['profiling_purchased_item']['delete'])
+            current_user.user_permissions.add(permissions['profiling_subject']['delete'])
+            current_user.user_permissions.add(permissions['profiling_enrolled_subject']['delete'])
         
-        if(role == Profile.ADVISER): # Give permissions of a FACULTY ADVISER
-            current_user.is_superuser = True # Temporarily give superuser permissions
+        if(role == Profile.CENTRAL_OFFICE): # Give permissions of a CENTRAL OFFICE
+            current_user.is_superuser = True 
+
+        if(role == Profile.DOST): # Give permissions of a DOST
+            current_user.is_superuser = False
+
+            current_user.user_permissions.clear()
+
+            current_user.user_permissions.add(permissions['profiling_university']['view'])
+            current_user.user_permissions.add(permissions['profiling_department']['view'])
+            current_user.user_permissions.add(permissions['profiling_degree_program']['view'])
+            current_user.user_permissions.add(permissions['user']['view'])
+            current_user.user_permissions.add(permissions['profiling_person']['view'])
+            current_user.user_permissions.add(permissions['profiling_scholarship']['view'])
+            current_user.user_permissions.add(permissions['profiling_profile']['view'])
+            current_user.user_permissions.add(permissions['profiling_item_tag']['view'])
+            current_user.user_permissions.add(permissions['profiling_purchased_item']['view'])
+            current_user.user_permissions.add(permissions['profiling_subject']['view'])
+            current_user.user_permissions.add(permissions['profiling_enrolled_subject']['view'])
 
         current_user.save()
 

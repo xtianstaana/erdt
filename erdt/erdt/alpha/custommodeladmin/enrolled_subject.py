@@ -35,6 +35,16 @@ class EnrolledSubjectAdmin(ERDTModelAdmin):
             profile = Profile.objects.get(person__user=request.user.id, active=True) 
             if profile.role == Profile.STUDENT: # If User's profile is STUDENT
                 return qs.filter(scholarship__scholar__user = request.user.id)
+
+            if profile.role == Profile.UNIV_ADMIN: # If User's profile is UNIV_ADMIN
+                output_qs = set()
+
+                thru_scholarship = Enrolled_Subject.objects.get(scholarship__high_degree_univ = profile.university)
+                for p in thru_scholarship:
+                    output_qs.add(p.pk)
+
+                return qs.filter(pk__in = output_qs)
+
             else:
                 return qs
         except:
