@@ -37,3 +37,21 @@ class UniversityAdmin(ERDTModelAdmin):
     formfield_overrides = {
         models.ForeignKey: {'widget': LinkedSelect},
     }
+
+    """
+    Author: Christian Sta.Ana
+    Date: Sun Sep 28 2014
+    Description: Setting row/record-level permissions.      
+    Params: default
+    Returns: default
+    """
+    def get_queryset(self, request):
+        qs = super(UniversityAdmin, self).get_queryset(request)
+        try:
+            profile = Profile.objects.get(person__user=request.user.id, active=True) 
+            if profile.role == Profile.UNIV_ADMIN: # If User's profile is CONSORTIUM
+                return qs.filter(pk = profile.university.id)
+            else:
+                return qs
+        except:
+            return qs

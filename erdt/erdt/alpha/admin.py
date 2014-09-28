@@ -54,6 +54,8 @@ from custommodeladmin.purchased_item import PurchasedItemAdmin
 from custommodeladmin.enrolled_subject import EnrolledSubjectAdmin
 from custommodeladmin.item_tag import ItemTagAdmin
 
+import signals
+
 """
 Author: Christian Sta.Ana
 Date: Wed Jul 23 2014
