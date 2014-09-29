@@ -129,11 +129,15 @@ Revisions:
 """
 def generate_permissions(user_id, role):
 
+    print 'generating permissions'
+
     try:
         current_user = User.objects.get(pk=user_id)
 
         # Get permissions first
         permissions = get_permissions()
+
+        current_user.is_staff = True
 
         if(role == Profile.STUDENT): # Give permissions of a STUDENT
 

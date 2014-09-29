@@ -22,3 +22,8 @@ Date: Fri Jul 18
 .login #content {
     min-height: 300px;
 }
+
+.login #content-main {
+    width: 270px !important;
+    left: 0px !important;
+}
