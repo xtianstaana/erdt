@@ -36,7 +36,7 @@ class DegreeProgramAdmin(ERDTModelAdmin):
         qs = super(DegreeProgramAdmin, self).get_queryset(request)
 
         try:
-            profile = Profile.objects.get(person__user=request.user.id)
+            profile = Profile.objects.get(person__user=request.user.id, active = True)
             if profile.role == Profile.UNIV_ADMIN: # If User's profile is University Admin
                 return qs.filter(department__university_id=profile.university.id)
             else:

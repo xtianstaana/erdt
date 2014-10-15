@@ -37,7 +37,7 @@ class DepartmentAdmin(ERDTModelAdmin):
 
         try:
             person = Person.objects.get(user=request.user.id)
-            profile = Profile.objects.get(person=person.id)
+            profile = Profile.objects.get(person=person.id, active = True)
             if profile.role == Profile.UNIV_ADMIN: # If User's profile is University Admin
                 return qs.filter(university=profile.university.id)
             else:
