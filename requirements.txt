@@ -1,4 +1,6 @@
-Django==1.7b4
+Django
+django-polymorphic==0.6
+django-autocomplete-light==2.0.3
 Pillow==2.5.1
 django-suit==0.2.9
 wsgiref==0.1.2
