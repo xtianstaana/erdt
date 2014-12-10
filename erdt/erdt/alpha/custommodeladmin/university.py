@@ -13,27 +13,37 @@ from suit.widgets import *
 
 # Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject, Item_Tag)
+    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
 
 from django.http import HttpResponseRedirect
 
 class DepartmentInline(TabularInline):
-	model = Department
-	fk_name = 'university'
-	extra = 0
+    model = Department
+    fk_name = 'university'
+    extra = 0
+    suit_classes = 'suit-tab suit-tab-department'
 
 class SubjectInline(TabularInline):
-	model = Subject
-	verbose_name = 'Subject Offered'
-	verbose_name_plural = 'Subjects Offered'
-	fk_name = 'university'
-	extra = 0
+    model = Subject
+    verbose_name = 'Subject Offered'
+    verbose_name_plural = 'Subjects Offered'
+    fk_name = 'university'
+    extra = 0
+    suit_classes = 'suit-tab suit-tab-subject'
 
 class UniversityAdmin(ERDTModelAdmin):
-    list_display = ('name', 'no_semester', 'with_summer', 'is_consortium', 'email_address', 'landline_number')
+    list_display = ('name', 'is_consortium', 'address')
     list_filter = ('is_consortium',)
     inlines = [DepartmentInline, SubjectInline]
 
+    fieldsets = [
+        (None, {
+            'classes' : ('suit-tab', 'suit-tab-information'),
+            'fields' : ('photo', 'name', 'is_consortium', 'member_since', 'address', 'email_address', 'landline_number', 'no_semester', 'with_summer'),
+            }),
+    ]
+
+    suit_form_tabs = (('information', 'Information'), ('department', 'Departments'), ('subject', 'Subjects Offered'))
     formfield_overrides = {
         models.ForeignKey: {'widget': LinkedSelect},
     }
