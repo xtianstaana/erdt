@@ -33,7 +33,7 @@ from utils import *
 
 # Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject, Item_Tag)
+    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
 
 # Import Constants
 from context_processors import constants, external_urls
@@ -52,7 +52,6 @@ from custommodeladmin.scholarship import ScholarshipAdmin
 from custommodeladmin.subject import SubjectAdmin
 from custommodeladmin.purchased_item import PurchasedItemAdmin
 from custommodeladmin.enrolled_subject import EnrolledSubjectAdmin
-from custommodeladmin.item_tag import ItemTagAdmin
 
 import signals
 
@@ -127,10 +126,4 @@ create_readonly_permissions()
 
 admin_site.register(Person, PersonAdmin) 
 admin_site.register(University, UniversityAdmin)
-admin_site.register(Department, DepartmentAdmin)
 admin_site.register(Degree_Program, DegreeProgramAdmin)
-admin_site.register(Scholarship, ScholarshipAdmin)
-admin_site.register(Subject, SubjectAdmin)
-admin_site.register(Purchased_Item, PurchasedItemAdmin)
-admin_site.register(Enrolled_Subject, EnrolledSubjectAdmin)
-admin_site.register(Item_Tag, ItemTagAdmin)

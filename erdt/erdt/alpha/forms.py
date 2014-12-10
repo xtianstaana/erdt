@@ -18,7 +18,7 @@ from views import *
 
 # Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject, Item_Tag)
+    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
 
 # Import Constants
 from context_processors import constants, external_urls

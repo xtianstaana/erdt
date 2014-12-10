@@ -2,7 +2,7 @@ from django.db.models import get_app, get_models
 
 # Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject, Item_Tag)
+    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
 
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
@@ -174,7 +174,6 @@ def generate_permissions(user_id, role):
             current_user.user_permissions.add(permissions['profiling_person']['view'])
             current_user.user_permissions.add(permissions['profiling_scholarship']['view'])
             current_user.user_permissions.add(permissions['profiling_profile']['view'])
-            current_user.user_permissions.add(permissions['profiling_item_tag']['view'])
             current_user.user_permissions.add(permissions['profiling_purchased_item']['view'])
             current_user.user_permissions.add(permissions['profiling_subject']['view'])
             current_user.user_permissions.add(permissions['profiling_enrolled_subject']['view'])
@@ -186,7 +185,6 @@ def generate_permissions(user_id, role):
             current_user.user_permissions.add(permissions['profiling_person']['add'])
             current_user.user_permissions.add(permissions['profiling_scholarship']['add'])
             current_user.user_permissions.add(permissions['profiling_profile']['add'])
-            current_user.user_permissions.add(permissions['profiling_item_tag']['add'])
             current_user.user_permissions.add(permissions['profiling_purchased_item']['add'])
             current_user.user_permissions.add(permissions['profiling_subject']['add'])
             current_user.user_permissions.add(permissions['profiling_enrolled_subject']['add'])
@@ -198,7 +196,6 @@ def generate_permissions(user_id, role):
             current_user.user_permissions.add(permissions['profiling_person']['change'])
             current_user.user_permissions.add(permissions['profiling_scholarship']['change'])
             current_user.user_permissions.add(permissions['profiling_profile']['change'])
-            current_user.user_permissions.add(permissions['profiling_item_tag']['change'])
             current_user.user_permissions.add(permissions['profiling_purchased_item']['change'])
             current_user.user_permissions.add(permissions['profiling_subject']['change'])
             current_user.user_permissions.add(permissions['profiling_enrolled_subject']['change'])
@@ -210,7 +207,6 @@ def generate_permissions(user_id, role):
             current_user.user_permissions.add(permissions['profiling_person']['delete'])
             current_user.user_permissions.add(permissions['profiling_scholarship']['delete'])
             current_user.user_permissions.add(permissions['profiling_profile']['delete'])
-            current_user.user_permissions.add(permissions['profiling_item_tag']['delete'])
             current_user.user_permissions.add(permissions['profiling_purchased_item']['delete'])
             current_user.user_permissions.add(permissions['profiling_subject']['delete'])
             current_user.user_permissions.add(permissions['profiling_enrolled_subject']['delete'])

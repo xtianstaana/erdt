@@ -6,56 +6,66 @@ Description: Contains Admin Customization functions for Person
 
 from globals import ERDTModelAdmin
 from django.db import models
-from django.contrib.admin import StackedInline, TabularInline, actions
+from django.contrib.admin import StackedInline, TabularInline, actions, HORIZONTAL, VERTICAL
 from django.forms import ModelForm
 from django.forms.widgets import *
 from suit.widgets import *
 
 # Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject, Item_Tag)
+    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject, Grant)
 
 from django.http import HttpResponseRedirect
 
 class ProfileInline(TabularInline):
     model = Profile
-    fk_name = 'person'
     exclude = ('active',)
     extra = 0
+    suit_classes = 'suit-tab suit-tab-profile'
+
+class GrantInline(TabularInline):
+    model = Grant
+    fk_name = 'recipient'
+    extra = 0
+    suit_classes = 'suit-tab suit-tab-grant'
 
 class ScholarshipInline(StackedInline):
     model = Scholarship
-    fk_name = 'scholar'
+    fk_name = 'recipient'
     extra = 0
-    max_num = 1
+    suit_classes = 'suit-tab suit-tab-scholarship'
 
-class PurchasedItemInline(TabularInline):
-    model = Purchased_Item
-    verbose_name = 'Issued Item'
-    verbose_name_plural = 'Issued Items'
-    fields = ['description', 'location', 'status', 'date_procured', 'accountable']
-    fk_name = 'issuance'
-    extra = 0
 
-class AccountableInline(TabularInline):
-    model = Purchased_Item
-    verbose_name = 'Accountable Item'
-    verbose_name_plural = 'Accountable Items'
-    fields = ['description', 'location', 'status', 'date_procured']
-    fk_name = 'accountable'
-    extra = 0
+class PersonForm(ModelForm):
+    class Meta:
+        model = Person
+        widgets = {
+            'first_name' : TextInput(attrs={'placeholder':'First name'}),
+            'middle_name' : TextInput(attrs={'placeholder':'Middle name'}),
+            'last_name' : TextInput(attrs={'placeholder':'Last name'}),
+        }
 
 class PersonAdmin(ERDTModelAdmin):
-    inlines = [ProfileInline, ScholarshipInline, PurchasedItemInline, AccountableInline]
+    form = PersonForm
+    inlines = [ProfileInline, GrantInline]
     list_display = ('__unicode__', 'email_address', 'mobile_number')
     readonly_fields = ('age',)
-    list_filter = ('profile__role', 'profile__university', 'scholar__degree_program__degree', 'scholar__degree_program__program', 'scholar__scholarship_status')
+    list_filter = ('profile__role', 'profile__university', 'grant_recipient__scholarship__degree_program__degree', 'grant_recipient__scholarship__degree_program__program', 'grant_recipient__scholarship__scholarship_status')
+    radio_fields =  {'sex' : HORIZONTAL, 'civil_status' : HORIZONTAL}
 
     fieldsets = (
-        ('Personal Information', {'fields': ('photo', 'user', 'first_name', 'middle_name', 'last_name', 'sex', 
-            ('birthdate', 'age'), 'civil_status')}), 
-        ('Contact Information', {'fields':('address', 'email_address', 'landline_number', 'mobile_number')}),
+        ('Personal Information', {
+            'classes' : ('suit-tab', 'suit-tab-information'),
+            'fields': ('photo', 'user', 'first_name', 'middle_name', 'last_name', 'sex', 'civil_status',
+            ('birthdate', 'age'))
+            }), 
+        ('Contact Information', {
+            'classes' : ('suit-tab', 'suit-tab-information'),
+            'fields':('address', 'email_address', 'landline_number', 'mobile_number'), 
+            }),
     )
+
+    suit_form_tabs = (('information', 'Information'), ('profile', 'Profiles'), ('grant', 'Grants'))
 
     formfield_overrides = {
         models.ForeignKey: {'widget': LinkedSelect},

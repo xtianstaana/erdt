@@ -11,7 +11,7 @@ from django.forms.widgets import *
 
 # Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject, Item_Tag)
+    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
 
 from django.http import HttpResponseRedirect
 

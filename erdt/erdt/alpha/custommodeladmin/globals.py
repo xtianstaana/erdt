@@ -10,6 +10,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import widgets, helpers
 from django.contrib.admin import validation
+from django.contrib.admin.options import IncorrectLookupParameters
 from django.contrib.admin.checks import (BaseModelAdminChecks, ModelAdminChecks,
     InlineModelAdminChecks)
 from django.contrib.admin.utils import (unquote, flatten_fieldsets,
@@ -50,7 +51,7 @@ from django.views.decorators.csrf import csrf_protect
 
 # Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject, Item_Tag)
+    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
 
 csrf_protect_m = method_decorator(csrf_protect)
 
