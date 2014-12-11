@@ -86,7 +86,7 @@ class PersonAdmin(ERDTModelAdmin):
             else:
                 return self.readonly_fields
         except Exception as e: 
-            print ("Error getting readonly fields: %s" % e.message)
+            #print ("Error getting readonly fields: %s" % e.message)
             return self.readonly_fields
 
     """
