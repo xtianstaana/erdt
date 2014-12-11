@@ -13,8 +13,7 @@ from django.dispatch import receiver
 from utils import *
 
 # Import Profiling Module Models 
-from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
+from profiling.models import *
 
 # Import Constants
 from context_processors import constants, external_urls
@@ -42,11 +41,11 @@ def person_postsave_handler(sender, **kwargs):
 
         if(len(user_profiles) > 0):            
             for user_profile in user_profiles:
-                if(user_profile.role == Profile.STUDENT):
+                if user_profile.role == Profile.STUDENT:
                     has_existing_student_profile = True
                     existing_student_profile = user_profile
 
-        if(has_existing_student_profile is False):
+        if not has_existing_student_profile:
             # Create student profile for user
             student_profile = Profile(role = Profile.STUDENT, person = saved_person)
 
@@ -75,7 +74,6 @@ def person_postsave_handler(sender, **kwargs):
             existing_student_profile.save()
     except Exception as e:
         print e
-
 
 """
 Author: Christian Sta.Ana
@@ -146,7 +144,8 @@ def scholarship_postsave_sch(sender, **kwargs):
             student_profile.save()
 
     except Exception as e:
-        print e
+        #print e
+        pass
 
 
 """
@@ -179,7 +178,7 @@ def profile_presave_handler(sender, **kwargs):
 
 
     except Exception as e:
-        print e
-
+        #print e
+        pass
 
 

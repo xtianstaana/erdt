@@ -50,8 +50,7 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_protect
 
 # Import Profiling Module Models 
-from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
+from profiling.models import *
 
 csrf_protect_m = method_decorator(csrf_protect)
 

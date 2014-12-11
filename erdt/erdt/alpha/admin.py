@@ -32,8 +32,7 @@ from forms import *
 from utils import *
 
 # Import Profiling Module Models 
-from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
+from profiling.models import *
 
 # Import Constants
 from context_processors import constants, external_urls
@@ -44,14 +43,11 @@ external_urls = external_urls(None)
 from custommodeladmin.globals import ERDTModelAdmin
 from custommodeladmin.user import UserAdmin
 from custommodeladmin.person import PersonAdmin
-from custommodeladmin.profile import ProfileAdmin
 from custommodeladmin.university import UniversityAdmin
-from custommodeladmin.department import DepartmentAdmin
 from custommodeladmin.degree_program import DegreeProgramAdmin
 from custommodeladmin.scholarship import ScholarshipAdmin
-from custommodeladmin.subject import SubjectAdmin
-from custommodeladmin.purchased_item import PurchasedItemAdmin
-from custommodeladmin.enrolled_subject import EnrolledSubjectAdmin
+from custommodeladmin.sandwich import SandwichAdmin
+#from custommodeladmin.purchased_item import PurchasedItemAdmin
 
 import signals
 
@@ -88,7 +84,7 @@ class ERDTAdminSite(AdminSite):
             currentUserPerson = Person.objects.get(user=currentUser.id)
         except:
             e = sys.exc_info()[0]
-            print("Error: %s" % e)
+            #print("Error: %s" % e)
 
         # Excluded fields list
         user_exclude = ['first_name', 'last_name', 'is_active', 'email', 'is_superuser', 'is_staff', 'groups', 
@@ -118,12 +114,11 @@ admin_site = ERDTAdminSite()
 # Register Django models
 admin_site.register(User, UserAdmin)
 
-# Register Profiling models
-admin_site.register(Profile, ProfileAdmin)
-
 # Programatically create permissions
 create_readonly_permissions()
-
+admin_site.register(Sandwich_Program, SandwichAdmin)
 admin_site.register(Person, PersonAdmin) 
 admin_site.register(University, UniversityAdmin)
 admin_site.register(Degree_Program, DegreeProgramAdmin)
+admin_site.register(Scholarship, ScholarshipAdmin)
+admin_site.register(Grant_Allocation_Release)

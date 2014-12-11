@@ -12,18 +12,27 @@ from django.forms.widgets import *
 from suit.widgets import *
 
 # Import Profiling Module Models 
-from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
+from profiling.models import (Profile, University, Department, Scholarship, Equipment)
 
 from django.http import HttpResponseRedirect
 
+
+class MyScholarshipForm(ModelForm):
+    class Meta:
+        model = Scholarship
+        fields = '__all__'
+        widgets = {
+            'adviser' : LinkedSelect,
+        }
+
 class ScholarshipAdmin(ERDTModelAdmin):
+    form = MyScholarshipForm
     list_display = ('degree_program', 'where', 'scholarship_status')
     list_filter = ('degree_program__department__university__name', 'scholarship_status')
 
-    formfield_overrides = {
-        models.ForeignKey: {'widget': LinkedSelect},
-    }
+    #formfield_overrides = {
+    #    models.ForeignKey: {'widget': LinkedSelect},
+    #}
 
     """
     Author: Christian Sta.Ana
