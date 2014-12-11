@@ -10,9 +10,7 @@ from django.forms import ModelForm
 from django.forms.widgets import *
 
 # Import Profiling Module Models 
-from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
-
+from profiling.models import (Profile, Person)
 from django.http import HttpResponseRedirect
 
 class UserForm(ModelForm):

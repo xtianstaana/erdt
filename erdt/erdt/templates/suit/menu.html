@@ -36,6 +36,26 @@
                     </li>
                   {% endif %}
 
+                  {% if model.label == 'Sandwich Programs' %} 
+                    {% if request.get_full_path == "/profiling/sandwich_program/" %} 
+                    <li class="active"> 
+                    {% else %}
+                    <li>
+                    {% endif %}
+                    <a href="{% url 'admin:profiling_sandwich_program_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    </li>
+                  {% endif %}
+
+                  {% if model.label == 'Vouchers' %} 
+                    {% if request.get_full_path == "/profiling/grant_allocation_release/" %} 
+                    <li class="active"> 
+                    {% else %}
+                    <li>
+                    {% endif %}
+                    <a href="{% url 'admin:profiling_grant_allocation_release_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    </li>
+                  {% endif %}
+
                   {% if model.label == 'Universities' %}  
                     {% if request.get_full_path == "/profiling/university/" %} 
                     <li class="active"> 
@@ -66,13 +86,13 @@
                     </li>
                   {% endif %}
 
-                  {% if model.label == 'Purchased Items' %}  
-                    {% if request.get_full_path == "/profiling/purchased_item/" %} 
+                  {% if model.label == 'Equipment' %}  
+                    {% if request.get_full_path == "/profiling/equipment/" %} 
                     <li class="active"> 
                     {% else %}
                     <li>
                     {% endif %}
-                    <a href="{% url 'admin:profiling_purchased_item_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    <a href="{% url 'admin:profiling_equipment_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
                     </li>
                   {% endif %}
 

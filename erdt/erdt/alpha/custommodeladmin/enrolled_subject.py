@@ -13,7 +13,7 @@ from suit.widgets import *
 
 # Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
+    Degree_Program, Scholarship, Subject, Enrolled_Subject)
 
 from django.http import HttpResponseRedirect
 
