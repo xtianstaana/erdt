@@ -7,24 +7,8 @@ Description: Contains Admin Customization functions
 import sys
 
 from django.contrib.admin import AdminSite
-from functools import update_wrapper
-from django.http import Http404, HttpResponseRedirect
-from django.contrib.admin import ModelAdmin, StackedInline, TabularInline, actions
-from django.contrib.admin.forms import AdminAuthenticationForm
-from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.models import User
-from django.contrib.contenttypes import views as contenttype_views
-from django.views.decorators.csrf import csrf_protect
-from django.db import models
-from django.db.models.base import ModelBase
-from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse, NoReverseMatch
-from django.template.response import TemplateResponse
-from django.utils.safestring import mark_safe
-from django.utils.text import capfirst
-from django.utils.translation import ugettext as _
 from django.views.decorators.cache import never_cache
-from django.conf import settings
 from django.forms.models import model_to_dict
 from forms import *
 
@@ -47,9 +31,7 @@ from custommodeladmin.university import UniversityAdmin
 from custommodeladmin.degree_program import DegreeProgramAdmin
 from custommodeladmin.scholarship import ScholarshipAdmin
 from custommodeladmin.sandwich import SandwichAdmin
-#from custommodeladmin.purchased_item import PurchasedItemAdmin
-
-import signals
+from custommodeladmin.fund_release import GrantAllocationReleaseAdmin
 
 """
 Author: Christian Sta.Ana
@@ -116,9 +98,10 @@ admin_site.register(User, UserAdmin)
 
 # Programatically create permissions
 create_readonly_permissions()
+
 admin_site.register(Sandwich_Program, SandwichAdmin)
 admin_site.register(Person, PersonAdmin) 
 admin_site.register(University, UniversityAdmin)
 admin_site.register(Degree_Program, DegreeProgramAdmin)
 admin_site.register(Scholarship, ScholarshipAdmin)
-admin_site.register(Grant_Allocation_Release)
+admin_site.register(Grant_Allocation_Release, GrantAllocationReleaseAdmin) 

@@ -13,5 +13,6 @@ urlpatterns = patterns('',
     url(r'^', include(admin_site.urls)),
     url(r'^', include('erdt.alpha.urls')),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
+    url(r'^chaining/', include('smart_selects.urls')),
     #url(r'^community/', include('django_website.aggregator.urls', namespace='community')),
 )

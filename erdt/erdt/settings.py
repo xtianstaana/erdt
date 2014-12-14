@@ -26,11 +26,13 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+USE_DJANGO_JQUERY = False
 
 # Application definition
 
 INSTALLED_APPS = (
     'suit', #Django Suit
+    'smart_selects',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
