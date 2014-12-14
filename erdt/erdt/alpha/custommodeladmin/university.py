@@ -19,7 +19,6 @@ from django.http import HttpResponseRedirect
 class DepartmentInline(TabularInline):
     model = Department
     fk_name = 'university'
-    ordering = ('name',)
     extra = 0
     suit_classes = 'suit-tab suit-tab-department'
 
@@ -35,13 +34,12 @@ class SubjectInline(TabularInline):
 class UniversityAdmin(ERDTModelAdmin):
     list_display = ('name', 'is_consortium', 'address')
     list_filter = ('is_consortium',)
-    ordering = ('-is_consortium', 'name',)
     inlines = [DepartmentInline, SubjectInline]
 
     fieldsets = [
         (None, {
             'classes' : ('suit-tab', 'suit-tab-information'),
-            'fields' : ('photo', 'name', 'is_consortium', 'member_since', 'address', 'email_address', 'landline_number', 'no_semester', 'with_summer'),
+            'fields' : ('photo', 'name', 'short_name', 'is_consortium', 'member_since', 'address', 'email_address', 'landline_number', 'no_semester', 'with_summer'),
             }),
     ]
 

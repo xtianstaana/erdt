@@ -1,52 +1,27 @@
 from django.contrib.admin import ModelAdmin
-from collections import OrderedDict
-import copy
-import operator
-from functools import partial, reduce, update_wrapper
-import warnings
 
 from django import forms
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import widgets, helpers
-from django.contrib.admin import validation
 from django.contrib.admin.options import IncorrectLookupParameters
-from django.contrib.admin.checks import (BaseModelAdminChecks, ModelAdminChecks,
-    InlineModelAdminChecks)
 from django.contrib.admin.utils import (unquote, flatten_fieldsets,
     get_deleted_objects, model_format_dict, NestedObjects,
     lookup_needs_distinct)
-from django.contrib.admin.templatetags.admin_static import static
-from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
-from django.contrib.auth import get_permission_codename
-from django.core import checks
 from django.core.exceptions import (PermissionDenied, ValidationError,
     FieldError, ImproperlyConfigured)
-from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.db import models, transaction, router
-from django.db.models.constants import LOOKUP_SEP
-from django.db.models.related import RelatedObject
-from django.db.models.fields import BLANK_CHOICE_DASH, FieldDoesNotExist
-from django.db.models.sql.constants import QUERY_TERMS
+
 from django.forms.formsets import all_valid, DELETION_FIELD_NAME
-from django.forms.models import (modelform_factory, modelformset_factory,
-    inlineformset_factory, BaseInlineFormSet, modelform_defines_fields)
 from django.http import Http404, HttpResponseRedirect
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404
 from django.template.response import SimpleTemplateResponse, TemplateResponse
-from django.utils import six
 from django.utils.decorators import method_decorator
-from django.utils.deprecation import (RenameMethodsBase,
-    RemovedInDjango18Warning, RemovedInDjango19Warning)
 from django.utils.encoding import force_text, python_2_unicode_compatible
 from django.utils.html import escape, escapejs
-from django.utils.http import urlencode
-from django.utils.text import capfirst, get_text_list
 from django.utils.translation import ugettext as _
 from django.utils.translation import ungettext
-from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_protect
 
 # Import Profiling Module Models 

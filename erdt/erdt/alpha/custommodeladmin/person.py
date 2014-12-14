@@ -7,9 +7,10 @@ Description: Contains Admin Customization functions for Person
 from globals import ERDTModelAdmin
 from django.db import models
 from django.contrib.admin import StackedInline, TabularInline, actions, HORIZONTAL, VERTICAL
-from django.forms import ModelForm
+from django import forms 
 from django.forms.widgets import *
 from suit.widgets import *
+from django.core.urlresolvers import resolve
 
 # Import Profiling Module Models 
 from profiling.models import *
@@ -18,60 +19,72 @@ from django.http import HttpResponseRedirect
 
 class ProfileInline(TabularInline):
     model = Profile
+    verbose_name_plural = 'Academic Profile'
+    verbose_name_plural = 'Academic Profiles'
     exclude = ('active',)
     extra = 0
-    suit_classes = 'suit-tab suit-tab-profile'
+    suit_classes = 'suit-tab suit-tab-general'
+
+    class Meta:
+        model = Scholarship
 
 class ScholarshipInline(StackedInline):
     model = Scholarship
-    fk_name = 'recipient'
+    fk_name = 'awardee'
     extra = 0
+    #max_num = 1
     suit_classes = 'suit-tab suit-tab-scholarship'
-
-class Enrolled_SubjectInline(TabularInline):
-    model = Enrolled_Subject
-    fk_name = 'scholar'
-    extra = 3
-    suit_classes = 'suit-tab suit-tab-subj'
+    verbose_name = 'Local Scholarship'
+    verbose_name_plural = 'Local Scholarships'
+    fields = ('scholarship_status', 'degree_program', 'start_date', 'end_date' , 'total_amount', 'adviser', 'entry_grad_program', 'end_grad_program', 'cleared' , 'description')
+    readonly_fields = fields
 
 class EquipmentInline(StackedInline):
-    model=Equipment
-    fk_name = 'recipient'
+    model = Equipment
+    fk_name = 'payee'
     extra = 0
     suit_classes = 'suit-tab suit-tab-issued'
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        try:
-            profile = Profile.objects.get(person__user=request.user.id, active=True)
-            if db_field.name == 'grant':
-                pass
-                #kwargs["queryset"] = Grant.objects.filter(recipient=profile.university.id)
-        except:
-            pass
-        return super(EquipmentInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+    # def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    #     try:
+    #         if db_field.name == 'grant':
+    #             kwargs["queryset"] = Grant.objects.filter(awardee=resolve(request.path).args[0])
+    #     except:
+    #         pass
+    #     return super(EquipmentInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
-class GrantInline(TabularInline):
+class GrantSummaryInline(TabularInline):
     model = Grant
-    fk_name = 'recipient'
+    fk_name = 'awardee'
     extra = 0
-    max_num = 0
+    #max_num = 0
+    verbose_name = 'Grant Awarded'
+    verbose_name_plural = 'Grants Awarded'
     suit_classes = 'suit-tab suit-tab-grantsummary'
-    ordering = ('-start_date',)
     exclude = ('description', 'delete')
-    readonly_fields = ('grant_type', 'start_date', 'end_date', 'total_amount', 'total_released', 'total_liquidated', 'total_remaining')
+    readonly_fields = ('grant_type', 'start_date', 'end_date', 'total_amount', 'total_released', 'total_liquidated', 'total_available')
 
 class ReleaseInline(TabularInline):
     model = Grant_Allocation_Release
-    fk_name = 'recipient'
+    fk_name = 'payee'
     extra = 0
-    max_num = 0
-    ordering = ('-date_released',)
+    max_num = 0 
     suit_classes = 'suit-tab suit-tab-grantsummary'
     exclude = ('description', 'grant', 'allocation')
-    readonly_fields = ('released_to', 'date_released', 'amount_released', 'amount_liquidated', 'disparity')
+    readonly_fields = ('particular', 'date_released', 'amount_released', 'amount_liquidated', 'disparity')
 
+class EquipmentAccountableInline(TabularInline):
+    model = Equipment
+    fk_name = 'accountable'
+    extra = 3
+    max_num = 0
+    suit_classes = 'suit-tab suit-tab-grantsummary'
+    verbose_name = 'Accountable Equipment'
+    verbose_name_plural = 'Accountable Equipments'
+    fields = ('payee', 'description', 'date_released',)
+    readonly_fields = ('date_released', 'payee', 'description',)
 
-class MyPersonForm(ModelForm):
+class MyPersonForm(forms.ModelForm):
     class Meta:
         model = Person
         fields = '__all__'
@@ -84,30 +97,31 @@ class MyPersonForm(ModelForm):
 
 class PersonAdmin(ERDTModelAdmin):
     form = MyPersonForm
-    inlines = [ProfileInline, GrantInline, ReleaseInline, ScholarshipInline, Enrolled_SubjectInline, EquipmentInline]
+    inlines = (ProfileInline, GrantSummaryInline, ReleaseInline, ScholarshipInline, 
+        EquipmentInline, EquipmentAccountableInline)
     list_display = ('__unicode__', 'email_address', 'mobile_number')
     readonly_fields = ('age',)
-    list_filter = ('profile__role', 'profile__university', 'grant_recipient__scholarship__degree_program__degree', 'grant_recipient__scholarship__degree_program__program', 'grant_recipient__scholarship__scholarship_status')
+    list_filter = ('profile__role', 'profile__university', 'awardee__scholarship__degree_program__degree', 
+        'awardee__scholarship__degree_program__program', 'awardee__scholarship__scholarship_status')
     radio_fields =  {'sex' : HORIZONTAL, 'civil_status' : HORIZONTAL}
-
     fieldsets = (
         ('Personal Information', {
-            'classes' : ('suit-tab', 'suit-tab-information'),
+            'classes' : ('suit-tab', 'suit-tab-general',),
             'fields': ('photo', 'first_name', 'middle_name', 'last_name', 'sex', 'civil_status',
             ('birthdate', 'age'))
             }), 
         ('Contact Information', {
-            'classes' : ('suit-tab', 'suit-tab-information'),
+            'classes' : ('suit-tab', 'suit-tab-general', 'collapse'),
             'fields':('address', 'email_address', 'landline_number', 'mobile_number'), 
             }),
         ('User Account', {
-            'classes' : ('suit-tab', 'suit-tab-profile'),
-            'fields':('user',), 
+            'classes' : ('suit-tab', 'suit-tab-general'),
+            'fields':('user', ), 
             }),
     )
 
-    suit_form_tabs = (('information', 'Information'), ('profile', 'Profiles'), ('grantsummary', 'Grants Summary'),
-        ('scholarship', 'ERDT Local Scholarships'), ('subj', 'Courses Taken'), ('issued', 'Equipment'))
+    suit_form_tabs = (('general', 'General'), ('grantsummary', 'Grants Summary'), 
+        ('scholarship', 'Local Scholarships'), ('issued', 'Equipment'))
 
     # formfield_overrides = {
     #     models.ForeignKey: {'widget': LinkedSelect},

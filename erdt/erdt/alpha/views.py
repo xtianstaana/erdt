@@ -3,13 +3,9 @@ Author: Christian Sta.Ana
 Date: Wed Jul 23 2014
 Description: Contains all utility functions (ex: queries, creation, deletion, etc.)
 """
-
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
-from django.views import generic
 
-from django.shortcuts import render
 from profiling.models import (Profile, Person)
 from django.contrib.auth.decorators import login_required
 from utils import *

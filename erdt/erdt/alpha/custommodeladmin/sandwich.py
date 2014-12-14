@@ -24,6 +24,8 @@ class AllocationInline(TabularInline):
 
 class SandwichAdmin(ERDTModelAdmin):
     inlines =[AllocationInline]
+    list_display = ('year', 'awardee', 'host_university')
+
     """
     Author: Christian Sta.Ana
     Date: Sun Sep 28 2014

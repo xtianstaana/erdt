@@ -12,27 +12,47 @@ from django.forms.widgets import *
 from suit.widgets import *
 
 # Import Profiling Module Models 
-from profiling.models import (Profile, University, Department, Scholarship, Equipment)
+from profiling.models import *
 
 from django.http import HttpResponseRedirect
 
 
-class MyScholarshipForm(ModelForm):
-    class Meta:
-        model = Scholarship
-        fields = '__all__'
-        widgets = {
-            'adviser' : LinkedSelect,
-        }
+class AllocationInline(TabularInline):
+    model = Grant_Allocation
+    extra = 0
+    suit_classes = 'suit-tab suit-tab-allocation'
 
 class ScholarshipAdmin(ERDTModelAdmin):
-    form = MyScholarshipForm
-    list_display = ('degree_program', 'where', 'scholarship_status')
+    inlines = [AllocationInline]
+    list_display = ('awardee', 'degree_program', 'where', 'scholarship_status')
     list_filter = ('degree_program__department__university__name', 'scholarship_status')
+    readonly_fields = ('awardee',)
 
-    #formfield_overrides = {
-    #    models.ForeignKey: {'widget': LinkedSelect},
-    #}
+    formfield_overrides = {
+       models.ForeignKey: {'widget': LinkedSelect},
+    }
+
+    fieldsets = [
+        (None, {
+            'classes' : ('suit-tab', 'suit-tab-general'),
+            'fields' : ('awardee', 'start_date', 'end_date', 'total_amount', 'description', 'scholarship_status', 'lateral', 'cleared'),
+            }),
+        ('Program Details', {
+            'classes' : ('suit-tab', 'suit-tab-general'),
+            'fields' : ('university', 'degree_program', 'entry_grad_program' , 'end_grad_program', 'ce_schedule'),
+            }),
+        ('Educational Background', {
+            'classes' : ('suit-tab', 'suit-tab-general'),
+            'fields' : ('high_degree_univ', 'high_degree',),
+            }),
+        (None, {
+            'classes' : ('suit-tab', 'suit-tab-thesis'),
+            'fields' : ('adviser', 'thesis_status', 'thesis_title', 'thesis_topic'),
+            }),
+
+    ]
+
+    suit_form_tabs = (('general', 'General'), ('thesis', 'Thesis / Dissertation Information'), ('allocation', 'Scholarship Fund Allocations'))
 
     """
     Author: Christian Sta.Ana
