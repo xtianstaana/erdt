@@ -63,7 +63,7 @@
 
             {% if user.is_active and user.is_staff %}
               <div id="user-tools">
-                You are logged in as <span class="active-profile">{{ multi_profile.active_profile }}</span>. 
+                You are logged in as <span class="active-profile">{{ multi_profile.active_profile }}</span>.
                 {% if multi_profile.profiles|length > 1 %}
                     {% include "admin/profile-switcher.html" %}
                 {% endif %}

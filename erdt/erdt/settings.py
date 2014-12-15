@@ -33,6 +33,7 @@ USE_DJANGO_JQUERY = False
 INSTALLED_APPS = (
     'suit', #Django Suit
     'smart_selects',
+    'django_select2',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -68,7 +69,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
-}   
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
@@ -91,6 +92,7 @@ MEDIA_URL = '/media/'
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/static/'
 
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'erdt/templates')]
 
@@ -103,8 +105,8 @@ TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
     "django.contrib.messages.context_processors.messages",
-    "erdt.alpha.context_processors.external_urls", 
-    "erdt.alpha.context_processors.constants", 
+    "erdt.alpha.context_processors.external_urls",
+    "erdt.alpha.context_processors.constants",
     "erdt.alpha.context_processors.multi_profile"
 )
 
