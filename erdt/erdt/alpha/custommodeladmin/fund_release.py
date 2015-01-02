@@ -15,6 +15,8 @@ from suit.widgets import *
 from profiling.models import *
 
 from django.http import HttpResponseRedirect
+from django.utils.html import format_html
+from django.core.urlresolvers import reverse
 from django_select2.widgets import *
 
 
@@ -31,9 +33,13 @@ class MyGrantAllocationReleaseForm(forms.ModelForm):
 class GrantAllocationReleaseAdmin(ERDTModelAdmin):
     form = MyGrantAllocationReleaseForm
     model = Grant_Allocation_Release
-    list_display = ('date_released', 'the_who', 'particular',)
-    list_display_links = ('date_released', 'the_who',)
+    list_display = ('date_released', 'particular', 'payee_link', )
     fields = ('payee', 'grant', 'allocation', 'description', 'amount_released', 'amount_liquidated', 'date_released')
+
+    def payee_link(self, obj):
+        url = reverse('admin:profiling_person_change', args=(obj.payee.id,))
+        return format_html(u'<a href="{}">%s</a>' % obj.the_who(), url)
+    payee_link.short_description = 'Payee'
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
