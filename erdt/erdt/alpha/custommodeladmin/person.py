@@ -24,7 +24,7 @@ from django.http import HttpResponseRedirect
 
 class GrantSummaryInline(TabularInline):
     model = Grant
-    # template = 'admin/edit_inline_with_link/tabular_with_link.html'
+    template = 'admin/edit_inline_with_link/tabular_with_link.html'
     fk_name = 'awardee'
     extra = 0
     verbose_name = 'Grant Awarded'
@@ -35,6 +35,7 @@ class GrantSummaryInline(TabularInline):
 
 class ReleaseInline(TabularInline):
     model = Grant_Allocation_Release
+    template = 'admin/edit_inline_with_link/tabular_with_link.html'
     fk_name = 'payee'
     extra = 0
     suit_classes = 'suit-tab suit-tab-grantsummary'
