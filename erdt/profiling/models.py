@@ -197,6 +197,11 @@ class Grant(PolymorphicModel):
 
 		return 'Grant'
 
+	def awardee_link(self):
+		url = reverse('admin:profiling_person_change', args=(self.awardee.id,))
+		return format_html(u'<a href="{}" target=_blank>%s</a>' % self.awardee, url)
+	awardee_link.short_description = 'Awardee'
+
 	def grant_link(self):
 		url = self.grant_type()
 
@@ -206,8 +211,11 @@ class Grant(PolymorphicModel):
 			url = reverse('admin:profiling_sandwich_program_change', args=(self.id,))
 		else:
 			return url
-		return format_html(u'<a href="{}">%s</a>' % self.grant_type(), url)
+		return format_html(u'<a href="{}" target=_blank>%s</a>' % self.grant_type(), url)
 	grant_link.short_description = 'Grant type'
+
+	def is_active(self):
+		return 1 if (self.start_date <= date.today() <= self.end_date) else 0
 
 	def total_released(self):
 		total_amount = 0.0
@@ -267,9 +275,14 @@ class Grant_Allocation_Release(PolymorphicModel):
 		else:
 			return self.allocation.__unicode__()
 
+	def payee_link(self):
+		url = reverse('admin:profiling_person_change', args=(self.payee.id,))
+		return format_html(u'<a href="{}">%s</a>' % self.payee.__unicode__(), url)
+	payee_link.short_description = 'Payee'
+
 	def release_link(self):
 		url = reverse('admin:profiling_grant_allocation_release_change', args=(self.id,))
-		return format_html(u'<a href="{}">%s</a>' % self.particular(), url)
+		return format_html(u'<a href="{} target=_blank">%s</a>' % self.particular(), url)
 	release_link.short_description = 'Particular'
 
 	def the_who(self):
@@ -361,6 +374,11 @@ class Scholarship(Grant):
 
 	def grant_type(self):
 		return 'Scholarship (Local %s)' % self.degree_program.degree
+
+	def is_active(self):
+		if self.scholarship_status == Scholarship.ON_EXT:
+			return 2
+		return super(Scholarship, self).is_active()
 
 	def __unicode__(self):
 		return self.grant_type()

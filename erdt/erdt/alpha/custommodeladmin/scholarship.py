@@ -17,6 +17,14 @@ from profiling.models import *
 
 from django.http import HttpResponseRedirect
 
+class ReleaseInline(TabularInline):
+    model = Grant_Allocation_Release
+    fk = 'grant'
+    extra = 0
+    max_num = 0
+    fields = ('release_link', 'date_released', 'amount_released', 'amount_liquidated', 'disparity')
+    readonly_fields = fields
+    suit_classes = 'suit-tab suit-tab-releases'
 
 class AllocationInline(TabularInline):
     model = Grant_Allocation
@@ -38,8 +46,8 @@ class MyScholarshipForm(forms.ModelForm):
 
 class ScholarshipAdmin(ERDTModelAdmin):
     form = MyScholarshipForm
-    inlines = [AllocationInline]
-    list_display = ('awardee', 'degree_program', 'scholarship_status','cleared')
+    inlines = [AllocationInline, ReleaseInline]
+    list_display = ('degree_program', 'awardee_link', 'scholarship_status','cleared')
     list_filter = ('degree_program__department__university__name', 'scholarship_status')
 
     formfield_overrides = {
@@ -66,7 +74,8 @@ class ScholarshipAdmin(ERDTModelAdmin):
 
     ]
 
-    suit_form_tabs = (('general', 'General'), ('thesis', 'Thesis / Dissertation Information'), ('allocation', 'Scholarship Fund Allocations'))
+    suit_form_tabs = (('general', 'General'), ('thesis', 'Thesis / Dissertation Information'), 
+        ('allocation', 'Scholarship Fund Allocations'), ('releases', 'Scholarship Fund Releases') )
 
     def get_readonly_fields (self, request, obj=None):
         if obj:

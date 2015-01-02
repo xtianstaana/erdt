@@ -75,7 +75,8 @@ class ScholarshipInline(StackedInline):
     suit_classes = 'suit-tab suit-tab-scholarship'
     verbose_name = 'Local Scholarship'
     verbose_name_plural = 'Local Scholarships'
-    fields = ('scholarship_status', 'degree_program', 'start_date', 'end_date' , 'allotment', 'adviser', 'entry_grad_program', 'end_grad_program', 'cleared' , 'description')
+    fields = ('scholarship_status', 'degree_program', 'start_date', 'end_date' , 
+        'allotment', 'adviser', 'entry_grad_program', 'end_grad_program', 'cleared' , 'description')
     readonly_fields = fields
 
 class EquipmentInline(StackedInline):
