@@ -18,12 +18,18 @@ from django.http import HttpResponseRedirect
 
 
 class DegreeProgramAdmin(ERDTModelAdmin):
-    list_display = ('program', 'degree', 'department')
-    list_filter = ('department', 'degree',)
-    ordering = ('department', 'program', 'degree')
+    list_display = ('program', 'degree', 'department', )
+    list_filter = ('department__university', 'degree',)
+
     formfield_overrides = {
         models.ForeignKey: {'widget': LinkedSelect},
     }
+
+    def get_readonly_fields (self, request, obj=None):
+        if obj:
+            return ('department',)
+        else:
+            return super(DegreeProgramAdmin, self).get_readonly_fields(request, obj)
 
     """
     Author: Christian Sta.Ana

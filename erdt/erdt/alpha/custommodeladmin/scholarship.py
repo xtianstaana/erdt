@@ -10,6 +10,7 @@ from django.contrib.admin import StackedInline, TabularInline, actions
 from django.forms import ModelForm
 from django.forms.widgets import *
 from suit.widgets import *
+from django_select2.widgets import *
 
 # Import Profiling Module Models 
 from profiling.models import *
@@ -22,11 +23,24 @@ class AllocationInline(TabularInline):
     extra = 0
     suit_classes = 'suit-tab suit-tab-allocation'
 
+class MyScholarshipForm(forms.ModelForm):
+    class Meta:
+        model = Scholarship
+        fields = '__all__'
+        widgets = {
+            'awardee' : Select2Widget(select2_options={
+                'minimumInputLength' : 2,
+                'width':'200px'}),
+            'adviser' : Select2Widget(select2_options={
+                'minimumInputLength' : 2,
+                'width':'200px'}),
+        }
+
 class ScholarshipAdmin(ERDTModelAdmin):
+    form = MyScholarshipForm
     inlines = [AllocationInline]
-    list_display = ('awardee', 'degree_program', 'where', 'scholarship_status')
+    list_display = ('awardee', 'degree_program', 'scholarship_status','cleared')
     list_filter = ('degree_program__department__university__name', 'scholarship_status')
-    readonly_fields = ('awardee',)
 
     formfield_overrides = {
        models.ForeignKey: {'widget': LinkedSelect},
@@ -35,7 +49,7 @@ class ScholarshipAdmin(ERDTModelAdmin):
     fieldsets = [
         (None, {
             'classes' : ('suit-tab', 'suit-tab-general'),
-            'fields' : ('awardee', 'start_date', 'end_date', 'total_amount', 'description', 'scholarship_status', 'lateral', 'cleared'),
+            'fields' : ('awardee', 'start_date', 'end_date', 'allotment', 'description', 'scholarship_status', 'lateral', 'cleared'),
             }),
         ('Program Details', {
             'classes' : ('suit-tab', 'suit-tab-general'),
@@ -53,6 +67,12 @@ class ScholarshipAdmin(ERDTModelAdmin):
     ]
 
     suit_form_tabs = (('general', 'General'), ('thesis', 'Thesis / Dissertation Information'), ('allocation', 'Scholarship Fund Allocations'))
+
+    def get_readonly_fields (self, request, obj=None):
+        if obj:
+            return ('awardee',)
+        else:
+            return super(ScholarshipAdmin, self).get_readonly_fields(request, obj)
 
     """
     Author: Christian Sta.Ana

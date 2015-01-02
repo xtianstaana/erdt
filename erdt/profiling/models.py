@@ -26,7 +26,7 @@ class Person(models.Model):
 	first_name = models.CharField(max_length=50)
 	middle_name = models.CharField(max_length=50, blank=True)
 	last_name = models.CharField(max_length=50)
-	birthdate = models.DateField()
+	birthdate = models.DateField(help_text='Format: YYYY-MM-DD')
 	sex = models.CharField(max_length=1, choices=SEX_CHOICES, default=MALE)
 	civil_status = models.CharField(max_length=1, choices=CIVIL_STATUS_CHOICES, default=SINGLE)
 	address = models.CharField(max_length=250)
@@ -53,7 +53,7 @@ class University(models.Model):
 	name = models.CharField(max_length=150)
 	short_name = models.CharField(max_length=10, blank=True)
 	is_consortium = models.BooleanField(default=False, verbose_name='ERDT Consortium')
-	member_since = models.DateField(null=True, blank=True) 
+	member_since = models.DateField(null=True, blank=True, help_text='Format: YYYY-MM-DD') 
 	address = models.CharField(max_length=100, blank=True)
 	email_address = models.EmailField(blank=True)
 	landline_number = models.CharField(max_length=100, blank=True)
@@ -61,11 +61,13 @@ class University(models.Model):
 	with_summer = models.BooleanField(default=False, verbose_name='With summer semester')
 
 	def clean(self):
+		if self.is_consortium and (not self.member_since):
+			raise ValidationError('Specify membership date.')
+
+	def save(self, *args, **kwargs):
 		if not self.is_consortium:
 			self.member_since = None
-		else:
-			if not self.member_since:
-				raise ValidationError('Specify membership date.')
+		super(University, self).save(*args, **kwargs)
 
 	class Meta:
 		verbose_name_plural = 'Universities'
@@ -81,7 +83,7 @@ class Department(models.Model):
 	university = models.ForeignKey(University, limit_choices_to={'is_consortium':True})
 
 	class Meta:
-		ordering = ('name', 'university')
+		ordering = ('university', 'name')
 
 	def __unicode__(self):
 		return '%s, %s' % (self.name, self.university.short_name)
@@ -107,7 +109,7 @@ class Degree_Program(models.Model):
 	class Meta:
 		verbose_name = 'Degree Program'
 		verbose_name_plural = 'Degree Programs'
-		ordering = ('program', 'degree', 'department')
+		ordering = ('department', 'degree', 'program', )
 
 	def __unicode__(self):
 		return '%s %s, %s' % (self.degree, self.program, self.department.university.short_name)
@@ -132,7 +134,7 @@ class Subject(models.Model):
 class Enrolled_Subject(models.Model):
 	subject = models.ForeignKey(Subject)
 	scholar = models.ForeignKey(Person)
-	year_taken = models.DateField()
+	year_taken = models.DateField(help_text='Format: YYYY-MM-DD')
 	sem_taken = models.IntegerField(default=1, verbose_name='Semester taken')
 	eq_grade = models.FloatField(default=0.0)
 
@@ -179,9 +181,10 @@ class Profile(models.Model):
 class Grant(PolymorphicModel):
 	awardee = models.ForeignKey(Person, related_name='awardee')
 	description = models.CharField(max_length=250, blank=True)
-	start_date = models.DateField(verbose_name='Start of contract')
-	end_date = models.DateField(verbose_name='End of contract')
-	total_amount = models.FloatField(default=0.0, verbose_name='Allotment (PhP)')
+	start_date = models.DateField(verbose_name='Start of contract', help_text='Format: YYYY-MM-DD')
+	end_date = models.DateField(verbose_name='End of contract', help_text='Format: YYYY-MM-DD')
+	allotment = models.FloatField(default=0.0, verbose_name='Allotment (PhP)')
+	balance = models.FloatField(default=0.0, editable=False, null=False, verbose_name='Balance (PhP)')
 
 	class Meta:
 		verbose_name = 'Grant'
@@ -189,6 +192,8 @@ class Grant(PolymorphicModel):
 		ordering = ('awardee', '-end_date')
 
 	def grant_type(self):
+		"""Returns the type of grant. Overridden by children."""
+
 		return 'Grant'
 
 	def total_released(self):
@@ -205,19 +210,16 @@ class Grant(PolymorphicModel):
 		return total_amount
 	total_liquidated.short_description = 'Liquidated (PhP)'
 
-	def total_available(self):
-		total_amount = 0.0
-		for rel in Grant_Allocation_Release.objects.filter(grant__id=self.id):
-			total_amount = total_amount + rel.amount_liquidated	
-		return self.total_amount - total_amount
-	total_available.short_description = 'Available Funds (PhP)'
-
 	def __unicode__(self):
 		return '%s: %s' % (self.grant_type(), self.awardee.__unicode__())
 
+	def save(self, *args, **kwargs):
+		self.balance = self.allotment - self.total_liquidated()
+		super(Grant, self).save(*args, **kwargs)
+
 	def clean(self):
 		if self.start_date > self.end_date:
-			raise ValidationError('Start of contract date must preced or the same as the end of contract date.')
+			raise ValidationError('Start of contract date must precede or the same as the end of contract date.')
 
 class Grant_Allocation(models.Model):
 	grant = models.ForeignKey(Grant)
@@ -235,16 +237,20 @@ class Grant_Allocation(models.Model):
 class Grant_Allocation_Release(PolymorphicModel):
 	payee = models.ForeignKey(Person, related_name='payee')
 	grant = GF(Grant, chained_field='payee', chained_model_field='awardee', show_all=False, auto_choose=True) #models.ForeignKey(Grant)
-	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant')
+	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant', on_delete=models.CASCADE)
 	description = models.CharField(max_length=350, blank=True)
 	amount_released = models.FloatField(default=0.0, verbose_name='Released (PhP)')
 	amount_liquidated = models.FloatField(default=0.0, verbose_name='Liquidated (PhP)', help_text='Must be the same as the amount released if unliquidated.')
-	date_released = models.DateField()
+	date_released = models.DateField(help_text='Format: YYYY-MM-DD')
 
 	class Meta:
 		verbose_name = 'Fund Release'
 		verbose_name_plural = 'Fund Releases'
-		ordering = ('payee', '-date_released',)
+		ordering = ('-date_released', 'payee',)
+
+	def save(self, *args, **kwargs):
+		super(Grant_Allocation_Release, self).save(*args, **kwargs)
+		self.payee.save()
 
 	def particular(self):
 		if self.description.strip() != '':
@@ -311,8 +317,6 @@ class Scholarship(Grant):
 	)
 
 	university = models.ForeignKey(University, limit_choices_to={'is_consortium':True})
-
-	# inner reference not working
 	degree_program = GF(Degree_Program, chained_field='university', chained_model_field='department__university')
 	adviser = models.ForeignKey(Person, related_name='adviser', null=True, blank=True)
 	scholarship_status = models.CharField(max_length=5, choices=SCHOLARSHIP_STATUS_CHOICES, default=REG_ONGOING)
@@ -321,19 +325,18 @@ class Scholarship(Grant):
 	thesis_topic = models.CharField(max_length=350, blank=True)
 	thesis_title = models.CharField(max_length=350, blank=True)
 	thesis_status = models.CharField(max_length=5, choices=THESIS_STATUS_CHOICES, default=PROPOSAL)
-	ce_schedule = models.DateField(null=True, blank=True, verbose_name='Candidacy Exam schedule')
-	entry_grad_program = models.DateField(verbose_name='Entry to graduate program')
-	end_grad_program = models.DateField(verbose_name='Date of graduation')
+	ce_schedule = models.DateField(null=True, blank=True, verbose_name='Candidacy Exam schedule', help_text='Format: YYYY-MM-DD')
+	entry_grad_program = models.DateField(verbose_name='Entry to graduate program', help_text='Format: YYYY-MM-DD')
+	end_grad_program = models.DateField(verbose_name='Date of graduation', help_text='Format: YYYY-MM-DD')
 	lateral = models.BooleanField(default=False)
 	cleared = models.BooleanField(default=False)
 
-	def where(self):
-		return self.degree_program.department.__unicode__()
-	where.short_description = 'Department / University'
+	class Meta:
+		verbose_name = 'Local Scholarship'
+		verbose_name_plural = 'Local Scholarships'
 
 	def clean(self):
-		if self.start_date > self.end_date:
-			raise ValidationError('Start of contract date must preced or the same as the end of contract date.')
+		super(Scholarship, self).clean()
 
 		if self.adviser == self.awardee:
 			raise ValidationError('Scholarship grant awardee and adviser fields can not be the same.')
@@ -352,10 +355,6 @@ class ERDT_Scholarship_Special(Grant):
 	host_university = models.CharField(max_length=150)
 	host_professor = models.CharField(max_length=150)
 
-	def clean(self):
-		if self.start_date > self.end_date:
-			raise ValidationError('Start of contract date must preced or the same as the end of contract date.')
-
 class Sandwich_Program(Grant):
 	host_university = models.CharField(max_length=150)
 	host_professor = models.CharField(max_length=150)
@@ -363,10 +362,7 @@ class Sandwich_Program(Grant):
 	class Meta:
 		verbose_name = 'Sandwich Program'
 		verbose_name_plural = 'Sandwich Programs'
-
-	def clean(self):
-		if self.start_date > self.end_date:
-			raise ValidationError('Start of contract date must preced or the same as the end of contract date.')
+		ordering = ('-start_date', 'awardee',)
 
 	def grant_type(self):
 		return 'Sandwich %s' % str(self.start_date.year)
@@ -379,29 +375,19 @@ class Sandwich_Program(Grant):
 		return self.grant_type()
 
 class Postdoctoral_Fellowship(Grant):
-	def clean(self):
-		if self.start_date > self.end_date:
-			raise ValidationError('Start of contract date must preced or the same as the end of contract date.')
+	pass
 
 class FRGT(Grant):
-	def clean(self):
-		if self.start_date > self.end_date:
-			raise ValidationError('Start of contract date must preced or the same as the end of contract date.')
+	pass
 
 class FRDG(Grant):
-	def clean(self):
-		if self.start_date > self.end_date:
-			raise ValidationError('Start of contract date must preced or the same as the end of contract date.')
+	pass
 
 class Visiting_Professor_Grant(Grant):
 	distinguished = models.BooleanField(default=False)
 	home_univerisy = models.CharField(max_length=150)
 	host_university = models.ForeignKey(University, limit_choices_to={'is_consortium':True})
 	host_professor = models.ForeignKey(Person, related_name='host_professor')
-
-	def clean(self):
-		if self.start_date > self.end_date:
-			raise ValidationError('Start of contract date must preced or the same as the end of contract date.')
 
 #############################################################################################
 
@@ -422,16 +408,6 @@ class Equipment(Grant_Allocation_Release):
 	accountable = models.ForeignKey(Person, related_name='accountable')
 	surrendered = models.BooleanField(default=False)
 
-	def clean(self):
-		if self.grant and (not self.allocation):
-			raise ValidationError('Specify grant allocation.')
-		if (not self.grant) and (self.description.strip() == ''):
-			raise ValidationError('Description must be provided if grant is not indicated')
-		if self.amount_liquidated > self.amount_released:
-			raise ValidationError('Amount liquidated must be less than or equal to the amount released.')
-		if (self.amount_liquidated != self.amount_released) and (self.amount_liquidated == 0.0):
-			raise ValidationError('Lidquidated amount cannot be zero.')
-
 	def __unicode__(self):
 		return self.particular()
 
@@ -443,7 +419,7 @@ class Research_Dissemination(Grant_Allocation_Release):
 	paper_title = models.CharField(max_length=250)
 	conference_name = models.CharField(max_length=250)
 	conference_loc = models.CharField(max_length=250)
-	conference_date = models.DateField()
+	conference_date = models.DateField(help_text='Format: YYYY-MM-DD')
 
 	class Meta:
 		verbose_name = 'Research Dissemination'
@@ -452,13 +428,4 @@ class Research_Dissemination(Grant_Allocation_Release):
 	def __unicode__(self):
 		return '%s: %s' % (self.payee, self.paper_title)
 
-	def clean(self):
-		if self.grant and (not self.allocation):
-			raise ValidationError('Specify grant allocation.')
-		if (not self.grant) and (self.description.strip() == ''):
-			raise ValidationError('Description must be provided if grant is not indicated')
-		if self.amount_liquidated > self.amount_released:
-			raise ValidationError('Amount liquidated must be less than or equal to the amount released.')
-		if (self.amount_liquidated != self.amount_released) and (self.amount_liquidated == 0.0):
-			raise ValidationError('Lidquidated amount cannot be zero.')
-		###
+###

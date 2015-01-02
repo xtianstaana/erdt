@@ -26,7 +26,7 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
-USE_DJANGO_JQUERY = False
+USE_DJANGO_JQUERY = True
 
 # Application definition
 
@@ -92,7 +92,7 @@ MEDIA_URL = '/media/'
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/static/'
+STATIC_ROOT = 'erdt/alpha/static/'
 
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'erdt/templates')]
 

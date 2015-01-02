@@ -6,7 +6,7 @@ Description: Contains Admin Customization functions for University
 
 from globals import ERDTModelAdmin
 from django.db import models
-from django.contrib.admin import StackedInline, TabularInline, actions
+from django.contrib.admin import StackedInline, TabularInline, actions, BooleanFieldListFilter
 from django.forms import ModelForm
 from django.forms.widgets import *
 from suit.widgets import *
@@ -32,18 +32,17 @@ class SubjectInline(TabularInline):
     suit_classes = 'suit-tab suit-tab-subject'
 
 class UniversityAdmin(ERDTModelAdmin):
-    list_display = ('name', 'is_consortium', 'address')
-    list_filter = ('is_consortium',)
+    list_display = ('name', 'address', 'landline_number')
     inlines = [DepartmentInline, SubjectInline]
 
     fieldsets = [
         (None, {
-            'classes' : ('suit-tab', 'suit-tab-information'),
+            'classes' : ('suit-tab', 'suit-tab-general'),
             'fields' : ('photo', 'name', 'short_name', 'is_consortium', 'member_since', 'address', 'email_address', 'landline_number', 'no_semester', 'with_summer'),
             }),
     ]
 
-    suit_form_tabs = (('information', 'Information'), ('department', 'Departments'), ('subject', 'Subjects Offered'))
+    suit_form_tabs = (('general', 'General'), ('department', 'Departments'), ('subject', 'Subjects Offered'))
     formfield_overrides = {
         models.ForeignKey: {'widget': LinkedSelect},
     }
@@ -58,6 +57,7 @@ class UniversityAdmin(ERDTModelAdmin):
     def get_queryset(self, request):
         qs = super(UniversityAdmin, self).get_queryset(request)
         try:
+            qs = qs.filter(is_consortium=True)
             profile = Profile.objects.get(person__user=request.user.id, active=True) 
             if profile.role == Profile.UNIV_ADMIN: # If User's profile is CONSORTIUM
                 return qs.filter(pk = profile.university.id)

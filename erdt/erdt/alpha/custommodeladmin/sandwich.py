@@ -15,6 +15,7 @@ from suit.widgets import *
 from profiling.models import (Profile, University, Sandwich_Program, Grant_Allocation)
 
 from django.http import HttpResponseRedirect
+from django_select2.widgets import *
 
 
 class AllocationInline(TabularInline):
@@ -22,9 +23,28 @@ class AllocationInline(TabularInline):
     fk_name = 'grant'
     extra = 0
 
+class MySandwichForm(forms.ModelForm):
+    class Meta:
+        model = Sandwich_Program
+        fields = '__all__'
+        widgets = {
+            'awardee' : Select2Widget(select2_options={
+                'minimumInputLength' : 2,
+                'width':'200px'}),
+        }
+
 class SandwichAdmin(ERDTModelAdmin):
+    form = MySandwichForm
     inlines =[AllocationInline]
     list_display = ('year', 'awardee', 'host_university')
+    list_display_links = ('year', 'awardee')
+    fields = ('awardee', 'description', 'start_date', 'end_date',
+            'allotment', 'host_university', 'host_professor')
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('awardee',)
+        return super(SandwichAdmin, self).get_readonly_fields(request, obj)
 
     """
     Author: Christian Sta.Ana

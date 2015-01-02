@@ -28,11 +28,21 @@
 
                   {% if model.label == 'Persons' %} 
                     {% if request.get_full_path == "/profiling/person/" %} 
-                    <li class="active"> 
+                    <li class="active">  
                     {% else %}
                     <li>
                     {% endif %}
                     <a href="{% url 'admin:profiling_person_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    </li>
+                  {% endif %}
+
+                  {% if model.label == 'Local Scholarships' %} 
+                    {% if request.get_full_path == "/profiling/scholarship/" %} 
+                    <li class="active"> 
+                    {% else %}
+                    <li>
+                    {% endif %}
+                    <a href="{% url 'admin:profiling_scholarship_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
                     </li>
                   {% endif %}
 

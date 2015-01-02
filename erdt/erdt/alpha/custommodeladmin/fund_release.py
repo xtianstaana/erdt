@@ -15,8 +15,27 @@ from suit.widgets import *
 from profiling.models import *
 
 from django.http import HttpResponseRedirect
+from django_select2.widgets import *
+
+
+class MyGrantAllocationReleaseForm(forms.ModelForm):
+    class Meta:
+        model = Grant_Allocation_Release
+        fields = '__all__'
+        widgets = {
+            'payee' : Select2Widget(select2_options={
+                'minimumInputLength' : 2,
+                'width':'200px'}),
+        }
 
 class GrantAllocationReleaseAdmin(ERDTModelAdmin):
+    form = MyGrantAllocationReleaseForm
     model = Grant_Allocation_Release
-    ordering = ('-date_released', 'payee')
-    list_display = ['date_released', 'the_who', 'particular' ]
+    list_display = ('date_released', 'the_who', 'particular',)
+    list_display_links = ('date_released', 'the_who',)
+    fields = ('payee', 'grant', 'allocation', 'description', 'amount_released', 'amount_liquidated', 'date_released')
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('payee', 'grant', 'allocation')
+        return super(GrantAllocationReleaseAdmin, self).get_readonly_fields(request, obj)
