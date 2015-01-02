@@ -46,13 +46,7 @@
 
               {% block field_content %}
                 {% if field.is_readonly %}
-                  {% if field.field.name == 'particular' %}
-                    <p> <a href="/{{ app_label }}/grant_allocation_release/{{ inline_admin_form.original.pk }}/" target=_blank> {{ field.contents }}</a></p>
-                  {% elif field.field.name == 'grant_type' %}
-                    <p> <a href="{% url 'admin:profiling_scholarship_changelist' %}" target=_blank> {{ field.contents }}</a></p>
-                  {% else %}
                     <p> {{ field.contents }}</p>
-                  {% endif %}
                 {% else %}
                   {% if field.field.errors %}
                     <div class="help-block">
