@@ -19,4 +19,20 @@ jQuery(document).ready(function($) {
         $("#profile-switcher-container").fadeOut(300);
     });
 
+
+
 });
+
+function showPopupSelected(triggeringLink) {
+    var name = triggeringLink.id.replace(/^add_/, '');
+    name = id_to_windowname(name);
+    var href = triggeringLink.href;
+    if (href.indexOf('?') == -1) {
+        href += '?_popup=1';
+    } else {
+        href  += '&_popup=1';
+    }
+    var win = window.open(href, name, 'height=500,width=1100,resizable=yes,scrollbars=yes');
+    win.focus();
+    return false;
+}

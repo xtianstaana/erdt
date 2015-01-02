@@ -23,6 +23,40 @@
 
 <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
 
+
+<!-- For grant popup -->
+<!--  Todo: Put in a subtemplate -->
+<div id="grant-awarded-selector-container" class="popup-selector-container">
+
+  <div class="overlay"></div>
+
+  <div id="grant-awarded-selector" class="popup-selector">
+
+    <div class="popup-selector-wrapper">
+
+      <h3 data-unsp-sanitized="clean">Select type of Grant</h3>
+
+      <div class="selection">
+
+        <ul>
+
+          <li><a href="{% url 'admin:profiling_scholarship_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Local Scholarship</a></li>
+
+          <li><a href="{% url 'admin:profiling_sandwich_program_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Sandwich Program</a></li>
+
+        </ul>
+
+      </div>
+
+      <a href="#" class="cancel-btn">Cancel</a>
+
+    </div>
+
+  </div>
+
+</div>
+
+
 <!-- Sticky footer wrap -->
 <div id="wrap">
 

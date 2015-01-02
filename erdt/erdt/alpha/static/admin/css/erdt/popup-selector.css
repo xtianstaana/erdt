@@ -1,0 +1,82 @@
+/**********************************************
+ERDT Admin General Popup Selector Style
+Author: Christian Sta.Ana
+Date: Fri Jan 2
+**********************************************/
+
+.popup-selector-container {
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.popup-selector {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 300px;
+    height: 350px;
+    margin-left: -150px;
+    margin-top: -175px;
+    background: #fff;
+    z-index: 9999;
+    -moz-box-shadow: 0 0 5px #888;
+    -webkit-box-shadow: 0 0 5px#888;
+    box-shadow: 0 0 5px #888;
+    color: #000;
+    text-align: left;
+}
+
+.popup-selector-wrapper {
+    margin: 20px;
+}
+
+.popup-selector a.cancel-btn {
+    color: #5b80b2;
+    text-align: center;
+    display: block;
+}
+
+.popup-selector .selection {
+    margin: 15px 0 10px;
+    overflow-y: auto;
+    height: 235px;
+    width: 100%;
+    border-top: 1px solid #ddd;
+}
+
+.popup-selector .selection ul {
+    margin: 0;
+    padding: 0;
+}
+
+.popup-selector .selection li {
+    list-style: none;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    text-align: center;
+}
+
+.popup-selector .selection li a {
+    color: #333 !important;
+    padding: 20px 10px;
+    border-bottom: 1px solid #ddd;
+    font-weight: bold;
+    display: block;
+    text-shadow: none;
+    text-decoration: none;
+}
+
+.popup-selector .selection li:hover {
+    background: #ffc;
+    cursor: pointer;
+}
+
+.popup-selector .selection li:hover a {
+    text-decoration: none;
+    /**color: #333 !important;**/
+}
+
+
+
