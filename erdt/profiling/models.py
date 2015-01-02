@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError
 from polymorphic import PolymorphicModel
 from datetime import date
 from smart_selects.db_fields import ChainedForeignKey as GF
+from django.utils.html import format_html
+from django.core.urlresolvers import reverse
 
 # Create your models here.
 
@@ -184,7 +186,6 @@ class Grant(PolymorphicModel):
 	start_date = models.DateField(verbose_name='Start of contract', help_text='Format: YYYY-MM-DD')
 	end_date = models.DateField(verbose_name='End of contract', help_text='Format: YYYY-MM-DD')
 	allotment = models.FloatField(default=0.0, verbose_name='Allotment (PhP)')
-	balance = models.FloatField(default=0.0, editable=False, null=False, verbose_name='Balance (PhP)')
 
 	class Meta:
 		verbose_name = 'Grant'
@@ -195,6 +196,18 @@ class Grant(PolymorphicModel):
 		"""Returns the type of grant. Overridden by children."""
 
 		return 'Grant'
+
+	def grant_link(self):
+		url = self.grant_type()
+
+		if self.grant_type().startswith('Scholarship (Local'):
+			url = reverse('admin:profiling_scholarship_change', args=(self.id,))
+		elif self.grant_type().startswith('Sandwich'):
+			url = reverse('admin:profiling_sandwich_program_change', args=(self.id,))
+		else:
+			return url
+		return format_html(u'<a href="{}">%s</a>' % self.grant_type(), url)
+	grant_link.short_description = 'Grant type'
 
 	def total_released(self):
 		total_amount = 0.0
@@ -210,12 +223,12 @@ class Grant(PolymorphicModel):
 		return total_amount
 	total_liquidated.short_description = 'Liquidated (PhP)'
 
+	def balance(self):
+		return self.allotment - self.total_liquidated()
+	balance.short_description = 'Balance (PhP)'
+
 	def __unicode__(self):
 		return '%s: %s' % (self.grant_type(), self.awardee.__unicode__())
-
-	def save(self, *args, **kwargs):
-		self.balance = self.allotment - self.total_liquidated()
-		super(Grant, self).save(*args, **kwargs)
 
 	def clean(self):
 		if self.start_date > self.end_date:
@@ -248,15 +261,16 @@ class Grant_Allocation_Release(PolymorphicModel):
 		verbose_name_plural = 'Fund Releases'
 		ordering = ('-date_released', 'payee',)
 
-	def save(self, *args, **kwargs):
-		super(Grant_Allocation_Release, self).save(*args, **kwargs)
-		self.payee.save()
-
 	def particular(self):
 		if self.description.strip() != '':
 			return '%s (%s)' % (self.allocation.__unicode__(), self.description)
 		else:
 			return self.allocation.__unicode__()
+
+	def release_link(self):
+		url = reverse('admin:profiling_grant_allocation_release_change', args=(self.id,))
+		return format_html(u'<a href="{}">%s</a>' % self.particular(), url)
+	release_link.short_description = 'Particular'
 
 	def the_who(self):
 		""" Polymorphic model could not call overridden method if queried with payee. 

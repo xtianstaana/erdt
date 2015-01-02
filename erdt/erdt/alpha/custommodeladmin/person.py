@@ -24,26 +24,53 @@ from django.http import HttpResponseRedirect
 
 class GrantSummaryInline(TabularInline):
     model = Grant
-    template = 'admin/edit_inline_with_link/tabular_with_link.html'
+    # template = 'admin/edit_inline_with_link/tabular_with_link.html'
     fk_name = 'awardee'
     extra = 0
-    #max_num = 0
     verbose_name = 'Grant Awarded'
     verbose_name_plural = 'Grants Awarded'
     suit_classes = 'suit-tab suit-tab-grantsummary'
     exclude = ('description', 'delete')
-    readonly_fields = ('grant_type', 'start_date', 'end_date', 'allotment', 'total_released', 'total_liquidated', 'balance')
+    readonly_fields = ('grant_link', 'start_date', 'end_date', 'allotment', 'total_released', 'total_liquidated', 'balance')
 
-    # def admin_link(self, instance):
-    #     url = reverse('admin:%s_%s_change' % (instance._meta.app_label,
-    #         instance._meta.module_name), args=(instance.id,))
-    #     return format_html(u'<a href="{}">Edit</a>', url)
+class ReleaseInline(TabularInline):
+    model = Grant_Allocation_Release
+    fk_name = 'payee'
+    extra = 0
+    suit_classes = 'suit-tab suit-tab-grantsummary'
+    exclude = ('description', 'grant', 'allocation')
+    readonly_fields = ('release_link', 'date_released', 'amount_released', 'amount_liquidated', 'disparity')
+
+class EquipmentIssuedInline(TabularInline):
+    model = Equipment
+    fk_name = 'payee'
+    extra = 0
+    max_num = 0
+    suit_classes = 'suit-tab suit-tab-grantsummary'
+    verbose_name = 'Accountable Equipment'
+    verbose_name_plural = 'Issued Equipments'
+    fields = ('description', 'status', 'accountable', 'date_released', 'surrendered')
+    readonly_fields = fields
+
+class EquipmentAccountableInline(TabularInline):
+    model = Equipment
+    fk_name = 'accountable'
+    extra = 0
+    max_num = 0
+    suit_classes = 'suit-tab suit-tab-grantsummary'
+    verbose_name = 'Accountable Equipment'
+    verbose_name_plural = 'Accountable Equipments'
+    fields = ('issued_to', 'description', 'date_released',)
+    readonly_fields = fields
+
+    def issued_to(self, obj):
+        return obj.payee
 
 class ScholarshipInline(StackedInline):
     model = Scholarship
     fk_name = 'awardee'
     extra = 0
-    #max_num = 1
+    max_num = 0
     suit_classes = 'suit-tab suit-tab-scholarship'
     verbose_name = 'Local Scholarship'
     verbose_name_plural = 'Local Scholarships'
@@ -63,28 +90,6 @@ class EquipmentInline(StackedInline):
     #     except:
     #         pass
     #     return super(EquipmentInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
-
-class ReleaseInline(TabularInline):
-    model = Grant_Allocation_Release
-    template = 'admin/edit_inline_with_link/tabular_with_link.html'
-    fk_name = 'payee'
-    extra = 0
-    max_num = 0
-    suit_classes = 'suit-tab suit-tab-grantsummary'
-    exclude = ('description', 'grant', 'allocation')
-    readonly_fields = ('particular', 'date_released', 'amount_released', 'amount_liquidated', 'disparity')
-
-class EquipmentAccountableInline(TabularInline):
-    model = Equipment
-    fk_name = 'accountable'
-    extra = 3
-    max_num = 0
-    suit_classes = 'suit-tab suit-tab-grantsummary'
-    verbose_name = 'Accountable Equipment'
-    verbose_name_plural = 'Accountable Equipments'
-    fields = ('payee', 'description', 'date_released',)
-    readonly_fields = ('date_released', 'payee', 'description',)
-
 
 class ProfileInline(TabularInline):
     model = Profile
@@ -110,7 +115,7 @@ _thread_locals = threading.local()
 class PersonAdmin(ERDTModelAdmin):
     form = MyPersonForm
     inlines = (ProfileInline, GrantSummaryInline, ReleaseInline, ScholarshipInline,
-        EquipmentInline, EquipmentAccountableInline)
+        EquipmentInline, EquipmentIssuedInline, EquipmentAccountableInline)
     list_display = ('__unicode__', 'email_address', 'mobile_number')
     readonly_fields = ('age',)
     list_filter = ('profile__role', 'profile__university', 'awardee__scholarship__degree_program__degree',
