@@ -134,6 +134,7 @@
         });
 
       $("tr.add-row td a:contains('Grant Awarded')").off("click");
+      $("tr.add-row td a:contains('Fund Release')").off("click");
       
       $("tr.add-row td a:contains('Grant Awarded')").click(function(e) {
 
@@ -149,6 +150,31 @@
         e.preventDefault();
 
         $("#grant-awarded-selector-container").fadeOut(300);
+
+      });
+
+      $("tr.add-row td a:contains('Fund Release')").click(function(e) {
+
+        e.preventDefault();
+
+        $("#fund-releases-selector-container").fadeIn(300);
+
+
+      });
+
+      $("#fund-releases-selector .cancel-btn").click(function(e) {
+
+        e.preventDefault();
+
+        $("#fund-releases-selector-container").fadeOut(300);
+
+      });
+
+      $(".popup-selector .selection a").click(function() {
+
+        $(this).parent().parent().parent().parent().parent().parent().hide();
+        
+        $("#closing-container").show();
 
       });
 

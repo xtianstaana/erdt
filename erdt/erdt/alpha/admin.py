@@ -32,6 +32,7 @@ from custommodeladmin.degree_program import DegreeProgramAdmin
 from custommodeladmin.scholarship import ScholarshipAdmin
 from custommodeladmin.sandwich import SandwichAdmin
 from custommodeladmin.fund_release import GrantAllocationReleaseAdmin
+from custommodeladmin.equipment import PurchasedItemAdmin
 
 """
 Author: Christian Sta.Ana
@@ -105,3 +106,5 @@ admin_site.register(University, UniversityAdmin)
 admin_site.register(Degree_Program, DegreeProgramAdmin)
 admin_site.register(Scholarship, ScholarshipAdmin)
 admin_site.register(Grant_Allocation_Release, GrantAllocationReleaseAdmin) 
+admin_site.register(Equipment, PurchasedItemAdmin)
+admin_site.register(Research_Dissemination)

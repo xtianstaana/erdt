@@ -28,6 +28,18 @@ Date: Fri Jan 2
     text-align: left;
 }
 
+.popup-selector.closing {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 260px;
+    height: 100px;
+    margin-left: -130px;
+    margin-top: -50px;
+    background: #fff;
+    text-align: center;
+}
+
 .popup-selector-wrapper {
     margin: 20px;
 }
@@ -78,5 +90,10 @@ Date: Fri Jan 2
     /**color: #333 !important;**/
 }
 
-
+.closing a {
+    font-size: 30px;
+    margin-top: 40px;
+    display: inline-block;
+    text-decoration: none;
+}
 

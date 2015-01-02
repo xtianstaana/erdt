@@ -90,8 +90,8 @@ function dismissAddAnotherPopup(win, newId, newRepr) {
     } else {
         var toId = name + "_to";
         o = new Option(newRepr, newId);
-        SelectBox.add_to_cache(toId, o);
-        SelectBox.redisplay(toId);
+        //SelectBox.add_to_cache(toId, o);
+        //SelectBox.redisplay(toId);
     }
     win.close();
 }

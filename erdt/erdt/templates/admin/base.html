@@ -40,7 +40,7 @@
 
         <ul>
 
-          <li><a href="{% url 'admin:profiling_scholarship_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Local Scholarship</a></li>
+          <li><a href="{% url 'admin:profiling_scholarship_add' %}" onclick="return showPopupSelected(this);">Local Scholarship</a></li>
 
           <li><a href="{% url 'admin:profiling_sandwich_program_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Sandwich Program</a></li>
 
@@ -52,6 +52,51 @@
 
     </div>
 
+  </div>
+
+</div>
+
+<!-- For Fund Releases -->
+<div id="fund-releases-selector-container" class="popup-selector-container">
+
+  <div class="overlay"></div>
+
+  <div id="fund-releases-selector" class="popup-selector">
+
+    <div class="popup-selector-wrapper">
+
+      <h3 data-unsp-sanitized="clean">Select type of Grant</h3>
+
+      <div class="selection">
+
+        <ul>
+
+        <li><a href="{% url 'admin:profiling_grant_allocation_release_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Fund Release</a></li>
+
+          <li><a href="{% url 'admin:profiling_equipment_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Equipment</a></li>
+
+          <li><a href="{% url 'admin:profiling_research_dissemination_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Research Dissemination</a></li>
+
+        </ul>
+
+      </div>
+
+      <a href="#" class="cancel-btn">Cancel</a>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div id="closing-container" class="popup-selector-container">
+
+  <div class="overlay"></div>
+
+  <div class="popup-selector closing">
+  
+    <a href="javascript:location.reload();">Close</a>
+  
   </div>
 
 </div>
