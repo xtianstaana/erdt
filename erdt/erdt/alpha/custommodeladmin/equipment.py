@@ -13,7 +13,7 @@ from suit.widgets import *
 
 # Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Purchased_Item, Enrolled_Subject)
+    Degree_Program, Scholarship, Subject, Equipment, Enrolled_Subject)
 
 from django.http import HttpResponseRedirect
 
@@ -35,16 +35,12 @@ class PurchasedItemAdmin(ERDTModelAdmin):
             if profile.role == Profile.UNIV_ADMIN: # If User's profile is UNIV_ADMIN
                 output_qs = set()
                 
-                thru_issuance = Purchased_Item.objects.get(issuance__user = request.user.id)
+                thru_issuance = Equipment.objects.get(payee__user = request.user.id)
                 for p in thru_issuance:
                     output_qs.add(p.pk)
                 
-                thru_accountable = Purchased_Item.objects.get(accountable__user = request.user.id)
+                thru_accountable = Equipment.objects.get(accountable__user = request.user.id)
                 for p in thru_accountable:
-                    output_qs.add(p.pk)
-
-                thru_fundsource = Purchased_Item.objects.get(fund_source__high_degree_univ = profile.university)
-                for p in thru_fundsource:
                     output_qs.add(p.pk)
 
                 return qs.filter(pk__in = output_qs)
