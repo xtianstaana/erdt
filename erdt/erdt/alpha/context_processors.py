@@ -90,7 +90,7 @@ def multi_profile(request):
 
     except:
         e = sys.exc_info()[0]
-        print("Error: %s" % e)
+        print("**********Error: %s" % e)
 
     multi_profile = {
         'profiles' : userProfiles,

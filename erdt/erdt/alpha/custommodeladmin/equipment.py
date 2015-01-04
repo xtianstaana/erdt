@@ -10,6 +10,7 @@ from django.contrib.admin import StackedInline, TabularInline, actions
 from django.forms import ModelForm
 from django.forms.widgets import *
 from suit.widgets import *
+from django_select2.widgets import *
 
 # Import Profiling Module Models 
 from profiling.models import (Profile, Person, University, Department,
@@ -17,16 +18,55 @@ from profiling.models import (Profile, Person, University, Department,
 
 from django.http import HttpResponseRedirect
 
-class PurchasedItemAdmin(ERDTModelAdmin):
-    readonly_fields = ()
 
-    """
-    Author: Christian Sta.Ana
-    Date: Sun Sep 28 2014
-    Description: Setting row/record-level permissions.      
-    Params: default
-    Returns: default
-    """
+class MyEquipmentForm(forms.ModelForm):
+    class Meta:
+        model = Equipment
+        fields = '__all__'
+        widgets = {
+            'payee' : Select2Widget(select2_options={
+                'minimumInputLength' : 2,
+                'width':'200px'}),
+            'accountable' : Select2Widget(select2_options={
+                'minimumInputLength' : 2,
+                'width':'200px'}),
+        }
+
+class PurchasedItemAdmin(ERDTModelAdmin):
+    form = MyEquipmentForm
+
+    list_display = ('date_released', 'particular', 'payee', 'accountable', 'surrendered')
+    exclude = ('item_type',)
+
+    list_filter = ('surrendered',)
+
+    def get_fieldsets(self, request, obj=None):
+        if obj:
+            return (
+                (None, {
+                    'fields' : ('payee_link', 'allocation', 'description', 'amount_released', 
+                'amount_liquidated', 'date_released', )
+                    }),
+                ('Other Information', {
+                    'fields' : ('location', 'property_no', 'status', 'surrendered', 'accountable')
+                    }),
+            )
+        return (
+            (None, {
+                'fields' : ('payee', 'grant', 'allocation', 'description', 'amount_released', 
+            'amount_liquidated', 'date_released', )
+                }),
+            ('Other Information', {
+                'fields' : ('location', 'property_no', 'status', 'surrendered', 'accountable')
+                }),
+        )
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('payee_link', 'allocation', )
+        else:
+            return super(PurchasedItemAdmin, self).get_readonly_fields(request, obj)
+
     def get_queryset(self, request):
         qs = super(PurchasedItemAdmin, self).get_queryset(request)
         try:

@@ -17,7 +17,7 @@
     {% if app_list %}
       {% for app in app_list %}
         {% if app.separator %}
-          <li class="separator"></li>g
+          <li class="separator"></li>
         {% else %}
           <li{{ app.is_active|yesno:' class=active,' }}>
             <a href="{{ app.url }}"{{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}
@@ -76,6 +76,16 @@
                     </li>
                   {% endif %}
 
+                  {% if model.label == 'Visiting Professor Grants' %}  
+                    {% if request.get_full_path == "/profiling/visiting_professor_grant/" %} 
+                    <li class="active"> 
+                    {% else %}
+                    <li>
+                    {% endif %}
+                    <a href="{% url 'admin:profiling_visiting_professor_grant_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    </li>
+                  {% endif %}
+
                   {% if model.label == 'Degree Programs' %}  
                     {% if request.get_full_path == "/profiling/degree_program/" %} 
                     <li class="active"> 
@@ -96,13 +106,23 @@
                     </li>
                   {% endif %}
 
-                  {% if model.label == 'Equipment' %}  
+                  {% if model.label == 'Equipments' %}  
                     {% if request.get_full_path == "/profiling/equipment/" %} 
                     <li class="active"> 
                     {% else %}
                     <li>
                     {% endif %}
                     <a href="{% url 'admin:profiling_equipment_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    </li>
+                  {% endif %}
+
+                  {% if model.label == 'Research Disseminations' %}  
+                    {% if request.get_full_path == "/profiling/research_disseminations/" %} 
+                    <li class="active"> 
+                    {% else %}
+                    <li>
+                    {% endif %}
+                    <a href="{% url 'admin:profiling_research_dissemination_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
                     </li>
                   {% endif %}
 

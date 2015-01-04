@@ -3,9 +3,9 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from polymorphic import PolymorphicModel
-from datetime import date
+from datetime import datetime, date
 from smart_selects.db_fields import ChainedForeignKey as GF
-from django.utils.html import format_html
+from django.utils.html import format_html, mark_safe
 from django.core.urlresolvers import reverse
 
 # Create your models here.
@@ -137,22 +137,22 @@ class Enrolled_Subject(models.Model):
 	subject = models.ForeignKey(Subject)
 	scholar = models.ForeignKey(Person)
 	year_taken = models.DateField(help_text='Format: YYYY-MM-DD')
-	sem_taken = models.IntegerField(default=1, verbose_name='Semester taken')
-	eq_grade = models.FloatField(default=0.0)
+	eq_grade = models.FloatField(default=0.0, verbose_name='Grade')
 
 	class Meta:
 		verbose_name = 'Enrolled Subject'
 		verbose_name_plural = 'Enrolled Subjects'
-		ordering = ('sem_taken', 'subject',)
+		ordering = ('year_taken', 'subject',)
 
 	def __unicode__(self):
 		return '%s: %s' % (self.scholar.__unicode__(), self.subject.__unicode__())
 
 class Profile(models.Model):
-	STUDENT, ADVISER, UNIV_ADMIN, CENTRAL_OFFICE, DOST = 'STU', 'ADV', 'ADMIN', 'CENT', 'DOST'
+	STUDENT, ADVISER, UNIV_ADMIN, CENTRAL_OFFICE, DOST, VISITING = 'STU', 'ADV', 'ADMIN', 'CENT', 'DOST', 'VISIT'
 	ROLE_CHOICES = (
 		(STUDENT, 'Student'),
 		(ADVISER, 'Faculty Adviser'),
+		(VISITING, 'Visiting'),
 		(UNIV_ADMIN, 'Consortium Administrator'),
 		(CENTRAL_OFFICE, 'ERDT Central Office'),
 		(DOST, 'DOST Office'),
@@ -174,11 +174,14 @@ class Profile(models.Model):
 			return '%s as %s' % (self.person, self.get_role_display())
 
 	def clean(self):
-		if self.role in (self.DOST, self.CENTRAL_OFFICE):
-			self.university = None
-		elif self.role in (self.STUDENT, self.ADVISER, self.UNIV_ADMIN):
+		if self.role in (self.STUDENT, self.ADVISER, self.UNIV_ADMIN, self.VISITING):
 			if self.university == None:
 				raise ValidationError('Specify university of affiliation.')
+
+	def save(self, *args, **kwargs):
+		if self.role in (self.DOST, self.CENTRAL_OFFICE):
+			self.university = None
+		super(Profile, self).save(*args, **kwargs)
 
 class Grant(PolymorphicModel):
 	awardee = models.ForeignKey(Person, related_name='awardee')
@@ -199,7 +202,7 @@ class Grant(PolymorphicModel):
 
 	def awardee_link(self):
 		url = reverse('admin:profiling_person_change', args=(self.awardee.id,))
-		return format_html(u'<a href="{}" target=_blank>%s</a>' % self.awardee, url)
+		return format_html(u'<a href="{}">%s</a>' % self.awardee, url)
 	awardee_link.short_description = 'Awardee'
 
 	def grant_link(self):
@@ -211,11 +214,14 @@ class Grant(PolymorphicModel):
 			url = reverse('admin:profiling_sandwich_program_change', args=(self.id,))
 		else:
 			return url
-		return format_html(u'<a href="{}" target=_blank>%s</a>' % self.grant_type(), url)
+		return format_html(u'<a href="{}">%s</a>' % self.grant_type(), url)
 	grant_link.short_description = 'Grant type'
 
 	def is_active(self):
-		return 1 if (self.start_date <= date.today() <= self.end_date) else 0
+		if not self.start_date:
+			return -1
+		today = date.today()
+		return 1 if self.start_date <= today <= self.end_date else 0
 
 	def total_released(self):
 		total_amount = 0.0
@@ -235,6 +241,30 @@ class Grant(PolymorphicModel):
 		return self.allotment - self.total_liquidated()
 	balance.short_description = 'Balance (PhP)'
 
+	def allocation_summary(self):
+		out = u'<tr> <th><b>Grant Allocation</b></th> <th><b>Allotment (PhP)</b></th>  \
+			<th><b>Total Liquidated (PhP)</b></th> <th><b>Balance (PhP)</b></th> </tr>'
+
+		_temp = '<td> %s </td> ' * 4
+
+		t_allotment, t_liquidated, t_balance = (0.0, 0.0, 0.0)
+
+		for allocation in self.grant_allocation_set.all():
+			out = out + '<tr> %s </tr>' % (_temp % (allocation.name, str(allocation.amount), 
+				str(allocation.total_liquidated()), str(allocation.balance()) ))
+
+			t_allotment = t_allotment + allocation.amount
+			t_liquidated = t_liquidated + allocation.total_liquidated()
+			t_balance = t_balance + allocation.balance()
+
+		totals = ('<tr> %s </tr>' % _temp) % ('<b>Total</b>', '<b>%s</b>' % t_allotment, 
+			'<b>%s</b>' % t_liquidated, '<b>%s</b>' % t_balance)
+
+		out = u'<table class="table table-bordered table-condensed table-striped"><thread> %s %s \
+			</thread></table>' % (out, totals)
+
+		return format_html(mark_safe(out))
+
 	def __unicode__(self):
 		return '%s: %s' % (self.grant_type(), self.awardee.__unicode__())
 
@@ -252,17 +282,37 @@ class Grant_Allocation(models.Model):
 		verbose_name = 'Grant Allocation'
 		verbose_name_plural = 'Grant Allocations'
 
+	def total_liquidated(self):
+		total_amount = 0.0
+		for rel in self.grant_allocation_release_set.all():
+			total_amount = total_amount + rel.amount_liquidated
+		return total_amount
+	total_liquidated.short_description = 'Liquidated (PhP)'
+
+	def balance(self):
+		return self.amount - self.total_liquidated()
+	balance.short_description = 'Balance (PhP)'
+
 	def __unicode__(self):
 		return '%s: %s' % (self.grant.grant_type(), self.name)
 
 class Grant_Allocation_Release(PolymorphicModel):
+	CONSUMABLE, EQUIPMENT, SERVICE, OTHER = 'CONSUMABLE', 'EQUIPMENT', 'SERVICE', 'OTHER'
+	ITEMTYPE_CHOICES = (
+		(CONSUMABLE, 'Consumable'),
+		(SERVICE, 'Service'),
+		(OTHER, 'Other'),
+	)
+
+	item_type = models.CharField(max_length=50, choices=ITEMTYPE_CHOICES, blank=True, verbose_name='Type', help_text='For research grant fund releases only. Leave blank otherwise.')
 	payee = models.ForeignKey(Person, related_name='payee')
-	grant = GF(Grant, chained_field='payee', chained_model_field='awardee', show_all=False, auto_choose=True) #models.ForeignKey(Grant)
-	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant', on_delete=models.CASCADE)
+	grant = GF(Grant, chained_field='payee', chained_model_field='awardee', show_all=False, auto_choose=True, verbose_name='Funding grant')
+	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant', auto_choose=True, verbose_name='Funding grant allocation')
 	description = models.CharField(max_length=350, blank=True)
-	amount_released = models.FloatField(default=0.0, verbose_name='Released (PhP)')
-	amount_liquidated = models.FloatField(default=0.0, verbose_name='Liquidated (PhP)', help_text='Must be the same as the amount released if unliquidated.')
-	date_released = models.DateField(help_text='Format: YYYY-MM-DD')
+	amount_released = models.FloatField(default=0.0, verbose_name='Amount Released (PhP)')
+	amount_liquidated = models.FloatField(default=0.0, verbose_name='Amount Liquidated (PhP)', help_text='Must be the same as the amount released if unliquidated.')
+	date_released = models.DateField(help_text='Format: YYYY-MM-DD', verbose_name='Date of fund release')
+
 
 	class Meta:
 		verbose_name = 'Fund Release'
@@ -274,15 +324,17 @@ class Grant_Allocation_Release(PolymorphicModel):
 			return '%s (%s)' % (self.allocation.__unicode__(), self.description)
 		else:
 			return self.allocation.__unicode__()
+	particular.admin_order_field = 'date_released'
 
 	def payee_link(self):
 		url = reverse('admin:profiling_person_change', args=(self.payee.id,))
 		return format_html(u'<a href="{}">%s</a>' % self.payee.__unicode__(), url)
 	payee_link.short_description = 'Payee'
+	payee_link.admin_order_field = 'payee'
 
 	def release_link(self):
 		url = reverse('admin:profiling_grant_allocation_release_change', args=(self.id,))
-		return format_html(u'<a href="{} target=_blank">%s</a>' % self.particular(), url)
+		return format_html(u'<a href="{}">%s</a>' % self.particular(), url)
 	release_link.short_description = 'Particular'
 
 	def the_who(self):
@@ -298,7 +350,7 @@ class Grant_Allocation_Release(PolymorphicModel):
 
 	def clean(self):
 		if (self.payee != self.grant.awardee) or (self.grant != self.allocation.grant):
-			raise ValidationError('Payee, grant awardee, and grant allocation must be consistent.')
+			raise ValidationError('Payee, grant, and grant allocation must be consistent.')
 		if self.amount_liquidated > self.amount_released:
 			raise ValidationError('Amount liquidated must be less than or equal to the amount released.')
 		if (self.amount_liquidated != self.amount_released) and (self.amount_liquidated == 0.0):
@@ -387,6 +439,16 @@ class ERDT_Scholarship_Special(Grant):
 	host_university = models.CharField(max_length=150)
 	host_professor = models.CharField(max_length=150)
 
+	class Meta:
+		verbose_name = 'Abroad Scholarship'
+		verbose_name_plural = 'Abroad Scholarships'
+
+	def grant_type(self):
+		return 'Scholarship (Abroad PhD)'
+
+	def __unicode__(self):
+		return self.grant_type()
+
 class Sandwich_Program(Grant):
 	host_university = models.CharField(max_length=150)
 	host_professor = models.CharField(max_length=150)
@@ -417,47 +479,63 @@ class FRDG(Grant):
 
 class Visiting_Professor_Grant(Grant):
 	distinguished = models.BooleanField(default=False)
-	home_univerisy = models.CharField(max_length=150)
+	home_university = models.CharField(max_length=150)
 	host_university = models.ForeignKey(University, limit_choices_to={'is_consortium':True})
 	host_professor = models.ForeignKey(Person, related_name='host_professor')
+
+	class Meta:
+		verbose_name = 'Visiting Professor Grant'
+		verbose_name_plural = 'Visiting Professor Grants'
+		ordering = ('-start_date', 'awardee',)
+
+	def grant_type(self):
+		return 'Visiting %s' % str(self.start_date.year)
+
+	def __unicode__(self):
+		return self.grant_type()
 
 #############################################################################################
 
 class Equipment(Grant_Allocation_Release):
-	# CONSUMABLE, EQUIPMENT, SERVICE, OTHER = 'CONSUMABLE', 'EQUIPMENT', 'SERVICE', 'OTHER'
-	# ITEMTYPE_CHOICES = (
-	# 	(CONSUMABLE, 'Consumable'),
-	# 	(EQUIPMENT, 'Equipment'),
-	# 	(SERVICE, 'Service'),
-	# 	(OTHER, 'Other'),
-	# )
-
-	# item_type = models.CharField(max_length=50, choices=ITEMTYPE_CHOICES, default=OTHER, verbose_name='Item type')
-	# quantity = models.FloatField(default=1.0, null=True, blank=True)
+	#quantity = models.FloatField(default=1.0, null=True, blank=True)
 	location = models.CharField(max_length=150, blank=True)
 	property_no =  models.CharField(max_length=50, blank=True, help_text='If funded by multiple grants, use the same property no for the same item.')
 	status = models.CharField(max_length=150, blank=True)
 	accountable = models.ForeignKey(Person, related_name='accountable')
 	surrendered = models.BooleanField(default=False)
 
-	def __unicode__(self):
-		return self.particular()
+	def accountable_link(self):
+		url = reverse('admin:profiling_person_change', args=(self.accountable.id,))
+		return format_html(u'<a href="{}">%s</a>' % self.accountable.__unicode__(), url)
+	accountable_link.short_description = 'Accountable'
+	accountable_link.admin_order_field = 'accountable'
+
+	def description_link(self):
+		url = reverse('admin:profiling_equipment_change', args=(self.id,))
+		return format_html(u'<a href="{}">%s</a>' % self.description, url)
+	description_link.short_description = 'Description'
 
 	class Meta:
 		verbose_name = 'Equipment'
 		verbose_name_plural = 'Equipments'
+
+	def clean(self):
+		super(Equipment, self).clean()
+		if self.description.strip() == '':
+			raise ValidationError('Description cannot be blank for equipment.')
+
+	def save(self, *args, **kwargs):
+		self.item_type = Grant_Allocation_Release.EQUIPMENT
+		super(Equipment, self).save(*args, **kwargs)
 	
 class Research_Dissemination(Grant_Allocation_Release):
 	paper_title = models.CharField(max_length=250)
 	conference_name = models.CharField(max_length=250)
-	conference_loc = models.CharField(max_length=250)
+	conference_loc = models.CharField(max_length=250, verbose_name='Conference location')
 	conference_date = models.DateField(help_text='Format: YYYY-MM-DD')
 
 	class Meta:
 		verbose_name = 'Research Dissemination'
 		verbose_name_plural = 'Research Disseminations'
-
-	def __unicode__(self):
-		return '%s: %s' % (self.payee, self.paper_title)
 
 ###

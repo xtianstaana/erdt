@@ -33,6 +33,8 @@ from custommodeladmin.scholarship import ScholarshipAdmin
 from custommodeladmin.sandwich import SandwichAdmin
 from custommodeladmin.fund_release import GrantAllocationReleaseAdmin
 from custommodeladmin.equipment import PurchasedItemAdmin
+from custommodeladmin.research_dissemination import ResearchDisseminationAdmin
+from custommodeladmin.visiting_professor import VisitingProfessorAdmin
 
 """
 Author: Christian Sta.Ana
@@ -107,4 +109,5 @@ admin_site.register(Degree_Program, DegreeProgramAdmin)
 admin_site.register(Scholarship, ScholarshipAdmin)
 admin_site.register(Grant_Allocation_Release, GrantAllocationReleaseAdmin) 
 admin_site.register(Equipment, PurchasedItemAdmin)
-admin_site.register(Research_Dissemination)
+admin_site.register(Research_Dissemination, ResearchDisseminationAdmin)
+admin_site.register(Visiting_Professor_Grant, VisitingProfessorAdmin)

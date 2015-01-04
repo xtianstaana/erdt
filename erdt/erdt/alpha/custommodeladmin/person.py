@@ -14,7 +14,6 @@ from suit.widgets import *
 from django.core.urlresolvers import resolve, reverse
 from django_select2.widgets import *
 from django.utils.translation import ugettext_lazy as _
-from django.utils.html import format_html
 
 # Import Profiling Module Models
 from profiling.models import *
@@ -31,7 +30,10 @@ class GrantSummaryInline(TabularInline):
     verbose_name_plural = 'Grants Awarded'
     suit_classes = 'suit-tab suit-tab-grantsummary'
     exclude = ('description', 'delete')
-    readonly_fields = ('grant_link', 'start_date', 'end_date', 'allotment', 'total_released', 'total_liquidated', 'balance')
+    readonly_fields = ('grant_link', 'start_date', 'end_date', 'allotment', 'total_liquidated', 'balance', 'is_active')
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 class ReleaseInline(TabularInline):
     model = Grant_Allocation_Release
@@ -39,8 +41,11 @@ class ReleaseInline(TabularInline):
     fk_name = 'payee'
     extra = 0
     suit_classes = 'suit-tab suit-tab-grantsummary'
-    exclude = ('description', 'grant', 'allocation')
-    readonly_fields = ('release_link', 'date_released', 'amount_released', 'amount_liquidated', 'disparity')
+    fields = ('release_link', 'date_released', 'amount_released', 'amount_liquidated', 'disparity')
+    readonly_fields = fields
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 class EquipmentIssuedInline(TabularInline):
     model = Equipment
@@ -50,8 +55,11 @@ class EquipmentIssuedInline(TabularInline):
     suit_classes = 'suit-tab suit-tab-grantsummary'
     verbose_name = 'Accountable Equipment'
     verbose_name_plural = 'Issued Equipments'
-    fields = ('description', 'status', 'accountable', 'date_released', 'surrendered')
+    fields = ('description_link', 'status', 'accountable_link', 'date_released', 'surrendered')
     readonly_fields = fields
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 class EquipmentAccountableInline(TabularInline):
     model = Equipment
@@ -61,11 +69,14 @@ class EquipmentAccountableInline(TabularInline):
     suit_classes = 'suit-tab suit-tab-grantsummary'
     verbose_name = 'Accountable Equipment'
     verbose_name_plural = 'Accountable Equipments'
-    fields = ('issued_to', 'description', 'date_released',)
+    fields = ('issued_to', 'description_link', 'date_released',)
     readonly_fields = fields
 
     def issued_to(self, obj):
         return obj.payee
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 class ScholarshipInline(StackedInline):
     model = Scholarship
@@ -75,23 +86,38 @@ class ScholarshipInline(StackedInline):
     suit_classes = 'suit-tab suit-tab-scholarship'
     verbose_name = 'Local Scholarship'
     verbose_name_plural = 'Local Scholarships'
-    fields = ('scholarship_status', 'degree_program', 'start_date', 'end_date' , 
-        'allotment', 'adviser', 'entry_grad_program', 'end_grad_program', 'cleared' , 'description')
+    fields = ('scholarship_status', 'degree_program',  'adviser', 'thesis_status', 'start_date', 'end_date', 
+        'entry_grad_program', 'end_grad_program', 'description', 'lateral', 'cleared' , 'allotment', 
+        'allocation_summary',)
     readonly_fields = fields
 
-class EquipmentInline(StackedInline):
-    model = Equipment
-    fk_name = 'payee'
-    extra = 0
-    suit_classes = 'suit-tab suit-tab-issued'
+    def __unicode__(self, obj=None):
+        if obj:
+            return self.grant_link()
 
-    # def formfield_for_foreignkey(self, db_field, request, **kwargs):
-    #     try:
-    #         if db_field.name == 'grant':
-    #             kwargs["queryset"] = Grant.objects.filter(awardee=resolve(request.path).args[0])
-    #     except:
-    #         pass
-    #     return super(EquipmentInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class SandwichInline(StackedInline):
+    model = Sandwich_Program
+    fk_name = 'awardee'
+    extra = 0
+    max_num = 0
+    suit_classes = 'suit-tab suit-tab-sandwich'
+
+    fields = ('start_date', 'end_date', 'host_university', 'host_professor', 'description', 'allotment', 
+        'allocation_summary')
+    readonly_fields = fields
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class EnrolledSubjectInline(TabularInline):
+    model = Enrolled_Subject
+    fk_name = 'scholar'
+    extra = 0
+    suit_classes = 'suit-tab suit-tab-enrolled'
+    fields = ('subject', 'year_taken', 'eq_grade')
 
 class ProfileInline(TabularInline):
     model = Profile
@@ -116,8 +142,8 @@ _thread_locals = threading.local()
 
 class PersonAdmin(ERDTModelAdmin):
     form = MyPersonForm
-    inlines = (ProfileInline, GrantSummaryInline, ReleaseInline, ScholarshipInline,
-        EquipmentInline, EquipmentIssuedInline, EquipmentAccountableInline)
+    inlines = (ProfileInline, GrantSummaryInline, EquipmentIssuedInline, 
+        EquipmentAccountableInline, ReleaseInline, ScholarshipInline, SandwichInline, EnrolledSubjectInline)
     list_display = ('__unicode__', 'email_address', 'mobile_number')
     readonly_fields = ('age',)
     list_filter = ('profile__role', 'profile__university', 'awardee__scholarship__degree_program__degree',
@@ -139,13 +165,6 @@ class PersonAdmin(ERDTModelAdmin):
             }),
     )
 
-    #suit_form_tabs = (('general', 'General'), ('grantsummary', 'Grants Summary'),
-     #   ('scholarship', 'Local Scholarships'), ('issued', 'Equipment'))
-
-    formfield_overrides = {
-        models.ForeignKey: {'widget': Select},
-    }
-
     def get_form(self, request, obj=None):
         _thread_locals.request = request
         _thread_locals.obj = obj
@@ -164,38 +183,31 @@ class PersonAdmin(ERDTModelAdmin):
                 is_student = profiles.filter(role=Profile.STUDENT).count() > 0
                 is_faculty =  profiles.filter(role=Profile.ADVISER).count() > 0
 
+                grants = Grant.objects.filter(awardee__pk=obj.pk)
+
 
                 if is_student or is_faculty:
                     tabs.append(('grantsummary', 'Grants Summary'))
                     
-                if is_student:
+                if grants.instance_of(Scholarship):
                     tabs.append(('scholarship', 'Local Scholarships'))
+                if grants.instance_of(ERDT_Scholarship_Special):
+                    tabs.append(('sscholarship', 'Abroad Scholarships'))
+                if grants.instance_of(Sandwich_Program):
+                    tabs.append(('sandwich', 'Sandwich Programs'))
+                if grants.instance_of(Postdoctoral_Fellowship):
+                    tabs.append(('postdoc', 'Postdoctoral Fellowships'))
+                if grants.instance_of(FRGT):
+                    tabs.append(('frgt', 'FRGT'))
+                if grants.instance_of(FRDG):
+                    tabs.append(('frdg', 'FRDG'))
 
+                if grants.instance_of(Scholarship):
+                    tabs.append(('enrolled', 'Enrolled Subjects'))
             except:
-                print "error at get_suit_form_tabs ****************88"
-                return tabs
-            finally:
-                return tabs
+                pass
         return tabs
-
-    """
-    Author: Christian Sta.Ana
-    Date: Mon Aug 11 2014
-    Description: Setting field-level permissions.
-    Params: default
-    Returns: default    
-    """
-    def get_readonly_fields(self, request, obj=None):
-        try:
-            profile = Profile.objectsself.get(person__user=request.user.id, active=True)
-            if profile.role == Profile.STUDENT: # If User's profile is STUDENT
-                return self.readonly_fields + ('user', )
-            else:
-                return self.readonly_fields
-        except Exception as e:
-            print ("Error getting readonly fields: %s" % e.message)
-            return self.readonly_fields
-
+    
     """
     Author: Christian Sta.Ana
     Date: Sun Sep 28 2014
@@ -204,22 +216,15 @@ class PersonAdmin(ERDTModelAdmin):
     Returns: default
     """
     def get_queryset(self, request):
-        qs = super(PersonAdmin, self).get_queryset(request)
         try:
-            profile = Profile.objects.get(person__user=request.user.id, active=True)
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
 
-            if profile.role == Profile.STUDENT: # If User's profile is STUDENT
-                return qs.filter(user = request.user.id)
-            if profile.role == Profile.UNIV_ADMIN: # If User's profile is UNIV_ADMIN
-                output_qs = set()
-                user_person = Person.objects.get(user = request.user.id)
-                output_qs.add(user_person.pk)
-                for qs_person in qs:
-                    for qs_profile in qs_person.profile_set.all():
-                        if(qs_profile.university == profile.university):
-                            output_qs.add(qs_person.pk)
-                return qs.filter(pk__in = output_qs)
-            else:
-                return qs
-        except:
-            return qs
+            if my_profile.role == Profile.STUDENT: # If User's profile is STUDENT
+                return Person.objects.filter(user__pk=request.user.pk)
+            elif my_profile.role == Profile.UNIV_ADMIN: # If User's profile is UNIV_ADMIN
+                return Person.objects.filter(profile__university__pk=my_profile.university.pk)
+            elif my_profile.role in (Profile.CENTRAL_OFFICE, Profile.DOST):
+                return Person.objects.all()
+        except Exception as e:
+            print 'Error at PersonAdmin', e
+        return Person.objects.none()
