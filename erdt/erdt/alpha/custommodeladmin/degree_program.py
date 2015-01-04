@@ -12,24 +12,41 @@ from django.forms.widgets import *
 from suit.widgets import *
 
 # Import Profiling Module Models 
-from profiling.models import (Profile, Department, Degree_Program)
-
+from profiling.models import *
 from django.http import HttpResponseRedirect
+from django_select2.widgets import *
 
+
+class MyDegreeProgramForm(forms.ModelForm):
+    class Meta:
+        model = Degree_Program
+        fields = '__all__'
+        widgets = {
+            'department' : Select2Widget(select2_options={
+                'minimumInputLength' : 2,
+                'width':'200px'}),
+        }
 
 class DegreeProgramAdmin(ERDTModelAdmin):
+    form = MyDegreeProgramForm
     list_display = ('program', 'degree', 'department', )
     list_filter = ('department__university', 'degree',)
 
-    formfield_overrides = {
-        models.ForeignKey: {'widget': LinkedSelect},
-    }
-
     def get_readonly_fields (self, request, obj=None):
         if obj:
-            return ('department',)
+            return ('degree', 'program', 'no_semester', 'department')
         else:
             return super(DegreeProgramAdmin, self).get_readonly_fields(request, obj)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        try:
+            if db_field.name == 'department':
+                my_profile = Profile.objects.get(person__user=request.user.id, active = True)
+
+                kwargs["queryset"] = Department.objects.filter(university__pk = my_profile.university.pk)
+        except:
+            pass
+        return super(DegreeProgramAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
     """
     Author: Christian Sta.Ana
@@ -42,40 +59,11 @@ class DegreeProgramAdmin(ERDTModelAdmin):
         qs = super(DegreeProgramAdmin, self).get_queryset(request)
 
         try:
-            profile = Profile.objects.get(person__user=request.user.id, active = True)
-            if profile.role == Profile.UNIV_ADMIN: # If User's profile is University Admin
-                return qs.filter(department__university_id=profile.university.id)
-            else:
-                return qs
-        except:
-            return qs
-
-
-    """
-    Author: Christian Sta.Ana
-    Date: Wed Oct 15 2014
-    Description: Override the form on edit   
-    Params: default
-    Returns: default
-    """            
-    def render_change_form(self, request, context, *args, **kwargs):
-        
-        # For changing the choices of the Department Foreign Key
-        dept_queryset = context['adminform'].form.fields["department"].queryset
-
-        # Check current user's profile 
-        try:
-            profile = Profile.objects.get(person__user=request.user.id, active = True)
-            if profile.role == Profile.UNIV_ADMIN: # If User's profile is University Admin
-                dept_queryset = Department.objects.filter(university_id = profile.university.id)
-            else:
-                print "Default view"
+            my_profile = Profile.objects.get(person__user=request.user.id, active = True)
+            if my_profile.role == Profile.UNIV_ADMIN:
+                return qs.filter(department__university_id=my_profile.university.id)
+            elif my_profile.role in (Profile.CENTRAL_OFFICE, Profile.DOST):
+                return Degree_Program.objects.all()
         except Exception as e:
-            print("Error Getting Permissions: %s" % e.message)
-
-        context['adminform'].form.fields["department"].queryset = dept_queryset
-            
-        
-        return super(DegreeProgramAdmin, self).render_change_form(
-            request, context, args, kwargs)
-
+            print 'Error at DegreeProgramAdmin', e
+        return Degree_Program.objects.none()

@@ -33,15 +33,14 @@ class MyGrantAllocationReleaseForm(forms.ModelForm):
 class GrantAllocationReleaseAdmin(ERDTModelAdmin):
     form = MyGrantAllocationReleaseForm
     model = Grant_Allocation_Release
-    list_display = ('date_released', 'particular', 'payee_link', )
-    fields = ('payee', 'grant', 'allocation', 'description', 'amount_released', 'amount_liquidated', 'date_released')
+    list_display = ('date_released', 'particular', 'payee', )
 
-    def payee_link(self, obj):
-        url = reverse('admin:profiling_person_change', args=(obj.payee.id,))
-        return format_html(u'<a href="{}">%s</a>' % obj.the_who(), url)
-    payee_link.short_description = 'Payee'
+    def get_fields(self, request, obj=None):
+        if obj:
+            return ('payee_link', 'allocation', 'description', 'item_type', 'amount_released', 'amount_liquidated', 'date_released',)
+        return ('payee', 'grant', 'allocation', 'description' ,'item_type', 'amount_released', 'amount_liquidated', 'date_released', )
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ('payee', 'grant', 'allocation')
+            return ('payee_link', 'allocation')
         return super(GrantAllocationReleaseAdmin, self).get_readonly_fields(request, obj)
