@@ -81,19 +81,16 @@ class EquipmentAccountableInline(TabularInline):
 class ScholarshipInline(StackedInline):
     model = Scholarship
     fk_name = 'awardee'
+    template = 'admin/edit_inline_with_link/stacked_with_link.html'
     extra = 0
     max_num = 0
     suit_classes = 'suit-tab suit-tab-scholarship'
     verbose_name = 'Local Scholarship'
     verbose_name_plural = 'Local Scholarships'
-    fields = ('scholarship_status', 'degree_program',  'adviser', 'thesis_status', 'start_date', 'end_date', 
-        'entry_grad_program', 'end_grad_program', 'description', 'lateral', 'cleared' , 'allotment', 
-        'allocation_summary',)
+    fields = ('degree_program', 'scholarship_status', 'start_date', 'end_date', 'description', 'allotment', 'allocation_summary',
+        'entry_grad_program', 'end_grad_program', 'ce_schedule',  'lateral', 'adviser', 'thesis_status', 'thesis_title',
+        'thesis_topic', 'high_degree_univ', 'high_degree', 'cleared')
     readonly_fields = fields
-
-    def __unicode__(self, obj=None):
-        if obj:
-            return self.grant_link()
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -101,13 +98,96 @@ class ScholarshipInline(StackedInline):
 class SandwichInline(StackedInline):
     model = Sandwich_Program
     fk_name = 'awardee'
+    template = 'admin/edit_inline_with_link/stacked_with_link.html'
     extra = 0
     max_num = 0
     suit_classes = 'suit-tab suit-tab-sandwich'
 
-    fields = ('start_date', 'end_date', 'host_university', 'host_professor', 'description', 'allotment', 
-        'allocation_summary')
+    fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',
+        'host_university', 'host_professor',)
     readonly_fields = fields
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class Scholarship2Inline(StackedInline):
+    model = ERDT_Scholarship_Special
+    fk_name = 'awardee'
+    template = 'admin/edit_inline_with_link/stacked_with_link.html'
+    extra = 0
+    max_num = 0
+    suit_classes = 'suit-tab suit-tab-scholarship'
+
+    fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',
+        'host_university', 'host_professor',)
+    readonly_fields = fields
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class FRDGInline(StackedInline):
+    model = FRDG
+    fk_name = 'awardee'
+    template = 'admin/edit_inline_with_link/stacked_with_link.html'
+    extra = 0
+    max_num = 0
+    fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',)
+    readonly_fields = fields
+    suit_classes = 'suit-tab suit-tab-frdg'
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class FRGTInline(StackedInline):
+    model = FRGT
+    fk_name = 'awardee'
+    template = 'admin/edit_inline_with_link/stacked_with_link.html'
+    extra = 0
+    max_num = 0
+    fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',)
+    readonly_fields = fields
+    suit_classes = 'suit-tab suit-tab-frgt'
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class PostdocInline(StackedInline):
+    model = Postdoctoral_Fellowship
+    fk_name = 'awardee'
+    template = 'admin/edit_inline_with_link/stacked_with_link.html'
+    extra = 0
+    max_num = 0
+    fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',)
+    readonly_fields = fields
+    suit_classes = 'suit-tab suit-tab-postdoc'
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class VisitingInline(StackedInline):
+    model = Visiting_Professor_Grant
+    fk_name = 'awardee'
+    template = 'admin/edit_inline_with_link/stacked_with_link.html'
+    extra = 0
+    max_num = 0
+    fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',
+        'distinguished', 'home_university', 'host_university', 'host_professor',)
+    readonly_fields = fields
+    suit_classes = 'suit-tab suit-tab-visiting'
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+class AdviseesInline(TabularInline):
+    model = Scholarship
+    fk_name = 'adviser'
+    verbose_name = 'Advisee'
+    verbose_name_plural = 'Advisees'
+    fields = ('awardee_link', 'degree_program', 'thesis_status', 'scholarship_status', 'end_date')
+    readonly_fields = fields
+    suit_classes = 'suit-tab suit-tab-advisees'
+    extra = 0
+    max_num = 0
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -142,12 +222,13 @@ _thread_locals = threading.local()
 
 class PersonAdmin(ERDTModelAdmin):
     form = MyPersonForm
-    inlines = (ProfileInline, GrantSummaryInline, EquipmentIssuedInline, 
-        EquipmentAccountableInline, ReleaseInline, ScholarshipInline, SandwichInline, EnrolledSubjectInline)
-    list_display = ('__unicode__', 'email_address', 'mobile_number')
+    inlines = (ProfileInline, AdviseesInline, GrantSummaryInline, ReleaseInline, EquipmentIssuedInline, 
+        EquipmentAccountableInline, Scholarship2Inline, ScholarshipInline, SandwichInline, 
+        FRGTInline, FRDGInline, PostdocInline, VisitingInline, EnrolledSubjectInline)
+    list_display = ('__unicode__', 'user', 'email_address', 'mobile_number')
     readonly_fields = ('age',)
-    list_filter = ('profile__role', 'profile__university', 'awardee__scholarship__degree_program__degree',
-        'awardee__scholarship__degree_program__program', 'awardee__scholarship__scholarship_status')
+    list_filter = ('profile__role', 'profile__university', )
+    search_fields = ('first_name', 'last_name',)
     radio_fields =  {'sex' : HORIZONTAL, 'civil_status' : HORIZONTAL}
     fieldsets = (
         ('Personal Information', {
@@ -157,7 +238,7 @@ class PersonAdmin(ERDTModelAdmin):
             }),
         ('Contact Information', {
             'classes' : ('suit-tab', 'suit-tab-general', 'collapse'),
-            'fields':('address', 'email_address', 'landline_number', 'mobile_number'),
+            'fields':('address', 'address2', 'email_address', 'landline_number', 'mobile_number'),
             }),
         ('User Account', {
             'classes' : ('suit-tab', 'suit-tab-general'),
@@ -180,29 +261,30 @@ class PersonAdmin(ERDTModelAdmin):
         if obj:
             try:
                 profiles = Profile.objects.filter(person__pk=obj.pk)
-                is_student = profiles.filter(role=Profile.STUDENT).count() > 0
-                is_faculty =  profiles.filter(role=Profile.ADVISER).count() > 0
+                is_student_faculty = profiles.filter(Q(role=Profile.STUDENT)|Q(role=Profile.ADVISER)).exists()
 
                 grants = Grant.objects.filter(awardee__pk=obj.pk)
 
+                if Scholarship.objects.filter(adviser__pk=obj.pk):
+                    tabs.append(('advisees', 'Advisees'), )
 
-                if is_student or is_faculty:
+                if is_student_faculty:
                     tabs.append(('grantsummary', 'Grants Summary'))
-                    
-                if grants.instance_of(Scholarship):
-                    tabs.append(('scholarship', 'Local Scholarships'))
-                if grants.instance_of(ERDT_Scholarship_Special):
-                    tabs.append(('sscholarship', 'Abroad Scholarships'))
-                if grants.instance_of(Sandwich_Program):
+                
+                if grants.instance_of(Scholarship).exists() or grants.instance_of(ERDT_Scholarship_Special).exists():
+                    tabs.append(('scholarship', 'Local/Abroad Scholarships'))
+                if grants.instance_of(Sandwich_Program).exists():
                     tabs.append(('sandwich', 'Sandwich Programs'))
-                if grants.instance_of(Postdoctoral_Fellowship):
+                if grants.instance_of(FRGT).exists():
+                    tabs.append(('frgt', 'FRGTs'))
+                if grants.instance_of(FRDG).exists():
+                    tabs.append(('frdg', 'FRDGs'))
+                if grants.instance_of(Postdoctoral_Fellowship).exists():
                     tabs.append(('postdoc', 'Postdoctoral Fellowships'))
-                if grants.instance_of(FRGT):
-                    tabs.append(('frgt', 'FRGT'))
-                if grants.instance_of(FRDG):
-                    tabs.append(('frdg', 'FRDG'))
+                if grants.instance_of(Visiting_Professor_Grant).exists():
+                    tabs.append(('visiting', 'Visiting Professor Grants'))
 
-                if grants.instance_of(Scholarship):
+                if grants.instance_of(Scholarship).exists():
                     tabs.append(('enrolled', 'Enrolled Subjects'))
             except:
                 pass
@@ -222,7 +304,7 @@ class PersonAdmin(ERDTModelAdmin):
             if my_profile.role == Profile.STUDENT: # If User's profile is STUDENT
                 return Person.objects.filter(user__pk=request.user.pk)
             elif my_profile.role == Profile.UNIV_ADMIN: # If User's profile is UNIV_ADMIN
-                return Person.objects.filter(profile__university__pk=my_profile.university.pk)
+                return Person.objects.filter(profile__university__pk=my_profile.university.pk).distinct()
             elif my_profile.role in (Profile.CENTRAL_OFFICE, Profile.DOST):
                 return Person.objects.all()
         except Exception as e:

@@ -43,7 +43,7 @@ class DegreeProgramAdmin(ERDTModelAdmin):
             if db_field.name == 'department':
                 my_profile = Profile.objects.get(person__user=request.user.id, active = True)
 
-                kwargs["queryset"] = Department.objects.filter(university__pk = my_profile.university.pk)
+                kwargs["queryset"] = Department.objects.filter(university__pk = my_profile.university.pk).distinct()
         except:
             pass
         return super(DegreeProgramAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)

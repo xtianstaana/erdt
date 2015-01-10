@@ -22,7 +22,7 @@ from django_select2.widgets import *
 
 class MyResearchDisseminationForm(forms.ModelForm):
     class Meta:
-        model = Grant_Allocation_Release
+        model = Research_Dissemination
         fields = '__all__'
         widgets = {
             'payee' : Select2Widget(select2_options={
@@ -32,8 +32,20 @@ class MyResearchDisseminationForm(forms.ModelForm):
 
 class ResearchDisseminationAdmin(ERDTModelAdmin):
     form = MyResearchDisseminationForm
-    list_display = ('date_released', 'paper_title', 'payee', )
+    list_display = ('date_released', 'paper_title', 'payee_sub', 'particular')
     exclude = ('item_type',)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if db_field.name == 'payee':
+                qs = Person.objects.filter(profile__role__in=(Profile.ADVISER, Profile.STUDENT))
+                if my_profile.role == Profile.UNIV_ADMIN:
+                    qs = qs.filter(profile__university__pk=my_profile.university.pk)
+                kwargs["queryset"] = qs.distinct()
+        except:
+            kwargs["queryset"] = Person.objects.none()
+        return super(ResearchDisseminationAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
         if obj:

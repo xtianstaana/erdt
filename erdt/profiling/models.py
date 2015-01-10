@@ -23,6 +23,7 @@ class Person(models.Model):
 		(MARRIED, 'Married'),
 	)
 
+	#erdt_id = models.CharField(max_length=100, unique=True, editable=False)
 	user = models.ForeignKey(User, verbose_name='User account', null=True, blank=True, unique=True) 
 	photo = models.ImageField(upload_to='img', null=True, blank=True)
 	first_name = models.CharField(max_length=50)
@@ -31,7 +32,8 @@ class Person(models.Model):
 	birthdate = models.DateField(help_text='Format: YYYY-MM-DD')
 	sex = models.CharField(max_length=1, choices=SEX_CHOICES, default=MALE)
 	civil_status = models.CharField(max_length=1, choices=CIVIL_STATUS_CHOICES, default=SINGLE)
-	address = models.CharField(max_length=250)
+	address = models.CharField(max_length=250, verbose_name='Permanent address')
+	address2 = models.CharField(max_length=250, verbose_name='Current address')
 	email_address = models.EmailField(blank=True)
 	landline_number = models.CharField(max_length=100, blank=True)
 	mobile_number = models.CharField(max_length=100, blank=True)
@@ -151,8 +153,8 @@ class Profile(models.Model):
 	STUDENT, ADVISER, UNIV_ADMIN, CENTRAL_OFFICE, DOST, VISITING = 'STU', 'ADV', 'ADMIN', 'CENT', 'DOST', 'VISIT'
 	ROLE_CHOICES = (
 		(STUDENT, 'Student'),
-		(ADVISER, 'Faculty Adviser'),
-		(VISITING, 'Visiting'),
+		(ADVISER, 'Faculty'),
+		(VISITING, 'Visiting Professor'),
 		(UNIV_ADMIN, 'Consortium Administrator'),
 		(CENTRAL_OFFICE, 'ERDT Central Office'),
 		(DOST, 'DOST Office'),
@@ -208,10 +210,20 @@ class Grant(PolymorphicModel):
 	def grant_link(self):
 		url = self.grant_type()
 
-		if self.grant_type().startswith('Scholarship (Local'):
+		if self.__class__ == Scholarship:
 			url = reverse('admin:profiling_scholarship_change', args=(self.id,))
-		elif self.grant_type().startswith('Sandwich'):
+		elif self.__class__ == Sandwich_Program:
 			url = reverse('admin:profiling_sandwich_program_change', args=(self.id,))
+		elif self.__class__ == ERDT_Scholarship_Special:
+			url = reverse('admin:profiling_erdt_scholarship_special_change', args=(self.id,))
+		elif self.__class__ == FRDG:
+			url = reverse('admin:profiling_frdg_change', args=(self.id,))
+		elif self.__class__ == FRGT:
+			url = reverse('admin:profiling_frgt_change', args=(self.id,))
+		elif self.__class__ == Postdoctoral_Fellowship:
+			url = reverse('admin:profiling_postdoctoral_fellowship_change', args=(self.id,))
+		elif self.__class__ == Visiting_Professor_Grant:
+			url = reverse('admin:profiling_visiting_professor_grant_change', args=(self.id,))
 		else:
 			return url
 		return format_html(u'<a href="{}">%s</a>' % self.grant_type(), url)
@@ -250,7 +262,7 @@ class Grant(PolymorphicModel):
 		t_allotment, t_liquidated, t_balance = (0.0, 0.0, 0.0)
 
 		for allocation in self.grant_allocation_set.all():
-			out = out + '<tr> %s </tr>' % (_temp % (allocation.name, str(allocation.amount), 
+			out = out + '<tr> %s </tr>' % (_temp % (allocation.get_name_display(), str(allocation.amount), 
 				str(allocation.total_liquidated()), str(allocation.balance()) ))
 
 			t_allotment = t_allotment + allocation.amount
@@ -273,8 +285,87 @@ class Grant(PolymorphicModel):
 			raise ValidationError('Start of contract date must precede or the same as the end of contract date.')
 
 class Grant_Allocation(models.Model):
+
+	TUITION_FEE, STIPEND, BOOK_ALLOWANCE, TRANSPORTATION_ALLOWANCE = 'TUITION', 'STIPEND', 'BOOK_ALW', 'TRANSP_ALW'
+	THESIS_ALLOWANCE, RESEARCH_GRANT, RESEARCH_DISSEMINATION_ALLOWNACE = 'THESIS_ALW', 'RESEARCH_GNT', 'DISSEMINATION_ALLW'
+	MENTORS_FEE, AIRFARE, RESEARCH_EXPENSES, PRETRAVEL_EXPENSES = 'MENTORS_FEE', 'AIRFARE', 'RESEARCH_EXP', 'PRETRAVEL_EXP'
+	LIVING_EXPENSES, RELOCATE_ALLOWANCE = 'LIVING_EXP', 'RELOCATE_ALW'
+	MEDICAL_INSURANCE, TRAVEL_INSURANCE, MEDICAL_TRAVEL_INSURANCE = 'MEDICAL_INS', 'TRAVEL_INS', 'MED_TRAV_INS'
+	CONFERENCE_REG, DSA, PROFESSIONAL_FEE = 'CONFE_REG', 'DSA', 'PROF_FEE'
+
+	GRANT_ALLOC_CHOICES = (
+		(TUITION_FEE, 'Tuition Fees'),
+		(STIPEND, 'Stipend'),
+		(BOOK_ALLOWANCE, 'Book Allowance'),
+		(TRANSPORTATION_ALLOWANCE, 'Transportation Allowance'),
+		(THESIS_ALLOWANCE, 'Thesis/Dissertation Allowance'),
+		(RESEARCH_GRANT, 'Research Grant'),
+		(RESEARCH_DISSEMINATION_ALLOWNACE, 'Research Dissemination Allowance'),
+		(MENTORS_FEE, 'Mentor\'s Fee'),
+		(AIRFARE, 'Airfare'),
+		(RESEARCH_EXPENSES, 'Research Expenses'),
+		(PRETRAVEL_EXPENSES, 'Pre-travel Expenses'),
+		(LIVING_EXPENSES, 'Living Expenses'),
+		(RELOCATE_ALLOWANCE, 'Relocation Allowance'),
+		(MEDICAL_INSURANCE, 'Medical Insurance'),
+		(TRAVEL_INSURANCE, 'Travel Insurance'),
+		(MEDICAL_TRAVEL_INSURANCE, 'Medical and Travel Insurance'),
+		(CONFERENCE_REG, 'Conference Registration'),
+		(DSA, 'DSA'),
+		(PROFESSIONAL_FEE, 'Professional Fee')
+	)
+	SCHOLARSHIP_ALLOC_CHOICES = (
+		(TUITION_FEE, 'Tuition Fees'),
+		(STIPEND, 'Stipend'),
+		(BOOK_ALLOWANCE, 'Book Allowance'),
+		(TRANSPORTATION_ALLOWANCE, 'Transportation Allowance'),
+		(THESIS_ALLOWANCE, 'Thesis/Dissertation Allowance'),
+		(RESEARCH_GRANT, 'Research Grant'),
+		(RESEARCH_DISSEMINATION_ALLOWNACE, 'Research Dissemination Allowance'),
+		(MENTORS_FEE, 'Mentor\'s Fee'),
+	)
+	SANDWICH_ALLOC_CHOICES = (
+		(AIRFARE, 'Airfare'),
+		(RESEARCH_EXPENSES, 'Research Expenses'),
+		(PRETRAVEL_EXPENSES, 'Pre-travel Expenses'),
+		(LIVING_EXPENSES, 'Living Expenses'),
+		(RELOCATE_ALLOWANCE, 'Relocation Allowance'),
+	)
+	SCHOLARSHIP2_ALLOC_CHOICES = (
+		(TUITION_FEE, 'Tuition Fees'),
+		(PRETRAVEL_EXPENSES, 'Pre-travel Expenses'),
+		(AIRFARE, 'Airfare'),
+		(BOOK_ALLOWANCE, 'Book Allowance'),
+		(STIPEND, 'Stipend'),
+		(MEDICAL_TRAVEL_INSURANCE, 'Medical and Travel Insurance'),
+		(THESIS_ALLOWANCE, 'Dissertation Allowance'),
+		(RESEARCH_DISSEMINATION_ALLOWNACE, 'Research Dissemination Allowance'),
+	)
+	POSTDOCTORAL_ALLOC_CHOICES = (
+		(AIRFARE, 'Airfare'),
+		(RESEARCH_EXPENSES, 'Research Expenses'),
+		(PRETRAVEL_EXPENSES, 'Pre-travel Expenses'),
+		(LIVING_EXPENSES, 'Living Expenses'),
+	)
+	FRGT_ALLOC_CHOICES = (
+		(RESEARCH_GRANT, 'Research Grant'),
+	)
+	FRDG_ALLOC_CHOICES = (
+		(CONFERENCE_REG, 'Conference Registration'),
+		(DSA, 'DSA'),
+		(AIRFARE, 'Airfare'),
+		(TRAVEL_INSURANCE, 'Travel Insurance'),
+	)
+	VP_ALLOC_CHOICES = (
+		(AIRFARE, 'Airfare'),
+		(TRAVEL_INSURANCE, 'Travel Insurance'),
+		(PROFESSIONAL_FEE, 'Professional Fee'),
+		(TRANSPORTATION_ALLOWANCE, 'Transportation Allowance'),
+		(DSA, 'DSA'),
+	)
+
 	grant = models.ForeignKey(Grant)
-	name = models.CharField(max_length=150, verbose_name="Line item")
+	name = models.CharField(max_length=150, choices=GRANT_ALLOC_CHOICES,verbose_name="Line item")
 	description = models.CharField(max_length=350, blank=True)
 	amount = models.FloatField(default=0.0)
 
@@ -294,17 +385,19 @@ class Grant_Allocation(models.Model):
 	balance.short_description = 'Balance (PhP)'
 
 	def __unicode__(self):
-		return '%s: %s' % (self.grant.grant_type(), self.name)
+		return '%s: %s' % (self.grant.grant_type(), self.get_name_display())
 
 class Grant_Allocation_Release(PolymorphicModel):
-	CONSUMABLE, EQUIPMENT, SERVICE, OTHER = 'CONSUMABLE', 'EQUIPMENT', 'SERVICE', 'OTHER'
+	CONSUMABLE, EQUIPMENT, SERVICE, OTHER, RS = 'CONSUMABLE', 'EQUIPMENT', 'SERVICE', 'OTHER', 'DISSEMINATION'
 	ITEMTYPE_CHOICES = (
 		(CONSUMABLE, 'Consumable'),
 		(SERVICE, 'Service'),
 		(OTHER, 'Other'),
 	)
 
-	item_type = models.CharField(max_length=50, choices=ITEMTYPE_CHOICES, blank=True, verbose_name='Type', help_text='For research grant fund releases only. Leave blank otherwise.')
+	ITEMTYPE_CHOICES_ALL = ITEMTYPE_CHOICES + ((RS, 'Reasearch Dissemination'), (EQUIPMENT, 'Equipment'),)
+
+	item_type = models.CharField(max_length=50, choices=ITEMTYPE_CHOICES_ALL, blank=True, verbose_name='Type', help_text='For research grant fund releases only. Leave blank otherwise.')
 	payee = models.ForeignKey(Person, related_name='payee')
 	grant = GF(Grant, chained_field='payee', chained_model_field='awardee', show_all=False, auto_choose=True, verbose_name='Funding grant')
 	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant', auto_choose=True, verbose_name='Funding grant allocation')
@@ -313,11 +406,17 @@ class Grant_Allocation_Release(PolymorphicModel):
 	amount_liquidated = models.FloatField(default=0.0, verbose_name='Amount Liquidated (PhP)', help_text='Must be the same as the amount released if unliquidated.')
 	date_released = models.DateField(help_text='Format: YYYY-MM-DD', verbose_name='Date of fund release')
 
-
 	class Meta:
 		verbose_name = 'Fund Release'
 		verbose_name_plural = 'Fund Releases'
 		ordering = ('-date_released', 'payee',)
+
+	def payee_sub(self):
+		""" Polymorphic model could not call overridden method if queried with payee. 
+			Use this medthod to display payee's name """
+		return '%s, %s %s' % (self.payee.last_name, self.payee.first_name, self.payee.middle_name)
+	payee_sub.short_description = 'Payee'
+	payee_sub.admin_order_field = 'payee'
 
 	def particular(self):
 		if self.description.strip() != '':
@@ -334,15 +433,12 @@ class Grant_Allocation_Release(PolymorphicModel):
 
 	def release_link(self):
 		url = reverse('admin:profiling_grant_allocation_release_change', args=(self.id,))
+		if self.item_type == self.EQUIPMENT:
+			url = reverse('admin:profiling_equipment_change', args=(self.id,))
+		elif self.item_type == self.RS:
+			url = reverse('admin:profiling_research_dissemination_change', args=(self.id,))
 		return format_html(u'<a href="{}">%s</a>' % self.particular(), url)
-	release_link.short_description = 'Particular'
-
-	def the_who(self):
-		""" Polymorphic model could not call overridden method if queried with payee. 
-			Use this medthod to display payee's name """
-		return '%s, %s %s' % (self.payee.last_name, self.payee.first_name, self.payee.middle_name)
-	the_who.short_description = 'Payee'
-	the_who.admin_order_field = 'payee'
+	release_link.short_description = 'Particular'	
 
 	def disparity(self):
 		return self.amount_released - self.amount_liquidated
@@ -442,6 +538,7 @@ class ERDT_Scholarship_Special(Grant):
 	class Meta:
 		verbose_name = 'Abroad Scholarship'
 		verbose_name_plural = 'Abroad Scholarships'
+		ordering = ('-start_date', 'awardee',)
 
 	def grant_type(self):
 		return 'Scholarship (Abroad PhD)'
@@ -461,21 +558,26 @@ class Sandwich_Program(Grant):
 	def grant_type(self):
 		return 'Sandwich %s' % str(self.start_date.year)
 
-	def year(self):
-		return self.start_date.year
-	year.admin_order_field = '-start_date'
-
 	def __unicode__(self):
 		return self.grant_type()
 
 class Postdoctoral_Fellowship(Grant):
-	pass
+	class Meta:
+		verbose_name = 'Postdoctoral Fellowship'
+		verbose_name_plural = 'Postdoctoral Fellowships'
+		ordering = ('-start_date', 'awardee',)
 
 class FRGT(Grant):
-	pass
+	class Meta:
+		verbose_name = 'Faculty Research Grant'
+		verbose_name_plural = 'Faculty Research Grants'
+		ordering = ('-start_date', 'awardee',)
 
 class FRDG(Grant):
-	pass
+	class Meta:
+		verbose_name = 'Faculty Research Dissemination Grant'
+		verbose_name_plural = 'Faculty Research Dissemination Grants'
+		ordering = ('-start_date', 'awardee',)
 
 class Visiting_Professor_Grant(Grant):
 	distinguished = models.BooleanField(default=False)
@@ -510,6 +612,13 @@ class Equipment(Grant_Allocation_Release):
 	accountable_link.short_description = 'Accountable'
 	accountable_link.admin_order_field = 'accountable'
 
+	def accountable_sub(self):
+		""" Polymorphic model could not call overridden method if queried with accountable. 
+			Use this medthod to display accountable's name """
+		return '%s, %s %s' % (self.accountable.last_name, self.accountable.first_name, self.accountable.middle_name)
+	accountable_sub.short_description = 'Accountable'
+	accountable_sub.admin_order_field = 'accountable'
+
 	def description_link(self):
 		url = reverse('admin:profiling_equipment_change', args=(self.id,))
 		return format_html(u'<a href="{}">%s</a>' % self.description, url)
@@ -537,5 +646,9 @@ class Research_Dissemination(Grant_Allocation_Release):
 	class Meta:
 		verbose_name = 'Research Dissemination'
 		verbose_name_plural = 'Research Disseminations'
+
+	def save(self, *args, **kwargs):
+		self.item_type = Grant_Allocation_Release.RS
+		super(Equipment, self).save(*args, **kwargs)
 
 ###

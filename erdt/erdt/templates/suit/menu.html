@@ -46,6 +46,16 @@
                     </li>
                   {% endif %}
 
+                  {% if model.label == 'Abroad Scholarships' %} 
+                    {% if request.get_full_path == "/profiling/erdt_scholarship_special/" %} 
+                    <li class="active"> 
+                    {% else %}
+                    <li>
+                    {% endif %}
+                    <a href="{% url 'admin:profiling_erdt_scholarship_special_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    </li>
+                  {% endif %}
+
                   {% if model.label == 'Sandwich Programs' %} 
                     {% if request.get_full_path == "/profiling/sandwich_program/" %} 
                     <li class="active"> 
@@ -55,6 +65,36 @@
                     <a href="{% url 'admin:profiling_sandwich_program_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
                     </li>
                   {% endif %}
+
+                  {% if model.label == 'Postdoctoral Fellowships' %} 
+                    {% if request.get_full_path == "/profiling/postdoctoral_fellowship/" %} 
+                    <li class="active"> 
+                    {% else %}
+                    <li>
+                    {% endif %}
+                    <a href="{% url 'admin:profiling_postdoctoral_fellowship_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    </li>
+                  {% endif %}
+
+                  {% if model.label == 'Faculty Research Grants' %} 
+                    {% if request.get_full_path == "/profiling/frgt/" %} 
+                    <li class="active"> 
+                    {% else %}
+                    <li>
+                    {% endif %}
+                    <a href="{% url 'admin:profiling_frgt_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    </li>
+                  {% endif %}
+
+                  {% if model.label == 'Faculty Research Dissemination Grants' %} 
+                    {% if request.get_full_path == "/profiling/frdg/" %} 
+                    <li class="active"> 
+                    {% else %}
+                    <li>
+                    {% endif %}
+                    <a href="{% url 'admin:profiling_frdg_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    </li>
+                  {% endif %}              
 
                   {% if model.label == 'Fund Releases' %} 
                     {% if request.get_full_path == "/profiling/grant_allocation_release/" %} 

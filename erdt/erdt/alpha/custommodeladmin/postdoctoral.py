@@ -33,15 +33,15 @@ class AllocationInline(TabularInline):
     fk_name = 'grant'
     extra = 0
     suit_classes = 'suit-tab suit-tab-allocation'
-
+    
     def formfield_for_choice_field(self, db_field, request, **kwargs):
         if db_field.name == 'name':
-            kwargs['choices'] = Grant_Allocation.SANDWICH_ALLOC_CHOICES
+            kwargs['choices'] = Grant_Allocation.POSTDOCTORAL_ALLOC_CHOICES
         return super(AllocationInline, self).formfield_for_choice_field(db_field, request, **kwargs)
 
 class MyForm(forms.ModelForm):
     class Meta:
-        model = Sandwich_Program
+        model = Postdoctoral_Fellowship
         fields = '__all__'
         widgets = {
             'awardee' : Select2Widget(select2_options={
@@ -49,16 +49,16 @@ class MyForm(forms.ModelForm):
                 'width':'200px'}),
         }
 
-class SandwichAdmin(ERDTModelAdmin):
+class PostdoctoralAdmin(ERDTModelAdmin):
     form = MyForm
     inlines =[AllocationInline, ReleaseInline]
-    list_display = ('awardee', 'start_date', 'end_date', 'host_university', )
+    list_display = ('awardee', 'start_date', 'end_date', )
 
     fieldsets = [
         (None, {
             'classes' : ('suit-tab', 'suit-tab-general'),
             'fields' : ('awardee', 'description', 'start_date', 'end_date', 
-                'allotment', 'host_university', 'host_professor')
+                'allotment',)
             }),
         (None, {
             'classes' : ('suit-tab', 'suit-tab-releases'),
@@ -74,31 +74,31 @@ class SandwichAdmin(ERDTModelAdmin):
                 (None, {
                     'classes' : ('suit-tab', 'suit-tab-general'),
                     'fields' : ('awardee_link', 'description', 'start_date', 'end_date', 
-                        'allotment', 'host_university', 'host_professor')
+                        'allotment',)
                     }),
                 (None, {
                     'classes' : ('suit-tab', 'suit-tab-releases'),
                     'fields' : ('allocation_summary',)
                     }),
             ]            
-        return super(SandwichAdmin, self).get_fieldsets(request, obj)
+        return super(PostdoctoralAdmin, self).get_fieldsets(request, obj)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
             if db_field.name == 'awardee':
-                qs = Person.objects.filter(Q(profile__role=Profile.STUDENT)|Q(profile__role=Profile.ADVISER))
+                qs = Person.objects.filter(profile__role=Profile.ADVISER)
                 if my_profile.role == Profile.UNIV_ADMIN:
                     qs = qs.filter(profile__university__pk=my_profile.university.pk)
                 kwargs["queryset"] = qs.distinct()
         except:
             kwargs["queryset"] = Person.objects.none()
-        return super(SandwichAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        return super(PostdoctoralAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_form(self, request, obj=None):
         _thread_locals.request = request
         _thread_locals.obj = obj
-        return super(SandwichAdmin, self).get_form(request, obj)
+        return super(PostdoctoralAdmin, self).get_form(request, obj)
 
     def _suit_form_tabs(self):
         return self.get_suit_form_tabs(_thread_locals.request, _thread_locals.obj)
@@ -106,7 +106,7 @@ class SandwichAdmin(ERDTModelAdmin):
     suit_form_tabs = property(_suit_form_tabs)
 
     def get_suit_form_tabs(self, request, obj=None):
-        tabs = [('general', 'General'), ('allocation', 'Sandwich Fund Allocations')]
+        tabs = [('general', 'General'), ('allocation', 'Postdoctoral Fellowship Fund Allocations')]
 
         if obj:
             tabs.append(('releases', 'Release Summary'))
@@ -115,4 +115,4 @@ class SandwichAdmin(ERDTModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         if obj:
             return ('awardee_link', 'allocation_summary')
-        return super(SandwichAdmin, self).get_readonly_fields(request, obj)
+        return super(PostdoctoralAdmin, self).get_readonly_fields(request, obj)

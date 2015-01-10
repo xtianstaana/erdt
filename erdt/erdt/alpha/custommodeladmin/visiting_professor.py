@@ -34,6 +34,11 @@ class AllocationInline(TabularInline):
     extra = 0
     suit_classes = 'suit-tab suit-tab-allocation'
 
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        if db_field.name == 'name':
+            kwargs['choices'] = Grant_Allocation.VP_ALLOC_CHOICES
+        return super(AllocationInline, self).formfield_for_choice_field(db_field, request, **kwargs)
+
 class MyVisitingProfessorForm(forms.ModelForm):
     class Meta:
         model = Visiting_Professor_Grant
@@ -88,23 +93,18 @@ class VisitingProfessorAdmin(ERDTModelAdmin):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
             if db_field.name == 'awardee':
-                qs_t = Profile.objects.filter(role=Profile.VISITING)
+                qs = Person.objects.filter(profile__role=Profile.VISITING)
                 if my_profile.role == Profile.UNIV_ADMIN:
-                    qs_t = qs_t.filter(university__pk=my_profile.university.pk)
-
-                output_qs = tuple(p.person.pk for p in qs_t)
-                kwargs["queryset"] = Person.objects.filter(pk__in=output_qs)
+                    qs = qs.filter(profile__university__pk=my_profile.university.pk)
+                kwargs["queryset"] = qs.distinct().distinct()
             elif db_field.name == 'host_university':
                 if my_profile.role == Profile.UNIV_ADMIN:
                     kwargs["queryset"] = University.objects.filter(pk=my_profile.university.pk)
             elif db_field.name == 'host_professor':
-                qs_t = Profile.objects.filter(role=Profile.ADVISER)
-
-                if my_profile.role == Profile.UNIV_ADMIN:                    
-                    qs_t = qs_t.filter(university__pk=my_profile.university.pk)
-                    
-                output_qs = tuple(p.person.pk for p in qs_t)
-                kwargs["queryset"] = Person.objects.filter(pk__in=output_qs)
+                qs = Person.objects.filter(profile__role=Profile.ADVISER)
+                if my_profile.role == Profile.UNIV_ADMIN:
+                    qs = qs.filter(profile__university__pk=my_profile.university.pk)
+                kwargs["queryset"] = qs.distinct()
         except Exception as e:
             print '\n\n**************', e, '\n\n'
             kwargs["queryset"] = Person.objects.none()
@@ -140,11 +140,10 @@ class VisitingProfessorAdmin(ERDTModelAdmin):
     Returns: default
     """
     def get_queryset(self, request):
-        qs = super(VisitingProfessorAdmin, self).get_queryset(request)
         try:
-            profile = Profile.objects.get(person__user=request.user.id, active=True) 
-            if profile.role == Profile.UNIV_ADMIN: # If User's profile is CONSORTIUM
-                return Visiting_Professor_Grant.objects.filter(host_university__pk=profile.university.pk)
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True) 
+            if my_profile.role == Profile.UNIV_ADMIN: # If User's profile is CONSORTIUM
+                return Visiting_Professor_Grant.objects.filter(host_university__pk=my_profile.university.pk).distinct()
             elif my_profile.role in (Profile.CENTRAL_OFFICE, Profile.DOST):
                 return Visiting_Professor_Grant.objects.all()
         except Exception as e:

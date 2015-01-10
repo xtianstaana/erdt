@@ -35,6 +35,10 @@ from custommodeladmin.fund_release import GrantAllocationReleaseAdmin
 from custommodeladmin.equipment import PurchasedItemAdmin
 from custommodeladmin.research_dissemination import ResearchDisseminationAdmin
 from custommodeladmin.visiting_professor import VisitingProfessorAdmin
+from custommodeladmin.postdoctoral import PostdoctoralAdmin
+from custommodeladmin.frgt import FRGTAdmin
+from custommodeladmin.frdg import FRDGAdmin
+from custommodeladmin.scholarship2 import Scholarship2Admin
 
 """
 Author: Christian Sta.Ana
@@ -111,3 +115,7 @@ admin_site.register(Grant_Allocation_Release, GrantAllocationReleaseAdmin)
 admin_site.register(Equipment, PurchasedItemAdmin)
 admin_site.register(Research_Dissemination, ResearchDisseminationAdmin)
 admin_site.register(Visiting_Professor_Grant, VisitingProfessorAdmin)
+admin_site.register(ERDT_Scholarship_Special, Scholarship2Admin)
+admin_site.register(Postdoctoral_Fellowship, PostdoctoralAdmin)
+admin_site.register(FRDG, FRDGAdmin)
+admin_site.register(FRGT, FRGTAdmin)

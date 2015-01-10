@@ -35,10 +35,38 @@ class MyEquipmentForm(forms.ModelForm):
 class PurchasedItemAdmin(ERDTModelAdmin):
     form = MyEquipmentForm
 
-    list_display = ('date_released', 'particular', 'payee', 'accountable', 'surrendered')
+    list_display = ('date_released', 'particular', 'payee_sub', 'accountable_univ', 'surrendered')
     exclude = ('item_type',)
 
     list_filter = ('surrendered',)
+
+    def accountable_univ(self, obj=None):
+        try:
+            if obj:
+                p = Profile.objects.get(person__pk=obj.accountable.pk, role=Profile.ADVISER)
+                return '%s / %s' % (obj.accountable_sub(), p.university.short_name)
+        except:
+            pass
+        return 'Unknown'
+    accountable_univ.short_description = 'Accountable'
+    accountable_univ.admin_order_field = 'accountable'
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if db_field.name == 'payee':
+                qs = Person.objects.filter(profile__role__in=(Profile.ADVISER, Profile.STUDENT))
+                if my_profile.role == Profile.UNIV_ADMIN:
+                    qs = qs.filter(profile__university__pk=my_profile.university.pk)
+                kwargs["queryset"] = qs.distinct()
+            elif db_field.name == 'accountable':
+                qs = Person.objects.filter(profile__role=Profile.ADVISER)
+                if my_profile.role == Profile.UNIV_ADMIN:
+                    qs = qs.filter(profile__university__pk=my_profile.university.pk)
+                kwargs["queryset"] = qs.distinct()
+        except:
+            kwargs["queryset"] = Person.objects.none()
+        return super(PurchasedItemAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
         if obj:
@@ -66,26 +94,3 @@ class PurchasedItemAdmin(ERDTModelAdmin):
             return ('payee_link', 'allocation', )
         else:
             return super(PurchasedItemAdmin, self).get_readonly_fields(request, obj)
-
-    def get_queryset(self, request):
-        qs = super(PurchasedItemAdmin, self).get_queryset(request)
-        try:
-            profile = Profile.objects.get(person__user=request.user.id, active=True) 
-
-            if profile.role == Profile.UNIV_ADMIN: # If User's profile is UNIV_ADMIN
-                output_qs = set()
-                
-                thru_issuance = Equipment.objects.get(payee__user = request.user.id)
-                for p in thru_issuance:
-                    output_qs.add(p.pk)
-                
-                thru_accountable = Equipment.objects.get(accountable__user = request.user.id)
-                for p in thru_accountable:
-                    output_qs.add(p.pk)
-
-
-                return qs.filter(pk__in = output_qs)
-            else:
-                return qs
-        except:
-            return qs
