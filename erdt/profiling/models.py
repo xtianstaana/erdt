@@ -641,7 +641,7 @@ class Equipment(Grant_Allocation_Release):
 		verbose_name_plural = 'Equipments'
 
 	def clean_fields(self, exclude=None):
-		super(Equipment, self).clean(exclude)
+		super(Equipment, self).clean_fields(exclude)
 		if self.description.strip() == '':
 			raise ValidationError('Description cannot be blank for equipment.')
 

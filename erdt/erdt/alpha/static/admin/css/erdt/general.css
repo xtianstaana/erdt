@@ -95,3 +95,19 @@ Date: Fri Jul 18
 h1 {
     margin-bottom: 7px;
 }
+
+tr.form-row.inactive td {
+    background: #F0F0F0 !important;
+}
+
+tr.form-row.active td {
+    background: #BDFCC9 !important;
+}
+
+tr.form-row.for-extension td {
+    background: #F5DEB3 !important;
+}
+
+table.table-bordered td {
+    box-shadow: none;
+}
