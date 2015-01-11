@@ -36,6 +36,7 @@ class AllocationInline(TabularInline):
     max_num = 1
     model = Grant_Allocation
     extra = 0
+    max_num = 1
     suit_classes = 'suit-tab suit-tab-allocation'
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
