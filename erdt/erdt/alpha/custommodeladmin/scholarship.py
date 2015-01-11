@@ -65,6 +65,7 @@ class ScholarshipAdmin(ERDTModelAdmin):
     inlines = [AllocationInline, ReleaseInline]
     list_display = ('awardee', 'degree_program', 'start_date', 'adviser')
     list_filter = ('degree_program__department__university__name', 'degree_program', 'start_date','scholarship_status')
+    search_fields = ('awardee__first_name', 'awardee__last_name', 'awardee__middle_name', )
 
     readonly_fields = ('allocation_summary',)
 

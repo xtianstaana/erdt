@@ -38,6 +38,7 @@ class PurchasedItemAdmin(ERDTModelAdmin):
     list_display = ('date_released', 'particular', 'payee_sub', 'accountable_univ', 'surrendered')
     list_display_links = ('particular', )
     exclude = ('item_type',)
+    search_fields = ('payee__first_name', 'payee__last_name', 'payee__middle_name', )
 
     list_filter = ('surrendered',)
 

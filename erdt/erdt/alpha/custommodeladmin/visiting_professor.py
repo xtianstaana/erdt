@@ -59,7 +59,8 @@ class MyVisitingProfessorForm(forms.ModelForm):
 class VisitingProfessorAdmin(ERDTModelAdmin):
     form = MyVisitingProfessorForm
     inlines =[AllocationInline, ReleaseInline]
-    list_display = ('awardee', 'host_university', 'home_university')
+    list_display = ('awardee', 'host_university', 'home_university', 'distinguished')
+    search_fields = ('awardee__first_name', 'awardee__last_name', 'awardee__middle_name', )
 
     fieldsets = (
         (None, {

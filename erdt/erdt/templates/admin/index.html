@@ -38,8 +38,15 @@
             {% endfor %}
             {% for field in person_fields%}
             <tr>
+
                 <td>
-                    <label for="{{ field.name }}">{{ field.label }}</label>
+                    {% if field.label == 'Address' %}
+                      <label for="{{ field.name }}">Permanent address</label>
+                    {% elif field.label == 'Address2' %}
+                      <label for="{{ field.name }}">Current address</label>
+                    {% else %}
+                      <label for="{{ field.name }}">{{ field.label }}</label>
+                    {% endif %}
                 </td>
                 <td>
                     <span id="{{ field.name }}">{{ field.value }}</span>

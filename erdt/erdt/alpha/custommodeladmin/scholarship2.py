@@ -54,6 +54,7 @@ class Scholarship2Admin(ERDTModelAdmin):
     form = MyForm
     inlines =[AllocationInline, ReleaseInline]
     list_display = ('awardee', 'start_date', 'end_date', 'host_university', )
+    search_fields = ('awardee__first_name', 'awardee__last_name', 'awardee__middle_name', )
 
     fieldsets = [
         (None, {

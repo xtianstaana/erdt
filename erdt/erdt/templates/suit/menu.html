@@ -127,13 +127,13 @@
             class="active"
           {% endif %}
             >
-            <a href="{% url 'admin:profiling_erdt_scholarship_special_changelist' %}"><i class="icon-chevron-right"></i>Grants
+            <a href="{% url 'admin:profiling_scholarship_changelist' %}"><i class="icon-chevron-right"></i>Grants
             </a>
             
               <ul>
                 {% for model in app.models %}
 
-                  {% if model.label == 'Local Scholarships' %} 
+                  {% if model.label == 'Scholarships (Local)' %} 
                     {% if "/profiling/scholarship/" in request.get_full_path %} 
                     <li class="active"> 
                     {% else %}
@@ -143,7 +143,7 @@
                     </li>
                   {% endif %}
 
-                  {% if model.label == 'Abroad Scholarships' %} 
+                  {% if model.label == 'Scholarships (PhD Abroad)' %} 
                     {% if "/profiling/erdt_scholarship_special/" in request.get_full_path %} 
                     <li class="active"> 
                     {% else %}
@@ -183,7 +183,7 @@
                     </li>
                   {% endif %}
 
-                  {% if model.label == 'Faculty Research Dissemination Grants' %} 
+                  {% if model.label == 'Faculty Research Diss Grants' %} 
                     {% if "/profiling/frdg/" in request.get_full_path %} 
                     <li class="active"> 
                     {% else %}
@@ -218,7 +218,10 @@
         {% if app.separator %}
           <li class="separator"></li>
         {% elif app.label == 'Profiling' %}
-          <li 
+          <li
+          {% if "/profiling/grant_allocation_release/" in request.get_full_path %}
+            class="active"
+          {% endif %}
           {% if "/profiling/equipment/" in request.get_full_path %}
             class="active"
           {% endif %}
@@ -226,7 +229,7 @@
             class="active"
           {% endif %}
             >
-            <a href="{% url 'admin:profiling_equipment_changelist' %}"><i class="icon-chevron-right"></i>Fund Releases
+            <a href="{% url 'admin:profiling_grant_allocation_release_changelist' %}"><i class="icon-chevron-right"></i>Fund Releases
             </a>
             
               <ul>
@@ -239,6 +242,16 @@
                     <li>
                     {% endif %}
                     <a href="{% url 'admin:profiling_equipment_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    </li>
+                  {% endif %}
+
+                  {% if model.label == 'Fund Releases' %}  
+                    {% if "/profiling/grant_allocation_release/" in request.get_full_path %} 
+                    <li class="active"> 
+                    {% else %}
+                    <li>
+                    {% endif %}
+                    <a href="{% url 'admin:profiling_grant_allocation_release_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
                     </li>
                   {% endif %}
 

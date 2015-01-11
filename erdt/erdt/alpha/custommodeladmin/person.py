@@ -320,7 +320,7 @@ class PersonAdmin(ERDTModelAdmin):
     list_display = ('__unicode__', 'user', 'email_address', 'mobile_number')
     readonly_fields = ('age',)
     list_filter = ('profile__role', 'profile__university', )
-    search_fields = ('first_name', 'last_name',)
+    search_fields = ('first_name', 'last_name', 'middle_name', 'user__username')
     radio_fields =  {'sex' : HORIZONTAL, 'civil_status' : HORIZONTAL}
     fieldsets = (
         ('Personal Information', {

@@ -32,6 +32,7 @@ class GrantAllocationReleaseAdmin(ERDTModelAdmin):
     list_display = ('date_released', 'release_link', 'payee_sub', 'item_type', )
     list_display_links = None
     list_filter = ('item_type',)
+    search_fields = ('payee__first_name', 'payee__last_name', 'payee__middle_name', )
 
 
     def get_fields(self, request, obj=None):

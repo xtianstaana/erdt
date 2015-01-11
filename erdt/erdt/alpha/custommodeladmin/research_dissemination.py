@@ -34,6 +34,7 @@ class ResearchDisseminationAdmin(ERDTModelAdmin):
     form = MyResearchDisseminationForm
     list_display = ('date_released', 'particular', 'payee_sub', 'paper_title',)
     list_display_links = ('particular',)
+    search_fields = ('payee__first_name', 'payee__last_name', 'payee__middle_name', )
     exclude = ('item_type',)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):

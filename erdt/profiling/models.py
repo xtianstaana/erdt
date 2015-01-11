@@ -506,8 +506,8 @@ class Scholarship(Grant):
 	cleared = models.BooleanField(default=False)
 
 	class Meta:
-		verbose_name = 'Local Scholarship'
-		verbose_name_plural = 'Local Scholarships'
+		verbose_name = 'Scholarship (Local)'
+		verbose_name_plural = 'Scholarships (Local)'
 
 	def clean(self):
 		super(Scholarship, self).clean()
@@ -535,8 +535,8 @@ class ERDT_Scholarship_Special(Grant):
 	host_professor = models.CharField(max_length=150)
 
 	class Meta:
-		verbose_name = 'Abroad Scholarship'
-		verbose_name_plural = 'Abroad Scholarships'
+		verbose_name = 'Scholarship (PhD Abroad)'
+		verbose_name_plural = 'Scholarships (PhD Abroad)'
 		ordering = ('-start_date', 'awardee',)
 
 	def grant_type(self):
@@ -574,8 +574,8 @@ class FRGT(Grant):
 
 class FRDG(Grant):
 	class Meta:
-		verbose_name = 'Faculty Research Dissemination Grant'
-		verbose_name_plural = 'Faculty Research Dissemination Grants'
+		verbose_name = 'Faculty Research Diss Grant'
+		verbose_name_plural = 'Faculty Research Diss Grants'
 		ordering = ('-start_date', 'awardee',)
 
 class Visiting_Professor_Grant(Grant):
