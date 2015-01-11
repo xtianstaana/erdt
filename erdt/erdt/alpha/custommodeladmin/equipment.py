@@ -36,6 +36,7 @@ class PurchasedItemAdmin(ERDTModelAdmin):
     form = MyEquipmentForm
 
     list_display = ('date_released', 'particular', 'payee_sub', 'accountable_univ', 'surrendered')
+    list_display_links = ('particular', )
     exclude = ('item_type',)
 
     list_filter = ('surrendered',)

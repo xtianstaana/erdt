@@ -17,7 +17,7 @@ class Report(models.Model):
 
 	name = models.CharField(max_length=250, unique=True, verbose_name='Report name')
 	created_at = models.DateTimeField(auto_now_add=True)
-	report_type = models.CharField(max_length=50, verbose_name='Report type')
+	report_type = models.CharField(max_length=50, choices=ALL_REPORT_CHOICES, verbose_name='Report type')
 	start_date = models.DateField(verbose_name='Start of period', help_text='Format: YYYY-MM-DD')
 	end_date = models.DateField(verbose_name='End of period', help_text='Format: YYYY-MM-DD')
 	active_only = models.BooleanField(default=True)
@@ -33,17 +33,19 @@ class Individual_Report(Report):
 		verbose_name_plural = 'Individual Reports'
 
 	def create_report(self):
-		out = u'<h1>%s</h1> <br/> Created at %s. <br/><br/> <h2>Grants Awarded</h2><br/>' % (self.person.__unicode__(), 
+		out = u'<h2>%s</h2><p>Report created at %s.</p><h3>Grants Awarded</h3>' % (self.person.__unicode__(), 
 			self.created_at)
 		try:
 			my_grants = Grant.objects.filter(awardee_id=self.person.id)
 			_inner_table =  ''
 			for g in my_grants:
-				_inner_table += '<tr><th><b>%s</b></th></tr><tr><td>%s</td></tr>' % (g.__unicode__(),g.allocation_summary())
+				_inner_table += '<tr><td><b>%s</b></td></tr><tr><td>%s</td></tr>' % (g.__unicode__(),g.allocation_summary())
 			out += '<table>%s</table>' % _inner_table
+			out = format_html(mark_safe(out))
 		except Exception as e:
 			print 'Error at Individual_Report'
 		return out
+	create_report.short_description = ''
 
 class Grant_Report(Report):
 	grant = models.ForeignKey(Grant)
@@ -59,7 +61,10 @@ class University_Report(Report):
 		verbose_name_plural = 'University Reports'
 
 	def create_report(self):
-		return ''
+		out = u'<h1>%s</h1> <br/> Created at %s. <br/><br/> <h2>Report</h2><br/>' % (self.university.__unicode__(), 
+			self.created_at)
+		out = format_html(mark_safe(out))
+		return out
 
 class Consolidated_Report(Report):
 	pass
