@@ -32,6 +32,15 @@ class GrantSummaryInline(TabularInline):
     exclude = ('description', 'delete')
     readonly_fields = ('grant_link', 'start_date', 'end_date', 'allotment', 'total_liquidated', 'balance', 'is_active')
 
+    def has_add_permission(self, request, obj=None):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
+                return True
+        except:
+            pass
+        return False
+
     def has_delete_permission(self, request, obj=None):
         return False
 
@@ -43,6 +52,15 @@ class ReleaseInline(TabularInline):
     suit_classes = 'suit-tab suit-tab-grantsummary'
     fields = ('release_link', 'date_released', 'amount_released', 'amount_liquidated', 'disparity')
     readonly_fields = fields
+
+    def has_add_permission(self, request, obj=None):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
+                return True
+        except:
+            pass
+        return False
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -199,6 +217,33 @@ class EnrolledSubjectInline(TabularInline):
     suit_classes = 'suit-tab suit-tab-enrolled'
     fields = ('subject', 'year_taken', 'eq_grade')
 
+    def get_readonly_fields(self, request, obj=None):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role not in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
+                return ('subject', 'year_taken', 'eq_grade')
+        except:
+            pass
+        return super(EnrolledSubjectInline, self).get_readonly_fields(request, obj)
+
+    def has_add_permission(self, request, obj=None):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
+                return True
+        except:
+            pass
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
+                return True
+        except:
+            pass
+        return False
+
 class ProfileInline(TabularInline):
     model = Profile
     verbose_name_plural = 'Academic Profile'
@@ -206,6 +251,53 @@ class ProfileInline(TabularInline):
     exclude = ('active',)
     extra = 0
     suit_classes = 'suit-tab suit-tab-general'
+
+    def get_readonly_fields(self, request, obj=None):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role not in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
+                return ('role', 'university', )
+        except:
+            pass
+        return super(ProfileInline, self).get_readonly_fields(request, obj)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if db_field.name == 'university':
+                if my_profile.role == Profile.UNIV_ADMIN:
+                    kwargs["queryset"] = University.objects.filter(pk=my_profile.university.pk)
+        except:
+            pass
+        return super(ProfileInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def has_add_permission(self, request, obj=None):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
+                return True
+        except:
+            pass
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
+                return True
+        except:
+            pass
+        return False
+
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        if db_field.name == 'role':
+            try:
+                my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+                if my_profile.role == Profile.UNIV_ADMIN:                        
+                    kwargs['choices'] = Profile.ADMIN_ROLE_CHOICES
+            except Exception as e:
+                print 'Error at ProfileInline', e
+        return super(ProfileInline, self).formfield_for_choice_field(db_field, request, **kwargs)
 
 class MyPersonForm(forms.ModelForm):
     class Meta:

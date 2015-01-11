@@ -151,7 +151,7 @@ class Enrolled_Subject(models.Model):
 
 class Profile(models.Model):
 	STUDENT, ADVISER, UNIV_ADMIN, CENTRAL_OFFICE, DOST, VISITING = 'STU', 'ADV', 'ADMIN', 'CENT', 'DOST', 'VISIT'
-	ROLE_CHOICES = (
+	ALL_ROLE_CHOICES = (
 		(STUDENT, 'Student'),
 		(ADVISER, 'Faculty'),
 		(VISITING, 'Visiting Professor'),
@@ -159,8 +159,13 @@ class Profile(models.Model):
 		(CENTRAL_OFFICE, 'ERDT Central Office'),
 		(DOST, 'DOST Office'),
 	)
+	ADMIN_ROLE_CHOICES = (
+		(STUDENT, 'Student'),
+		(ADVISER, 'Faculty'),
+		(UNIV_ADMIN, 'Consortium Administrator'),
+	)
 
-	role = models.CharField(max_length=5, choices=ROLE_CHOICES, default=STUDENT)
+	role = models.CharField(max_length=5, choices=ALL_ROLE_CHOICES, default=STUDENT)
 	person = models.ForeignKey(Person)
 	university = models.ForeignKey(University, limit_choices_to={'is_consortium':True}, help_text='Leave blank for DOST or ERDT Central Office role.', null=True, blank=True)	
 	active = models.BooleanField(default=False)
@@ -175,7 +180,8 @@ class Profile(models.Model):
 		else:
 			return '%s as %s' % (self.person, self.get_role_display())
 
-	def clean(self):
+	def clean_fields(self, exclude=None):
+		super(Profile, self).clean_fields(exclude)
 		if self.role in (self.STUDENT, self.ADVISER, self.UNIV_ADMIN, self.VISITING):
 			if self.university == None:
 				raise ValidationError('Specify university of affiliation.')
@@ -444,9 +450,15 @@ class Grant_Allocation_Release(PolymorphicModel):
 		return self.amount_released - self.amount_liquidated
 	disparity.short_description = 'Disparity (PhP)'
 
+	# def clean_fields(self, exclude=None):
+	# 	print '*'*10
+	# 	print exclude
+	# 	print '-'*10
+	# 	if not self.id:
+	# 		if not self.payee:
+	# 			raise ValidationError('Select payee.')
+
 	def clean(self):
-		if (self.payee != self.grant.awardee) or (self.grant != self.allocation.grant):
-			raise ValidationError('Payee, grant, and grant allocation must be consistent.')
 		if self.amount_liquidated > self.amount_released:
 			raise ValidationError('Amount liquidated must be less than or equal to the amount released.')
 		if (self.amount_liquidated != self.amount_released) and (self.amount_liquidated == 0.0):
@@ -600,9 +612,9 @@ class Visiting_Professor_Grant(Grant):
 
 class Equipment(Grant_Allocation_Release):
 	#quantity = models.FloatField(default=1.0, null=True, blank=True)
-	location = models.CharField(max_length=150, blank=True)
-	property_no =  models.CharField(max_length=50, blank=True, help_text='If funded by multiple grants, use the same property no for the same item.')
-	status = models.CharField(max_length=150, blank=True)
+	location = models.CharField(max_length=150)
+	property_no =  models.CharField(max_length=50, help_text='If funded by multiple grants, use the same property no for the same item.')
+	status = models.CharField(max_length=150)
 	accountable = models.ForeignKey(Person, related_name='accountable')
 	surrendered = models.BooleanField(default=False)
 
@@ -628,8 +640,8 @@ class Equipment(Grant_Allocation_Release):
 		verbose_name = 'Equipment'
 		verbose_name_plural = 'Equipments'
 
-	def clean(self):
-		super(Equipment, self).clean()
+	def clean_fields(self, exclude=None):
+		super(Equipment, self).clean(exclude)
 		if self.description.strip() == '':
 			raise ValidationError('Description cannot be blank for equipment.')
 
