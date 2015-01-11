@@ -29,9 +29,14 @@ class Individual_Report(Report):
 	person = models.ForeignKey(Person)
 
 	def create_report(self):
-		out = ''
+		out = u'<h1>%s</h1> <br/> Created at %s. <br/><br/> <h2>Grants Awarded</h2><br/>' % (self.person.__unicode__(), 
+			self.created_at)
 		try:
 			my_grants = Grant.objects.filter(awardee_id=self.person.id)
+			_inner_table =  ''
+			for g in my_grants:
+				_inner_table += '<tr><th><b>%s</b></th></tr><tr><td>%s</td></tr>' % (g.__unicode__(),g.allocation_summary())
+			out += '<table>%s</table>' % _inner_table
 		except Exception as e:
 			print 'Error at Individual_Report'
 		return out
