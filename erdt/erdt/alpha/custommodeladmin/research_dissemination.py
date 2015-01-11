@@ -33,7 +33,7 @@ class MyResearchDisseminationForm(forms.ModelForm):
 class ResearchDisseminationAdmin(ERDTModelAdmin):
     form = MyResearchDisseminationForm
     list_display = ('date_released', 'particular', 'payee_sub', 'paper_title',)
-    list_display_links = ('paper_title',)
+    list_display_links = ('particular',)
     exclude = ('item_type',)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):

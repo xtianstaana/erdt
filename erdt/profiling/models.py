@@ -299,10 +299,10 @@ class Grant_Allocation(models.Model):
 		(TUITION_FEE, 'Tuition Fees'),
 		(STIPEND, 'Stipend'),
 		(BOOK_ALLOWANCE, 'Book Allowance'),
-		(TRANSPORTATION_ALLOWANCE, 'Transportation Allowance'),
-		(THESIS_ALLOWANCE, 'Thesis/Dissertation Allowance'),
+		(TRANSPORTATION_ALLOWANCE, 'Transportation Allow.'),
+		(THESIS_ALLOWANCE, 'Thesis/Dissert. Allow.'),
 		(RESEARCH_GRANT, 'Research Grant'),
-		(RESEARCH_DISSEMINATION_ALLOWNACE, 'Research Dissemination Allowance'),
+		(RESEARCH_DISSEMINATION_ALLOWNACE, 'Research Diss. Allow.'),
 		(MENTORS_FEE, 'Mentor\'s Fee'),
 		(AIRFARE, 'Airfare'),
 		(RESEARCH_EXPENSES, 'Research Expenses'),
@@ -311,8 +311,8 @@ class Grant_Allocation(models.Model):
 		(RELOCATE_ALLOWANCE, 'Relocation Allowance'),
 		(MEDICAL_INSURANCE, 'Medical Insurance'),
 		(TRAVEL_INSURANCE, 'Travel Insurance'),
-		(MEDICAL_TRAVEL_INSURANCE, 'Medical and Travel Insurance'),
-		(CONFERENCE_REG, 'Conference Registration'),
+		(MEDICAL_TRAVEL_INSURANCE, 'Medical/Travel Insur.'),
+		(CONFERENCE_REG, 'Conference Reg.'),
 		(DSA, 'DSA'),
 		(PROFESSIONAL_FEE, 'Professional Fee')
 	)
@@ -320,10 +320,10 @@ class Grant_Allocation(models.Model):
 		(TUITION_FEE, 'Tuition Fees'),
 		(STIPEND, 'Stipend'),
 		(BOOK_ALLOWANCE, 'Book Allowance'),
-		(TRANSPORTATION_ALLOWANCE, 'Transportation Allowance'),
-		(THESIS_ALLOWANCE, 'Thesis/Dissertation Allowance'),
+		(TRANSPORTATION_ALLOWANCE, 'Transportation Allow.'),
+		(THESIS_ALLOWANCE, 'Thesis/Dissert. Allow.'),
 		(RESEARCH_GRANT, 'Research Grant'),
-		(RESEARCH_DISSEMINATION_ALLOWNACE, 'Research Dissemination Allowance'),
+		(RESEARCH_DISSEMINATION_ALLOWNACE, 'Research Diss. Allow.'),
 		(MENTORS_FEE, 'Mentor\'s Fee'),
 	)
 	SANDWICH_ALLOC_CHOICES = (
@@ -339,9 +339,9 @@ class Grant_Allocation(models.Model):
 		(AIRFARE, 'Airfare'),
 		(BOOK_ALLOWANCE, 'Book Allowance'),
 		(STIPEND, 'Stipend'),
-		(MEDICAL_TRAVEL_INSURANCE, 'Medical and Travel Insurance'),
+		(MEDICAL_TRAVEL_INSURANCE, 'Medical/Travel Insur.'),
 		(THESIS_ALLOWANCE, 'Dissertation Allowance'),
-		(RESEARCH_DISSEMINATION_ALLOWNACE, 'Research Dissemination Allowance'),
+		(RESEARCH_DISSEMINATION_ALLOWNACE, 'Research Diss. Allow.'),
 	)
 	POSTDOCTORAL_ALLOC_CHOICES = (
 		(AIRFARE, 'Airfare'),
@@ -362,7 +362,7 @@ class Grant_Allocation(models.Model):
 		(AIRFARE, 'Airfare'),
 		(TRAVEL_INSURANCE, 'Travel Insurance'),
 		(PROFESSIONAL_FEE, 'Professional Fee'),
-		(TRANSPORTATION_ALLOWANCE, 'Transportation Allowance'),
+		(TRANSPORTATION_ALLOWANCE, 'Transportation Allow.'),
 		(DSA, 'DSA'),
 	)
 
@@ -648,6 +648,6 @@ class Research_Dissemination(Grant_Allocation_Release):
 
 	def save(self, *args, **kwargs):
 		self.item_type = Grant_Allocation_Release.RS
-		super(Equipment, self).save(*args, **kwargs)
+		super(Research_Dissemination, self).save(*args, **kwargs)
 
 ###

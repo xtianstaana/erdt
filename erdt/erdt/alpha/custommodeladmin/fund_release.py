@@ -33,9 +33,13 @@ class GrantAllocationReleaseAdmin(ERDTModelAdmin):
     list_display_links = None
     list_filter = ('item_type',)
 
+
     def get_fields(self, request, obj=None):
         if obj:
-            return ('payee_link', 'allocation', 'description', 'item_type', 'amount_released', 'amount_liquidated', 'date_released',)
+            if obj.item_type == '':
+                return ('payee_link', 'allocation', 'description', 'amount_released', 'amount_liquidated', 'date_released',)
+            else:
+                return ('payee_link', 'allocation', 'description', 'item_type', 'amount_released', 'amount_liquidated', 'date_released',)
         return ('payee', 'grant', 'allocation', 'description' ,'item_type', 'amount_released', 'amount_liquidated', 'date_released', )
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
