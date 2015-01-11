@@ -378,6 +378,7 @@ class Grant_Allocation(models.Model):
 	class Meta:
 		verbose_name = 'Grant Allocation'
 		verbose_name_plural = 'Grant Allocations'
+		unique_together = ('grant', 'name',)
 
 	def total_liquidated(self):
 		total_amount = 0.0
