@@ -1,5 +1,6 @@
 /erdt/erdt/local_settings.py
 /erdt/profiling/migrations
+/erdt/reporting/migrations
 db.sqlite3
 mm.log
 *.pyc
