@@ -33,6 +33,7 @@ class ReleaseInline(TabularInline):
         return False
 
 class AllocationInline(TabularInline):
+    max_num = 1
     model = Grant_Allocation
     extra = 0
     suit_classes = 'suit-tab suit-tab-allocation'

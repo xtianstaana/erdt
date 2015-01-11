@@ -129,8 +129,45 @@
                 updateSelectFilter();
                 alternatingRows(row);
                 Suit.after_inline.run("{{ inline_admin_formset.formset.prefix }}", row);
+              
+
+                // if for grant allocation
+                if($(row).hasClass("dynamic-grant_allocation_set")) {
+
+                  var options = $(row).find("select").eq(0).find("option").length;
+
+                  var max = $(row).parent().find(".form-row").not(".empty-row").length;
+
+                  max = max-1; //correction
+
+                  $(row).find("select").eq(0).val( $(row).find("select").eq(0).find("option").eq(max-1).val() );
+
+                  if(max < options) {
+
+                    for(var i=0; i<options-1; i++) {
+                      $("tr.add-row td a:contains('Grant Allocation')")[0].click();
+                    }
+
+                  }
+
+                }
             })
         });
+
+        //$("tr.add-row td a:contains('Grant Allocation')").off("click");
+
+        // Event handler for Grant Allocations add another
+        /**
+        $("tr.add-row td a:contains('Grant Allocation')").click(function(e){ 
+          e.preventDefault();
+          alert("d");
+          var options = $(this).parent().parent().parent().find("select")[0].find("option").length; 
+          
+          console.log(options);
+        
+        });**/
+
+
     });
 })(django.jQuery);
 </script>
