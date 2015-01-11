@@ -42,6 +42,7 @@ from custommodeladmin.frgt import FRGTAdmin
 from custommodeladmin.frdg import FRDGAdmin
 from custommodeladmin.scholarship2 import Scholarship2Admin
 from custommodeladmin.university_report import UniversityReportAdmin
+from custommodeladmin.individual_report import IndividualReportAdmin
 
 """
 Author: Christian Sta.Ana
@@ -122,5 +123,5 @@ admin_site.register(ERDT_Scholarship_Special, Scholarship2Admin)
 admin_site.register(Postdoctoral_Fellowship, PostdoctoralAdmin)
 admin_site.register(FRDG, FRDGAdmin)
 admin_site.register(FRGT, FRGTAdmin)
-admin_site.register(Individual_Report)
+admin_site.register(Individual_Report, IndividualReportAdmin)
 admin_site.register(University_Report, UniversityReportAdmin)
