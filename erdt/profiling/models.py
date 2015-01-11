@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, F, Sum
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from polymorphic import PolymorphicModel
@@ -242,17 +242,13 @@ class Grant(PolymorphicModel):
 		return 1 if self.start_date <= today <= self.end_date else 0
 
 	def total_released(self):
-		total_amount = 0.0
-		for rel in Grant_Allocation_Release.objects.filter(grant__id=self.id):
-			total_amount = total_amount + rel.amount_released
-		return total_amount
+		total_amount = self.grant_allocation_release_set.aggregate(Sum('amount_released')).values()[0]
+		return total_amount if total_amount else 0.0
 	total_released.short_description = 'Released (PhP)'
 
 	def total_liquidated(self):
-		total_amount = 0.0
-		for rel in Grant_Allocation_Release.objects.filter(grant__id=self.id):
-			total_amount = total_amount + rel.amount_liquidated
-		return total_amount
+		total_amount = self.grant_allocation_release_set.aggregate(Sum('amount_liquidated')).values()[0]
+		return total_amount if total_amount else 0.0
 	total_liquidated.short_description = 'Liquidated (PhP)'
 
 	def balance(self):
@@ -381,10 +377,8 @@ class Grant_Allocation(models.Model):
 		unique_together = ('grant', 'name',)
 
 	def total_liquidated(self):
-		total_amount = 0.0
-		for rel in self.grant_allocation_release_set.all():
-			total_amount = total_amount + rel.amount_liquidated
-		return total_amount
+		total_amount = self.grant_allocation_release_set.aggregate(Sum('amount_liquidated')).values()[0]
+		return total_amount if total_amount else 0.0
 	total_liquidated.short_description = 'Liquidated (PhP)'
 
 	def balance(self):
@@ -450,14 +444,6 @@ class Grant_Allocation_Release(PolymorphicModel):
 	def disparity(self):
 		return self.amount_released - self.amount_liquidated
 	disparity.short_description = 'Disparity (PhP)'
-
-	# def clean_fields(self, exclude=None):
-	# 	print '*'*10
-	# 	print exclude
-	# 	print '-'*10
-	# 	if not self.id:
-	# 		if not self.payee:
-	# 			raise ValidationError('Select payee.')
 
 	def clean(self):
 		if self.amount_liquidated > self.amount_released:
@@ -534,7 +520,7 @@ class Scholarship(Grant):
 			raise ValidationError('Entry to graduate and scholarship program must be the same if not lateral.')
 
 	def grant_type(self):
-		return 'Scholarship (Local %s)' % self.degree_program.degree
+		return 'Scholarship (%s)' % self.degree_program
 
 	def is_active(self):
 		if self.scholarship_status == Scholarship.ON_EXT:
