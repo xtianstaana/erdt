@@ -1,0 +1,16 @@
+{% load suit_tags %}
+
+{% for line in fieldset %}
+
+  {% for field in line %}
+
+    {% if field.field.name == 'create_report' %}
+
+      {{ field.contents }}
+
+    {% endif %}
+
+  {% endfor %}
+
+{% endfor %}
+

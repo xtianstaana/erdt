@@ -28,6 +28,10 @@ class Report(models.Model):
 class Individual_Report(Report):
 	person = models.ForeignKey(Person)
 
+	class Meta:
+		verbose_name = 'Individual Report'
+		verbose_name_plural = 'Individual Reports'
+
 	def create_report(self):
 		out = ''
 		try:
@@ -44,6 +48,10 @@ class Grant_Report(Report):
 
 class University_Report(Report):
 	university = models.ForeignKey(University)
+
+	class Meta:
+		verbose_name = 'University Report'
+		verbose_name_plural = 'University Reports'
 
 	def create_report(self):
 		return ''

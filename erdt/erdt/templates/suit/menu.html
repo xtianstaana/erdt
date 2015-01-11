@@ -166,6 +166,26 @@
                     </li>
                   {% endif %}
 
+                  {% if model.label == 'University Reports' %}  
+                    {% if request.get_full_path == "/reporting/university_report/" %} 
+                    <li class="active"> 
+                    {% else %}
+                    <li>
+                    {% endif %}
+                    <a href="{% url 'admin:reporting_university_report_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    </li>
+                  {% endif %}
+
+                  {% if model.label == 'Individual Reports' %}  
+                    {% if request.get_full_path == "/reporting/individual_report/" %} 
+                    <li class="active"> 
+                    {% else %}
+                    <li>
+                    {% endif %}
+                    <a href="{% url 'admin:reporting_individual_report_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    </li>
+                  {% endif %}
+
                 {% endfor %}
               </ul>
             {% endif %}
