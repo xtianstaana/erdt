@@ -44,7 +44,8 @@ INSTALLED_APPS = (
     'erdt.alpha', #Admin Customization
     'profiling',
     'reporting',
-
+    'reportlab',
+    'wkhtmltopdf'
 )
 
 MIDDLEWARE_CLASSES = (

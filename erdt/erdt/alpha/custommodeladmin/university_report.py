@@ -11,5 +11,5 @@ from django.utils.translation import ugettext_lazy as _
 
 class UniversityReportAdmin(ERDTModelAdmin):
     readonly_fields = ('active_only', 'create_report')
-    change_form_template = 'admin/reporting/change_form_pdf.html'
+    #change_form_template = 'admin/reporting/change_form_pdf.html'
 
