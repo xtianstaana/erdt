@@ -42,7 +42,9 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'polymorphic',
     'erdt.alpha', #Admin Customization
-    'profiling' #Profiling Module
+    'profiling',
+    'reporting',
+
 )
 
 MIDDLEWARE_CLASSES = (

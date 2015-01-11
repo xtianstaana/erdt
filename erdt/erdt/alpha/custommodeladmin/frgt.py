@@ -31,6 +31,7 @@ class ReleaseInline(TabularInline):
 class AllocationInline(TabularInline):
     model = Grant_Allocation
     fk_name = 'grant'
+    max_num = 1
     extra = 0
     suit_classes = 'suit-tab suit-tab-allocation'
 
