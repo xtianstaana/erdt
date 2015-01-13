@@ -30,7 +30,7 @@ class GrantSummaryInline(TabularInline):
     verbose_name_plural = 'Grants Awarded'
     suit_classes = 'suit-tab suit-tab-grantsummary'
     exclude = ('description', 'delete')
-    readonly_fields = ('grant_link', 'start_date', 'end_date', 'allotment', 'total_liquidated', 'balance', 'is_active')
+    readonly_fields = ('grant_link', 'start_date', 'end_date', 'allotment', 'total_released', 'balance', 'is_active')
 
     def has_add_permission(self, request, obj=None):
         try:
@@ -50,7 +50,7 @@ class ReleaseInline(TabularInline):
     fk_name = 'payee'
     extra = 0
     suit_classes = 'suit-tab suit-tab-grantsummary'
-    fields = ('release_link', 'date_released', 'amount_released', 'amount_liquidated', 'disparity')
+    fields = ('date_released', 'release_link',  'amount_released', 'amount_liquidated', 'disparity')
     readonly_fields = fields
 
     def has_add_permission(self, request, obj=None):
@@ -73,7 +73,7 @@ class EquipmentIssuedInline(TabularInline):
     suit_classes = 'suit-tab suit-tab-grantsummary'
     verbose_name = 'Accountable Equipment'
     verbose_name_plural = 'Issued Equipments'
-    fields = ('description_link', 'status', 'accountable_link', 'date_released', 'surrendered')
+    fields = ('date_released', 'property_no', 'description_link', 'status', 'accountable_link')
     readonly_fields = fields
 
     def has_delete_permission(self, request, obj=None):
@@ -87,7 +87,7 @@ class EquipmentAccountableInline(TabularInline):
     suit_classes = 'suit-tab suit-tab-grantsummary'
     verbose_name = 'Accountable Equipment'
     verbose_name_plural = 'Accountable Equipments'
-    fields = ('issued_to', 'description_link', 'date_released',)
+    fields = ('date_released', 'property_no', 'description_link', 'status', 'issued_to')
     readonly_fields = fields
 
     def issued_to(self, obj):
@@ -103,8 +103,6 @@ class ScholarshipInline(StackedInline):
     extra = 0
     max_num = 0
     suit_classes = 'suit-tab suit-tab-scholarship'
-    verbose_name = 'Local Scholarship'
-    verbose_name_plural = 'Local Scholarships'
     fields = ('degree_program', 'scholarship_status', 'start_date', 'end_date', 'description', 'allotment', 'allocation_summary',
         'entry_grad_program', 'end_grad_program', 'ce_schedule',  'lateral', 'adviser', 'thesis_status', 'thesis_title',
         'thesis_topic', 'high_degree_univ', 'high_degree', 'cleared')
@@ -364,7 +362,7 @@ class PersonAdmin(ERDTModelAdmin):
                     tabs.append(('grantsummary', 'Grants Summary'))
                 
                 if grants.instance_of(Scholarship).exists() or grants.instance_of(ERDT_Scholarship_Special).exists():
-                    tabs.append(('scholarship', 'Local/Abroad Scholarships'))
+                    tabs.append(('scholarship', 'Scholarships'))
                 if grants.instance_of(Sandwich_Program).exists():
                     tabs.append(('sandwich', 'Sandwich Programs'))
                 if grants.instance_of(FRGT).exists():

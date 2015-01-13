@@ -16,33 +16,7 @@ from django_select2.widgets import *
 from profiling.models import *
 
 from django.http import HttpResponseRedirect
-
-import threading
-_thread_locals = threading.local()
-
-class ReleaseInline(TabularInline):
-    model = Grant_Allocation_Release
-    fk = 'grant'
-    extra = 0
-    max_num = 0
-    fields =  ('release_link', 'date_released', 'amount_released', 'amount_liquidated', 'disparity')
-    readonly_fields = fields
-    suit_classes = 'suit-tab suit-tab-releases'
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-class AllocationInline(TabularInline):
-    max_num = 1
-    model = Grant_Allocation
-    extra = 0
-    max_num = 1
-    suit_classes = 'suit-tab suit-tab-allocation'
-
-    def formfield_for_choice_field(self, db_field, request, **kwargs):
-        if db_field.name == 'name':
-            kwargs['choices'] = Grant_Allocation.SCHOLARSHIP_ALLOC_CHOICES
-        return super(AllocationInline, self).formfield_for_choice_field(db_field, request, **kwargs)
+from grants_common import *
 
 class MyScholarshipForm(forms.ModelForm):
     class Meta:
@@ -52,6 +26,15 @@ class MyScholarshipForm(forms.ModelForm):
             'awardee' : Select2Widget(select2_options={
                 'minimumInputLength' : 2,
                 'width':'200px'}),
+            'description' : AutosizedTextarea(attrs={
+                'rows': 4, 
+                'class': 'input-xlarge'}),
+            'allotment' : EnclosedInput(prepend=u'\u20b1'),
+            'start_date' : SuitDateWidget,
+            'end_date' : SuitDateWidget,
+            'entry_grad_program' : SuitDateWidget,
+            'end_grad_program' : SuitDateWidget,
+            'ce_schedule' : SuitDateWidget,
             'adviser' : Select2Widget(select2_options={
                 'minimumInputLength' : 2,
                 'width':'200px'}),
@@ -62,18 +45,26 @@ class MyScholarshipForm(forms.ModelForm):
 
 class ScholarshipAdmin(ERDTModelAdmin):
     form = MyScholarshipForm
-    inlines = [AllocationInline, ReleaseInline]
+    inlines = [lineItemInline_factory(Grant_Allocation.SCHOLARSHIP_ALLOC_CHOICES), ReleaseInline]
     list_display = ('awardee', 'degree_program', 'start_date', 'adviser')
     list_filter = ('degree_program__department__university__name', 'degree_program', 'start_date','scholarship_status')
     search_fields = ('awardee__first_name', 'awardee__last_name', 'awardee__middle_name', )
 
-    readonly_fields = ('allocation_summary',)
+    readonly_fields = ('allocation_summary', 'awardee_link')
 
     def get_fieldsets(self, request, obj=None):
-        _fieldsets =  (
+        awardee = 'awardee'
+        if obj:
+            awardee = 'awardee_link'
+        return (
+            (None, {
+                'classes' : ('suit-tab', 'suit-tab-general'),
+                'fields' : (awardee, 'start_date', 'end_date', 'allotment','description', 'scholarship_status'),
+                }),
             ('Program Details', {
                 'classes' : ('suit-tab', 'suit-tab-general'),
-                'fields' : ('university', 'degree_program', 'entry_grad_program' , 'end_grad_program', 'ce_schedule'),
+                'fields' : ('university', 'degree_program', 'entry_grad_program' , 'end_grad_program', 'ce_schedule',
+                    'lateral', 'cleared'),
                 }),
             ('Educational Background', {
                 'classes' : ('suit-tab', 'suit-tab-general'),
@@ -88,34 +79,15 @@ class ScholarshipAdmin(ERDTModelAdmin):
                 'fields' : ('allocation_summary',)
                 }),
         )
-        if obj:
-            return ((None, {
-                'classes' : ('suit-tab', 'suit-tab-general'),
-                'fields' : ('awardee_link', 'start_date', 'end_date', 'allotment', 'description', 'scholarship_status', 'lateral', 'cleared'),
-                }),) + _fieldsets
-        return ((None, {
-                'classes' : ('suit-tab', 'suit-tab-general'),
-                'fields' : ('awardee', 'start_date', 'end_date', 'allotment', 'description', 'scholarship_status', 'lateral', 'cleared'),
-                }),) + _fieldsets
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ('awardee_link', 'allocation_summary')
+            return ('awardee_link', 'allocation_summary', 'university', 'degree_program')
         return super(ScholarshipAdmin, self).get_readonly_fields(request, obj)
-
-    def get_form(self, request, obj=None):
-        _thread_locals.request = request
-        _thread_locals.obj = obj
-        return super(ScholarshipAdmin, self).get_form(request, obj)
-
-    def _suit_form_tabs(self):
-        return self.get_suit_form_tabs(_thread_locals.request, _thread_locals.obj)
-
-    suit_form_tabs = property(_suit_form_tabs)
 
     def get_suit_form_tabs(self, request, obj=None):
         tabs = [('general', 'General'), ('thesis', 'Thesis / Dissertation Information'), 
-        ('allocation', 'Scholarship Fund Allocations')]
+        ('allocation', 'Line Item Budget')]
 
         if obj:
             tabs.append(('releases', 'Release Summary'))

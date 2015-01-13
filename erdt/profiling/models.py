@@ -45,6 +45,12 @@ class Person(models.Model):
 		today = date.today()
 		return today.year - self.birthdate.year - ((today.month, today.day) < (self.birthdate.month, self.birthdate.day))
 
+	def my_link(self):
+		if self.id:
+			url = reverse('admin:profiling_person_change', args=(self.id,))
+			return format_html(u'<a href="{}">%s</a>' % self.__unicode__(), url)
+		return self.__unicode__()
+
 	def clean(self):
 		if self.landline_number.strip() == '' and self.mobile_number.strip() == '' and self.email_address.strip() == '':
 			raise ValidationError('Provide at least one contact number or an email address.')
@@ -64,9 +70,10 @@ class University(models.Model):
 	no_semester = models.IntegerField(default=2, null=True, blank=True, verbose_name='No of semester per SY')
 	with_summer = models.BooleanField(default=False, verbose_name='With summer semester')
 
-	def clean(self):
+	def clean_fields(self, exclude=None):
 		if self.is_consortium and (not self.member_since):
 			raise ValidationError('Specify membership date.')
+		super(University, self).clean_fields(exclude)
 
 	def save(self, *args, **kwargs):
 		if not self.is_consortium:
@@ -196,7 +203,7 @@ class Grant(PolymorphicModel):
 	description = models.CharField(max_length=250, blank=True)
 	start_date = models.DateField(verbose_name='Start of contract', help_text='Format: YYYY-MM-DD')
 	end_date = models.DateField(verbose_name='End of contract', help_text='Format: YYYY-MM-DD')
-	allotment = models.FloatField(default=0.0, verbose_name='Allotment (PhP)')
+	allotment = models.FloatField(default=0.0, verbose_name='Budget')
 
 	class Meta:
 		verbose_name = 'Grant'
@@ -205,12 +212,10 @@ class Grant(PolymorphicModel):
 
 	def grant_type(self):
 		"""Returns the type of grant. Overridden by children."""
-
 		return 'Grant'
 
 	def awardee_link(self):
-		url = reverse('admin:profiling_person_change', args=(self.awardee.id,))
-		return format_html(u'<a href="{}">%s</a>' % self.awardee, url)
+		return self.awardee.my_link()
 	awardee_link.short_description = 'Awardee'
 
 	def grant_link(self):
@@ -244,20 +249,20 @@ class Grant(PolymorphicModel):
 	def total_released(self):
 		total_amount = self.grant_allocation_release_set.aggregate(Sum('amount_released')).values()[0]
 		return total_amount if total_amount else 0.0
-	total_released.short_description = 'Released (PhP)'
+	total_released.short_description = u'Released \u20b1'
 
 	def total_liquidated(self):
 		total_amount = self.grant_allocation_release_set.aggregate(Sum('amount_liquidated')).values()[0]
 		return total_amount if total_amount else 0.0
-	total_liquidated.short_description = 'Liquidated (PhP)'
+	total_liquidated.short_description = u'Expenditure \u20b1'
 
 	def balance(self):
-		return self.allotment - self.total_liquidated()
-	balance.short_description = 'Balance (PhP)'
+		return self.allotment - self.total_released() + (self.total_liquidated())
+	balance.short_description = u'Unreleased \u20b1'
 
 	def allocation_summary(self):
-		out = u'<tr> <th><b>Grant Allocation</b></th> <th><b>Allotment (PhP)</b></th>  \
-			<th><b>Total Liquidated (PhP)</b></th> <th><b>Balance (PhP)</b></th> </tr>'
+		out = u'<tr> <th><b>Line Item</b></th> <th><b>Budget \u20b1</b></th>  \
+			<th><b>Expenditure \u20b1</b></th> <th><b>Unreleased \u20b1</b></th> </tr>'
 
 		_temp = '<td> %s </td> ' * 4
 
@@ -372,18 +377,18 @@ class Grant_Allocation(models.Model):
 	amount = models.FloatField(default=0.0)
 
 	class Meta:
-		verbose_name = 'Grant Allocation'
-		verbose_name_plural = 'Grant Allocations'
+		verbose_name = 'Line Item'
+		verbose_name_plural = 'Line Items'
 		unique_together = ('grant', 'name',)
 
 	def total_liquidated(self):
 		total_amount = self.grant_allocation_release_set.aggregate(Sum('amount_liquidated')).values()[0]
 		return total_amount if total_amount else 0.0
-	total_liquidated.short_description = 'Liquidated (PhP)'
+	total_liquidated.short_description = u'Liquidated \u20b1'
 
 	def balance(self):
 		return self.amount - self.total_liquidated()
-	balance.short_description = 'Balance (PhP)'
+	balance.short_description =  u'Unreleased \u20b1'
 
 	def __unicode__(self):
 		return '%s: %s' % (self.grant.grant_type(), self.get_name_display())
@@ -403,9 +408,9 @@ class Grant_Allocation_Release(PolymorphicModel):
 	grant = GF(Grant, chained_field='payee', chained_model_field='awardee', show_all=False, auto_choose=True, verbose_name='Funding grant')
 	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant', auto_choose=True, verbose_name='Funding grant allocation')
 	description = models.CharField(max_length=350, blank=True)
-	amount_released = models.FloatField(default=0.0, verbose_name='Amount Released (PhP)')
-	amount_liquidated = models.FloatField(default=0.0, verbose_name='Amount Liquidated (PhP)', help_text='Must be the same as the amount released if unliquidated.')
-	date_released = models.DateField(help_text='Format: YYYY-MM-DD', verbose_name='Date of fund release')
+	amount_released = models.FloatField(default=0.0, verbose_name='Released')
+	amount_liquidated = models.FloatField(default=0.0, verbose_name='Liquidated')
+	date_released = models.DateField(help_text='Format: YYYY-MM-DD', verbose_name='Date Released')
 
 	class Meta:
 		verbose_name = 'Fund Release'
@@ -427,8 +432,7 @@ class Grant_Allocation_Release(PolymorphicModel):
 	particular.admin_order_field = 'date_released'
 
 	def payee_link(self):
-		url = reverse('admin:profiling_person_change', args=(self.payee.id,))
-		return format_html(u'<a href="{}">%s</a>' % self.payee.__unicode__(), url)
+		return self.payee.my_link()
 	payee_link.short_description = 'Payee'
 	payee_link.admin_order_field = 'payee'
 
@@ -443,13 +447,11 @@ class Grant_Allocation_Release(PolymorphicModel):
 
 	def disparity(self):
 		return self.amount_released - self.amount_liquidated
-	disparity.short_description = 'Disparity (PhP)'
+	disparity.short_description = u'Unexpended \u20b1'
 
 	def clean(self):
 		if self.amount_liquidated > self.amount_released:
 			raise ValidationError('Amount liquidated must be less than or equal to the amount released.')
-		if (self.amount_liquidated != self.amount_released) and (self.amount_liquidated == 0.0):
-			raise ValidationError('Lidquidated amount cannot be zero.')
 
 	def __unicode__(self):
 		return self.particular()
@@ -520,7 +522,7 @@ class Scholarship(Grant):
 			raise ValidationError('Entry to graduate and scholarship program must be the same if not lateral.')
 
 	def grant_type(self):
-		return 'Scholarship (%s)' % self.degree_program
+		return 'Scholarship (%s, %s)' % (self.degree_program.degree, self.degree_program.department.university.short_name)
 
 	def is_active(self):
 		if self.scholarship_status == Scholarship.ON_EXT:
@@ -572,6 +574,7 @@ class FRGT(Grant):
 		verbose_name_plural = 'Faculty Research Grants'
 		ordering = ('-start_date', 'awardee',)
 
+
 class FRDG(Grant):
 	class Meta:
 		verbose_name = 'Faculty Research Diss Grant'
@@ -598,16 +601,14 @@ class Visiting_Professor_Grant(Grant):
 #############################################################################################
 
 class Equipment(Grant_Allocation_Release):
-	#quantity = models.FloatField(default=1.0, null=True, blank=True)
 	location = models.CharField(max_length=150)
 	property_no =  models.CharField(max_length=50, help_text='If funded by multiple grants, use the same property no for the same item.')
 	status = models.CharField(max_length=150)
 	accountable = models.ForeignKey(Person, related_name='accountable')
-	surrendered = models.BooleanField(default=False)
+	surrendered = models.BooleanField(default=False, verbose_name='Donated')
 
 	def accountable_link(self):
-		url = reverse('admin:profiling_person_change', args=(self.accountable.id,))
-		return format_html(u'<a href="{}">%s</a>' % self.accountable.__unicode__(), url)
+		return self.accountable.my_link()
 	accountable_link.short_description = 'Accountable'
 	accountable_link.admin_order_field = 'accountable'
 

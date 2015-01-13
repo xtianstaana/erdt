@@ -32,6 +32,9 @@ csrf_protect_m = method_decorator(csrf_protect)
 IS_POPUP_VAR = '_popup'
 TO_FIELD_VAR = '_to_field'
 
+import threading
+_thread_locals = threading.local()
+
 
 HORIZONTAL, VERTICAL = 1, 2
 
@@ -321,5 +324,15 @@ class ERDTModelAdmin(ModelAdmin):
             return [f.name for f in self.model._meta.fields]
         
         return self.readonly_fields
+
+    def get_form(self, request, obj=None):
+        _thread_locals.request = request
+        _thread_locals.obj = obj
+        return super(ERDTModelAdmin, self).get_form(request, obj)
+
+    def _suit_form_tabs(self):
+        return self.get_suit_form_tabs(_thread_locals.request, _thread_locals.obj)
+
+    suit_form_tabs = property(_suit_form_tabs)
 
 

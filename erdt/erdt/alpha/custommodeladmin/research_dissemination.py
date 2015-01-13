@@ -5,22 +5,12 @@ Description: Contains Admin Customization functions for Research Dissemination
 """
 
 from globals import ERDTModelAdmin
-from django.db import models
-from django.contrib.admin import StackedInline, TabularInline, actions
-from django.forms import ModelForm
-from django.forms.widgets import *
-from suit.widgets import *
-
-# Import Profiling Module Models 
 from profiling.models import *
+from suit.widgets import AutosizedTextarea, EnclosedInput, SuitDateWidget
+from django_select2.widgets import Select2Widget
+from django.forms import ModelForm
 
-from django.http import HttpResponseRedirect
-from django.utils.html import format_html
-from django.core.urlresolvers import reverse
-from django_select2.widgets import *
-
-
-class MyResearchDisseminationForm(forms.ModelForm):
+class MyResearchDisseminationForm(ModelForm):
     class Meta:
         model = Research_Dissemination
         fields = '__all__'
@@ -28,12 +18,21 @@ class MyResearchDisseminationForm(forms.ModelForm):
             'payee' : Select2Widget(select2_options={
                 'minimumInputLength' : 2,
                 'width':'200px'}),
+            'description' : AutosizedTextarea(attrs={
+                'rows': 4, 
+                'class': 'input-xlarge'}),
+            'amount_released' : EnclosedInput(prepend=u'\u20b1',
+                attrs={'class': 'input-small'}),
+            'amount_liquidated' : EnclosedInput(prepend=u'\u20b1',
+                attrs={'class': 'input-small'}),
+            'date_released' : SuitDateWidget,
+            'conference_date' : SuitDateWidget,
         }
 
 class ResearchDisseminationAdmin(ERDTModelAdmin):
     form = MyResearchDisseminationForm
-    list_display = ('date_released', 'particular', 'payee_sub', 'paper_title',)
-    list_display_links = ('particular',)
+    list_display = ('date_released', 'release_link', 'payee_sub', 'paper_title',)
+    list_display_links = None
     search_fields = ('payee__first_name', 'payee__last_name', 'payee__middle_name', )
     exclude = ('item_type',)
 
@@ -53,8 +52,8 @@ class ResearchDisseminationAdmin(ERDTModelAdmin):
         if obj:
             return (
                 (None, {
-                    'fields' : ('payee_link', 'allocation', 'description', 'amount_released', 
-                'amount_liquidated', 'date_released', )
+                    'fields' : ('payee_link', 'allocation', 'date_released', 'amount_released', 
+                        'amount_liquidated', 'description',)
                     }),
                 ('Other Information', {
                     'fields' : (('paper_title', 'conference_name', 'conference_loc', 'conference_date'))
@@ -62,8 +61,8 @@ class ResearchDisseminationAdmin(ERDTModelAdmin):
             )
         return (
             (None, {
-                'fields' : ('payee', 'grant', 'allocation', 'description', 'amount_released', 
-            'amount_liquidated', 'date_released', )
+                'fields' : ('payee', 'grant', 'allocation', 'date_released', 'amount_released', 
+                    'amount_liquidated', 'description',)
                 }),
             ('Other Information', {
                 'fields' : (('paper_title', 'conference_name', 'conference_loc', 'conference_date'))

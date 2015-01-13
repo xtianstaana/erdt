@@ -5,21 +5,12 @@ Description: Contains Admin Customization functions for Purchased Item
 """
 
 from globals import ERDTModelAdmin
-from django.db import models
-from django.contrib.admin import StackedInline, TabularInline, actions
+from profiling.models import *
+from suit.widgets import AutosizedTextarea, EnclosedInput, SuitDateWidget
+from django_select2.widgets import Select2Widget
 from django.forms import ModelForm
-from django.forms.widgets import *
-from suit.widgets import *
-from django_select2.widgets import *
 
-# Import Profiling Module Models 
-from profiling.models import (Profile, Person, University, Department,
-    Degree_Program, Scholarship, Subject, Equipment, Enrolled_Subject)
-
-from django.http import HttpResponseRedirect
-
-
-class MyEquipmentForm(forms.ModelForm):
+class MyEquipmentForm(ModelForm):
     class Meta:
         model = Equipment
         fields = '__all__'
@@ -27,6 +18,14 @@ class MyEquipmentForm(forms.ModelForm):
             'payee' : Select2Widget(select2_options={
                 'minimumInputLength' : 2,
                 'width':'200px'}),
+            'description' : AutosizedTextarea(attrs={
+                'rows': 4, 
+                'class': 'input-xlarge'}),
+            'amount_released' : EnclosedInput(prepend=u'\u20b1',
+                attrs={'class': 'input-small'}),
+            'amount_liquidated' : EnclosedInput(prepend=u'\u20b1',
+                attrs={'class': 'input-small'}),
+            'date_released' : SuitDateWidget,
             'accountable' : Select2Widget(select2_options={
                 'minimumInputLength' : 2,
                 'width':'200px'}),
@@ -35,10 +34,10 @@ class MyEquipmentForm(forms.ModelForm):
 class PurchasedItemAdmin(ERDTModelAdmin):
     form = MyEquipmentForm
 
-    list_display = ('date_released', 'particular', 'payee_sub', 'accountable_univ', 'surrendered')
-    list_display_links = ('particular', )
-    exclude = ('item_type',)
+    list_display = ('date_released', 'release_link', 'payee_sub', 'accountable_univ', 'surrendered')
+    list_display_links = None
     search_fields = ('payee__first_name', 'payee__last_name', 'payee__middle_name', )
+    exclude = ('item_type',)
 
     list_filter = ('surrendered',)
 
@@ -74,20 +73,20 @@ class PurchasedItemAdmin(ERDTModelAdmin):
         if obj:
             return (
                 (None, {
-                    'fields' : ('payee_link', 'allocation', 'description', 'amount_released', 
-                'amount_liquidated', 'date_released', )
+                    'fields' : ('payee_link', 'allocation', 'date_released', 'amount_released', 
+                        'amount_liquidated', 'description',)
                     }),
                 ('Other Information', {
-                    'fields' : ('location', 'property_no', 'status', 'surrendered', 'accountable')
+                    'fields' : ('property_no', 'location',  'status', 'accountable', 'surrendered', )
                     }),
             )
         return (
             (None, {
-                'fields' : ('payee', 'grant', 'allocation', 'description', 'amount_released', 
-            'amount_liquidated', 'date_released', )
+                'fields' : ('payee', 'grant', 'allocation', 'date_released', 'amount_released', 
+                    'amount_liquidated', 'description',)
                 }),
             ('Other Information', {
-                'fields' : ('location', 'property_no', 'status', 'surrendered', 'accountable')
+                'fields' : ('property_no', 'location',  'status', 'accountable', 'surrendered', )
                 }),
         )
 

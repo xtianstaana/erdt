@@ -26,21 +26,19 @@ constants = constants(None)
 external_urls = external_urls(None)
 
 # Import Custom ModelAdmin
-from custommodeladmin.globals import ERDTModelAdmin
 from custommodeladmin.user import UserAdmin
 from custommodeladmin.person import PersonAdmin
 from custommodeladmin.university import UniversityAdmin
 from custommodeladmin.degree_program import DegreeProgramAdmin
-from custommodeladmin.scholarship import ScholarshipAdmin
-from custommodeladmin.sandwich import SandwichAdmin
+
 from custommodeladmin.fund_release import GrantAllocationReleaseAdmin
 from custommodeladmin.equipment import PurchasedItemAdmin
 from custommodeladmin.research_dissemination import ResearchDisseminationAdmin
-from custommodeladmin.visiting_professor import VisitingProfessorAdmin
-from custommodeladmin.postdoctoral import PostdoctoralAdmin
-from custommodeladmin.frgt import FRGTAdmin
-from custommodeladmin.frdg import FRDGAdmin
-from custommodeladmin.scholarship2 import Scholarship2Admin
+
+from custommodeladmin.grants import *
+from custommodeladmin.scholarship import ScholarshipAdmin
+#from custommodeladmin.visiting_professor import VisitingProfessorAdmin
+
 from custommodeladmin.university_report import UniversityReportAdmin
 from custommodeladmin.individual_report import IndividualReportAdmin
 
