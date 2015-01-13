@@ -29,13 +29,13 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 		LineItemInline = lineItemInline_factory(choices)
 
 		form = GrantForm
-		inlines =[LineItemInline, ReleaseInline]
+		inlines =[LineItemInline, ReleaseSummaryInline, ReleaseInline]
 		list_display = ('awardee', 'start_date', 'end_date', )
 		search_fields = ('awardee__first_name', 'awardee__last_name', 'awardee__middle_name', )
 
 		def get_readonly_fields(self, request, obj=None):
 			_ro = super(GrantModelAdmin,self).get_readonly_fields(request, obj)
-			_mro = ('awardee_link', 'allocation_summary', )
+			_mro = ('awardee_link', )#'allocation_summary', )
 			if _ro:
 				return tuple(_ro) + _mro
 			return _mro
@@ -58,10 +58,10 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 					'classes' : ('suit-tab', 'suit-tab-general'),
 					'fields' : (awardee, 'start_date', 'end_date', 'allotment', 'description',)
 				}),
-				(None, {
-					'classes' : ('suit-tab', 'suit-tab-releases'),
-					'fields' : ('allocation_summary',)
-				}),
+				# (None, {
+				# 	'classes' : ('suit-tab', 'suit-tab-releases'),
+				# 	'fields' : ('allocation_summary',)
+				# }),
 			) + others
 
 		def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -120,10 +120,27 @@ class ReleaseInline(TabularInline):
 	fk = 'grant'
 	extra = 0
 	max_num = 0
-	fields =  ('release_link', 'date_released', 'amount_released', 'amount_liquidated', 'disparity')
+	fields =  ('date_released', 'release_link',  'amount_released', 'amount_liquidated', 'amount_unexpended')
 	readonly_fields = fields
 	suit_classes = 'suit-tab suit-tab-releases'
 
 	def has_delete_permission(self, request, obj=None):
 		return False
 
+class ReleaseSummaryInline(TabularInline):
+	model = Grant_Allocation
+	fk = 'grant'
+	extra = 0
+	max_num = 0
+	verbose_name_plural = ''
+	fields =  ('name', 'approved_budget', 'total_released', 'total_expenditure', 'total_unexpended', 'total_unreleased')
+	readonly_fields = fields
+	suit_classes = 'suit-tab suit-tab-releases'
+
+	def approved_budget(self, obj=None):
+		if obj:
+			return obj.amount
+		return 0.0
+
+	def has_delete_permission(self, request, obj=None):
+		return False

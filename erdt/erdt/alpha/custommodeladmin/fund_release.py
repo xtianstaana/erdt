@@ -32,12 +32,16 @@ class GrantAllocationReleaseAdmin(ERDTModelAdmin):
     list_filter = ('item_type',)
     search_fields = ('payee__first_name', 'payee__last_name', 'payee__middle_name', )
 
+    def grant_link(self, obj=None):
+        return obj.grant.grant_link()
+    grant_link.short_description = 'Funding grant'
+
     def get_fields(self, request, obj=None):
         if obj:
             if obj.item_type == '':
-                return ('payee_link', 'allocation', 'date_released','amount_released', 'amount_liquidated', 'description',)
+                return ('payee_link', 'grant_link', 'allocation', 'date_released','amount_released', 'amount_liquidated', 'description',)
             else:
-                return ('payee_link', 'allocation', 'date_released','amount_released', 'amount_liquidated', 'item_type', 'description',)
+                return ('payee_link', 'grant_link', 'allocation', 'date_released','amount_released', 'amount_liquidated', 'item_type', 'description',)
         return ('payee', 'grant', 'allocation', 'date_released', 'amount_released', 'amount_liquidated', 'item_type', 'description',)
 
     def formfield_for_choice_field(self, db_field, request, **kwargs):
@@ -57,6 +61,6 @@ class GrantAllocationReleaseAdmin(ERDTModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         if obj:
             if obj.__class__ in (Equipment, Research_Dissemination):
-                return ('payee_link', 'allocation', 'item_type')
-            return ('payee_link', 'allocation')
+                return ('payee_link', 'allocation', 'item_type', 'grant_link')
+            return ('payee_link', 'allocation', 'grant_link')
         return super(GrantAllocationReleaseAdmin, self).get_readonly_fields(request, obj)

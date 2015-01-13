@@ -45,12 +45,12 @@ class MyScholarshipForm(forms.ModelForm):
 
 class ScholarshipAdmin(ERDTModelAdmin):
     form = MyScholarshipForm
-    inlines = [lineItemInline_factory(Grant_Allocation.SCHOLARSHIP_ALLOC_CHOICES), ReleaseInline]
+    inlines = [lineItemInline_factory(Grant_Allocation.SCHOLARSHIP_ALLOC_CHOICES), ReleaseSummaryInline, ReleaseInline]
     list_display = ('awardee', 'degree_program', 'start_date', 'adviser')
     list_filter = ('degree_program__department__university__name', 'degree_program', 'start_date','scholarship_status')
     search_fields = ('awardee__first_name', 'awardee__last_name', 'awardee__middle_name', )
 
-    readonly_fields = ('allocation_summary', 'awardee_link')
+    readonly_fields = ('awardee_link',)
 
     def get_fieldsets(self, request, obj=None):
         awardee = 'awardee'
@@ -74,15 +74,11 @@ class ScholarshipAdmin(ERDTModelAdmin):
                 'classes' : ('suit-tab', 'suit-tab-thesis'),
                 'fields' : ('adviser', 'thesis_status', 'thesis_title', 'thesis_topic'),
                 }),
-            (None, {
-                'classes' : ('suit-tab', 'suit-tab-releases'),
-                'fields' : ('allocation_summary',)
-                }),
         )
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ('awardee_link', 'allocation_summary', 'university', 'degree_program')
+            return ('awardee_link', 'university', 'degree_program')
         return super(ScholarshipAdmin, self).get_readonly_fields(request, obj)
 
     def get_suit_form_tabs(self, request, obj=None):

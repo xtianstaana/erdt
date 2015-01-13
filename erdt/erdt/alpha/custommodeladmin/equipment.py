@@ -52,6 +52,10 @@ class PurchasedItemAdmin(ERDTModelAdmin):
     accountable_univ.short_description = 'Accountable'
     accountable_univ.admin_order_field = 'accountable'
 
+    def grant_link(self, obj=None):
+        return obj.grant.grant_link()
+    grant_link.short_description = 'Funding grant'
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
@@ -73,7 +77,7 @@ class PurchasedItemAdmin(ERDTModelAdmin):
         if obj:
             return (
                 (None, {
-                    'fields' : ('payee_link', 'allocation', 'date_released', 'amount_released', 
+                    'fields' : ('payee_link', 'grant_link', 'allocation', 'date_released', 'amount_released', 
                         'amount_liquidated', 'description',)
                     }),
                 ('Other Information', {
@@ -92,6 +96,6 @@ class PurchasedItemAdmin(ERDTModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ('payee_link', 'allocation', )
+            return ('payee_link', 'allocation', 'grant_link')
         else:
             return super(PurchasedItemAdmin, self).get_readonly_fields(request, obj)

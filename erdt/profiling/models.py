@@ -203,7 +203,7 @@ class Grant(PolymorphicModel):
 	description = models.CharField(max_length=250, blank=True)
 	start_date = models.DateField(verbose_name='Start of contract', help_text='Format: YYYY-MM-DD')
 	end_date = models.DateField(verbose_name='End of contract', help_text='Format: YYYY-MM-DD')
-	allotment = models.FloatField(default=0.0, verbose_name='Budget')
+	allotment = models.FloatField(default=0.0, verbose_name='Budget', help_text='Must be the same as the total amount of the line items.')
 
 	class Meta:
 		verbose_name = 'Grant'
@@ -249,40 +249,50 @@ class Grant(PolymorphicModel):
 	def total_released(self):
 		total_amount = self.grant_allocation_release_set.aggregate(Sum('amount_released')).values()[0]
 		return total_amount if total_amount else 0.0
-	total_released.short_description = u'Released \u20b1'
+	total_released.short_description = 'Released'
 
-	def total_liquidated(self):
+	def total_expenditure(self):
 		total_amount = self.grant_allocation_release_set.aggregate(Sum('amount_liquidated')).values()[0]
 		return total_amount if total_amount else 0.0
-	total_liquidated.short_description = u'Expenditure \u20b1'
+	total_expenditure.short_description = 'Expenditure'
 
-	def balance(self):
-		return self.allotment - self.total_released() + (self.total_liquidated())
-	balance.short_description = u'Unreleased \u20b1'
+	def total_unexpended(self):
+		total_amount = 0.0
+		for fund_release in self.grant_allocation_release_set.all():
+			total_amount += fund_release.amount_unexpended()
+		return total_amount
+	total_unexpended.short_description = 'Unexpended'
+
+	def total_unreleased(self):
+		return self.allotment - self.total_released() + self.total_unexpended()
+	total_unreleased.short_description = 'Unreleased'
 
 	def allocation_summary(self):
-		out = u'<tr> <th><b>Line Item</b></th> <th><b>Budget \u20b1</b></th>  \
-			<th><b>Expenditure \u20b1</b></th> <th><b>Unreleased \u20b1</b></th> </tr>'
+		out = u'<tr> <th><b>Line Item</b></th> <th><b>App. Budget</b></th>  \
+			<th><b>Released</b></th> <th><b>Unexpended</b></th> <th><b>Unreleased</b></th> </tr>'
 
-		_temp = '<td> %s </td> ' * 4
+		_temp = '<td> %s </td> ' * 5
 
-		t_allotment, t_liquidated, t_balance = (0.0, 0.0, 0.0)
+		t_allotment, t_released, t_unexpended, t_unreleased = (0.0, 0.0, 0.0, 0.0)
 
 		for allocation in self.grant_allocation_set.all():
+			alloc_comps = allocation.get_computations().split()
 			out = out + '<tr> %s </tr>' % (_temp % (allocation.get_name_display(), str(allocation.amount), 
-				str(allocation.total_liquidated()), str(allocation.balance()) ))
+				alloc_comps[0], alloc_comps[2], alloc_comps[3]))
 
-			t_allotment = t_allotment + allocation.amount
-			t_liquidated = t_liquidated + allocation.total_liquidated()
-			t_balance = t_balance + allocation.balance()
+			t_allotment += + allocation.amount
+			t_released += float(alloc_comps[0])
+			t_unexpended += float(alloc_comps[2])
+			t_unreleased += float(alloc_comps[3])
 
 		totals = ('<tr> %s </tr>' % _temp) % ('<b>Total</b>', '<b>%s</b>' % t_allotment, 
-			'<b>%s</b>' % t_liquidated, '<b>%s</b>' % t_balance)
+			'<b>%s</b>' % t_released, '<b>%s</b>' % t_unexpended, '<b>%s</b>' % t_unreleased)
 
 		out = u'<table class="table table-bordered table-condensed table-striped"><thread> %s %s \
 			</thread></table>' % (out, totals)
 
 		return format_html(mark_safe(out))
+	allocation_summary.short_description = 'Budget Summary'
 
 	def __unicode__(self):
 		return '%s: %s' % (self.grant_type(), self.awardee.__unicode__())
@@ -292,7 +302,6 @@ class Grant(PolymorphicModel):
 			raise ValidationError('Start of contract date must precede or the same as the end of contract date.')
 
 class Grant_Allocation(models.Model):
-
 	TUITION_FEE, STIPEND, BOOK_ALLOWANCE, TRANSPORTATION_ALLOWANCE = 'TUITION', 'STIPEND', 'BOOK_ALW', 'TRANSP_ALW'
 	THESIS_ALLOWANCE, RESEARCH_GRANT, RESEARCH_DISSEMINATION_ALLOWNACE = 'THESIS_ALW', 'RESEARCH_GNT', 'DISSEMINATION_ALLW'
 	MENTORS_FEE, AIRFARE, RESEARCH_EXPENSES, PRETRAVEL_EXPENSES = 'MENTORS_FEE', 'AIRFARE', 'RESEARCH_EXP', 'PRETRAVEL_EXP'
@@ -381,14 +390,30 @@ class Grant_Allocation(models.Model):
 		verbose_name_plural = 'Line Items'
 		unique_together = ('grant', 'name',)
 
-	def total_liquidated(self):
-		total_amount = self.grant_allocation_release_set.aggregate(Sum('amount_liquidated')).values()[0]
-		return total_amount if total_amount else 0.0
-	total_liquidated.short_description = u'Liquidated \u20b1'
+	def get_computations(self):
+		total_released, total_expenditure, total_unexpended, total_unreleased = 0.0, 0.0, 0.0, 0.0
 
-	def balance(self):
-		return self.amount - self.total_liquidated()
-	balance.short_description =  u'Unreleased \u20b1'
+		for fund_release in self.grant_allocation_release_set.all():
+			total_released += fund_release.amount_released
+			total_expenditure += fund_release.amount_liquidated
+			total_unexpended +=  fund_release.amount_unexpended()
+
+		total_unreleased = self.amount - total_released + total_unexpended
+
+		return ' '.join((str(total_released), str(total_expenditure), str(total_unexpended), str(total_unreleased)))
+
+	def total_released(self):
+		return self.get_computations().split()[0]
+	total_released.short_description = 'Released'
+	def total_expenditure(self):
+		return self.get_computations().split()[1]
+	total_expenditure.short_description = 'Expenditure'
+	def total_unexpended(self):
+		return self.get_computations().split()[2]
+	total_unexpended.short_description = 'Unexpended'
+	def total_unreleased(self):
+		return self.get_computations().split()[3]
+	total_unreleased.short_description = 'Unreleased'
 
 	def __unicode__(self):
 		return '%s: %s' % (self.grant.grant_type(), self.get_name_display())
@@ -409,7 +434,7 @@ class Grant_Allocation_Release(PolymorphicModel):
 	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant', auto_choose=True, verbose_name='Funding grant allocation')
 	description = models.CharField(max_length=350, blank=True)
 	amount_released = models.FloatField(default=0.0, verbose_name='Released')
-	amount_liquidated = models.FloatField(default=0.0, verbose_name='Liquidated')
+	amount_liquidated = models.FloatField(default=0.0, verbose_name='Expenditure')
 	date_released = models.DateField(help_text='Format: YYYY-MM-DD', verbose_name='Date Released')
 
 	class Meta:
@@ -445,13 +470,17 @@ class Grant_Allocation_Release(PolymorphicModel):
 		return format_html(u'<a href="{}">%s</a>' % self.particular(), url)
 	release_link.short_description = 'Particular'	
 
-	def disparity(self):
-		return self.amount_released - self.amount_liquidated
-	disparity.short_description = u'Unexpended \u20b1'
+	def amount_unexpended(self):
+		if self.amount_liquidated > 0.0 :
+			return self.amount_released - self.amount_liquidated 
+		else:
+			return 0.0
+	amount_unexpended.short_description = 'Unexpended'
 
-	def clean(self):
+	def clean_fields(self, exclude=None):
 		if self.amount_liquidated > self.amount_released:
-			raise ValidationError('Amount liquidated must be less than or equal to the amount released.')
+			raise ValidationError('Expenditure must be less than or equal to the amount released.')
+		super(Grant_Allocation_Release, self).clean_fields(exclude)
 
 	def __unicode__(self):
 		return self.particular()
@@ -601,9 +630,16 @@ class Visiting_Professor_Grant(Grant):
 #############################################################################################
 
 class Equipment(Grant_Allocation_Release):
+	CONDEMNED, WORKING, FOR_REPAIR = 'CONDEMNED', 'WORKING', 'FOR_REPAIR'
+	STATUS_CHOICES = (
+		(WORKING, 'Working'),
+		(FOR_REPAIR, 'For Repair'),
+		(CONDEMNED,' Condemned'),
+	)
+
 	location = models.CharField(max_length=150)
 	property_no =  models.CharField(max_length=50, help_text='If funded by multiple grants, use the same property no for the same item.')
-	status = models.CharField(max_length=150)
+	status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=WORKING)
 	accountable = models.ForeignKey(Person, related_name='accountable')
 	surrendered = models.BooleanField(default=False, verbose_name='Donated')
 

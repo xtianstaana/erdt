@@ -6,7 +6,7 @@ Description: Contains Admin Customization functions for University
 
 from globals import ERDTModelAdmin
 from django.db import models
-from django.contrib.admin import StackedInline, TabularInline, actions, BooleanFieldListFilter
+from django.contrib.admin import StackedInline, TabularInline
 from django.forms import ModelForm
 from django.forms.widgets import *
 from suit.widgets import *
@@ -22,6 +22,7 @@ class DepartmentInline(TabularInline):
     model = Department
     fk_name = 'university'
     extra = 0
+    verbose_name_plural = ''
     suit_classes = 'suit-tab suit-tab-department'
 
 class SubjectInline(TabularInline):
@@ -30,6 +31,8 @@ class SubjectInline(TabularInline):
     verbose_name_plural = 'Subjects Offered'
     fk_name = 'university'
     extra = 0
+    verbose_name_plural = ''
+    fields = ('title', 'code', 'units')
     suit_classes = 'suit-tab suit-tab-subject'
 
 class UniversityAdmin(ERDTModelAdmin):
@@ -48,6 +51,11 @@ class UniversityAdmin(ERDTModelAdmin):
     formfield_overrides = {
         models.ForeignKey: {'widget': LinkedSelect},
     }
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('name',)
+        return super(UniversityAdmin, self).get_readonly_fields(request, obj)
 
     def get_fieldsets(self, request, obj=None):
         if not obj:

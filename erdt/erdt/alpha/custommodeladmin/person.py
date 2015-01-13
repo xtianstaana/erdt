@@ -5,21 +5,11 @@ Description: Contains Admin Customization functions for Person
 """
 
 from globals import ERDTModelAdmin
-from django.db import models
-from django.contrib.admin import StackedInline, TabularInline, actions, HORIZONTAL, VERTICAL
-from django.contrib.admin.options import InlineModelAdmin
+from django.contrib.admin import StackedInline, TabularInline, HORIZONTAL, VERTICAL
 from django import forms
-from django.forms.widgets import *
 from suit.widgets import *
-from django.core.urlresolvers import resolve, reverse
-from django_select2.widgets import *
-from django.utils.translation import ugettext_lazy as _
-
-# Import Profiling Module Models
+from django_select2.widgets import Select2Widget
 from profiling.models import *
-
-from django.http import HttpResponseRedirect
-
 
 class GrantSummaryInline(TabularInline):
     model = Grant
@@ -30,7 +20,8 @@ class GrantSummaryInline(TabularInline):
     verbose_name_plural = 'Grants Awarded'
     suit_classes = 'suit-tab suit-tab-grantsummary'
     exclude = ('description', 'delete')
-    readonly_fields = ('grant_link', 'start_date', 'end_date', 'allotment', 'total_released', 'balance', 'is_active')
+    readonly_fields = ('grant_link', 'start_date', 'end_date', 'allotment', 'total_released', 'total_unexpended',
+        'total_unreleased', 'is_active')
 
     def has_add_permission(self, request, obj=None):
         try:
@@ -50,7 +41,7 @@ class ReleaseInline(TabularInline):
     fk_name = 'payee'
     extra = 0
     suit_classes = 'suit-tab suit-tab-grantsummary'
-    fields = ('date_released', 'release_link',  'amount_released', 'amount_liquidated', 'disparity')
+    fields = ('date_released', 'release_link',  'amount_released', 'amount_liquidated', 'amount_unexpended')
     readonly_fields = fields
 
     def has_add_permission(self, request, obj=None):
@@ -117,6 +108,7 @@ class SandwichInline(StackedInline):
     template = 'admin/edit_inline_with_link/stacked_with_link.html'
     extra = 0
     max_num = 0
+    verbose_name_plural = ''
     suit_classes = 'suit-tab suit-tab-sandwich'
 
     fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',
@@ -149,6 +141,7 @@ class FRDGInline(StackedInline):
     max_num = 0
     fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',)
     readonly_fields = fields
+    verbose_name_plural = ''
     suit_classes = 'suit-tab suit-tab-frdg'
 
     def has_delete_permission(self, request, obj=None):
@@ -162,6 +155,7 @@ class FRGTInline(StackedInline):
     max_num = 0
     fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',)
     readonly_fields = fields
+    verbose_name_plural = ''
     suit_classes = 'suit-tab suit-tab-frgt'
 
     def has_delete_permission(self, request, obj=None):
@@ -175,6 +169,7 @@ class PostdocInline(StackedInline):
     max_num = 0
     fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',)
     readonly_fields = fields
+    verbose_name_plural = ''
     suit_classes = 'suit-tab suit-tab-postdoc'
 
     def has_delete_permission(self, request, obj=None):
@@ -189,6 +184,7 @@ class VisitingInline(StackedInline):
     fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',
         'distinguished', 'home_university', 'host_university', 'host_professor',)
     readonly_fields = fields
+    verbose_name_plural = ''
     suit_classes = 'suit-tab suit-tab-visiting'
 
     def has_delete_permission(self, request, obj=None):
@@ -199,11 +195,15 @@ class AdviseesInline(TabularInline):
     fk_name = 'adviser'
     verbose_name = 'Advisee'
     verbose_name_plural = 'Advisees'
-    fields = ('awardee_link', 'degree_program', 'thesis_status', 'scholarship_status', 'end_date')
+    fields = ('scholar', 'degree_program', 'thesis_status', 'scholarship_status', 'end_date')
     readonly_fields = fields
+    verbose_name_plural = ''
     suit_classes = 'suit-tab suit-tab-advisees'
     extra = 0
     max_num = 0
+
+    def scholar(self, obj=None):
+        return obj.awardee_link()
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -214,6 +214,7 @@ class EnrolledSubjectInline(TabularInline):
     extra = 0
     suit_classes = 'suit-tab suit-tab-enrolled'
     fields = ('subject', 'year_taken', 'eq_grade')
+    verbose_name_plural = ''
 
     def get_readonly_fields(self, request, obj=None):
         try:

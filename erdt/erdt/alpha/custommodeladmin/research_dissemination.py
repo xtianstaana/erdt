@@ -35,6 +35,10 @@ class ResearchDisseminationAdmin(ERDTModelAdmin):
     list_display_links = None
     search_fields = ('payee__first_name', 'payee__last_name', 'payee__middle_name', )
     exclude = ('item_type',)
+    
+    def grant_link(self, obj=None):
+        return obj.grant.grant_link()
+    grant_link.short_description = 'Funding grant'
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         try:
@@ -52,7 +56,7 @@ class ResearchDisseminationAdmin(ERDTModelAdmin):
         if obj:
             return (
                 (None, {
-                    'fields' : ('payee_link', 'allocation', 'date_released', 'amount_released', 
+                    'fields' : ('payee_link', 'grant_link', 'allocation', 'date_released', 'amount_released', 
                         'amount_liquidated', 'description',)
                     }),
                 ('Other Information', {
@@ -71,5 +75,5 @@ class ResearchDisseminationAdmin(ERDTModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ('payee_link', 'allocation')
+            return ('payee_link', 'allocation', 'grant_link')
         return super(ResearchDisseminationAdmin, self).get_readonly_fields(request, obj)

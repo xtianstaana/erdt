@@ -17,7 +17,7 @@ from django.http import HttpResponseRedirect
 from django_select2.widgets import *
 
 
-class MyDegreeProgramForm(forms.ModelForm):
+class MyDegreeProgramForm(ModelForm):
     class Meta:
         model = Degree_Program
         fields = '__all__'
@@ -32,11 +32,6 @@ class DegreeProgramAdmin(ERDTModelAdmin):
     list_display = ('program', 'degree', 'department', )
     list_filter = ('department__university', 'degree',)
 
-    def get_readonly_fields (self, request, obj=None):
-        if obj:
-            return ('degree', 'program', 'no_semester', 'department')
-        else:
-            return super(DegreeProgramAdmin, self).get_readonly_fields(request, obj)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         try:
