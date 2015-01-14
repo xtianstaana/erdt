@@ -357,15 +357,15 @@ class PersonAdmin(ERDTModelAdmin):
                 if grants.instance_of(Scholarship).exists() or grants.instance_of(ERDT_Scholarship_Special).exists():
                     tabs.append(('scholarship', 'Scholarships'))
                 if grants.instance_of(Sandwich_Program).exists():
-                    tabs.append(('sandwich', 'Sandwich Programs'))
+                    tabs.append(('sandwich', 'Sandwich'))
                 if grants.instance_of(FRGT).exists():
                     tabs.append(('frgt', 'FRGs'))
                 if grants.instance_of(FRDG).exists():
                     tabs.append(('frdg', 'FRDGs'))
                 if grants.instance_of(Postdoctoral_Fellowship).exists():
-                    tabs.append(('postdoc', 'Postdoctoral Fellowships'))
+                    tabs.append(('postdoc', 'Postdoc'))
                 if grants.instance_of(Visiting_Professor_Grant).exists():
-                    tabs.append(('visiting', 'Visiting Professor Grants'))
+                    tabs.append(('visiting', 'Visiting Prof'))
 
                 if grants.instance_of(Scholarship).exists():
                     tabs.append(('enrolled', 'Enrolled Subjects'))
