@@ -1,11 +1,31 @@
 from django.contrib.admin import StackedInline, TabularInline
-from profiling.models import Grant, Grant_Allocation, Grant_Allocation_Release, Person, Profile
+from profiling.models import Grant, Grant_Allocation, Grant_Allocation_Release, Person, Profile, University
 from django.forms import ModelForm
 from suit.widgets import AutosizedTextarea, EnclosedInput, SuitDateWidget
 from django_select2.widgets import Select2Widget
 
 from globals import ERDTModelAdmin
 
+
+def grantStackedInline_factory(my_grant, my_tab):
+	class GrantInline(StackedInline):
+		model = my_grant
+		fk_name = 'awardee'
+		extra = 0
+		max_num = 0
+		other_fields = tuple(
+			fld.name for fld in my_grant._meta.fields 
+				if (fld not in Grant._meta.fields) and fld.name != 'grant_ptr')
+
+		fields = ('start_date', 'end_date',  'description', 'allotment') + other_fields + ('allocation_summary',)
+		readonly_fields = fields
+		verbose_name_plural = ''
+		suit_classes = 'suit-tab %s' % my_tab
+
+		def has_delete_permission(self, request, obj=None):
+			return False
+
+	return GrantInline
 
 def grantModelAdmin_factory(my_grant, choices, *eligible):
 	class GrantForm(ModelForm):
@@ -23,6 +43,9 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 					attrs={'class': 'input-small'}),
 				'start_date' : SuitDateWidget,
 				'end_date' : SuitDateWidget,
+				'record_manager' : Select2Widget(select2_options={
+					'minimumInputLength' : 2,
+					'width':'200px'}),
 			}
 
 	class GrantModelAdmin(ERDTModelAdmin):
@@ -35,7 +58,13 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 
 		def get_readonly_fields(self, request, obj=None):
 			_ro = super(GrantModelAdmin,self).get_readonly_fields(request, obj)
-			_mro = ('awardee_link', )#'allocation_summary', )
+			_mro = ('awardee_link', 'record_manager', )
+			try:
+				my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+				if my_profile.role == Profile.CENTRAL_OFFICE:
+					_mro = ('awardee_link',)
+			except:
+				pass
 			if _ro:
 				return tuple(_ro) + _mro
 			return _mro
@@ -56,12 +85,8 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 			return (
 				(None, {
 					'classes' : ('suit-tab', 'suit-tab-general'),
-					'fields' : (awardee, 'start_date', 'end_date', 'allotment', 'description',)
+					'fields' : (awardee, 'start_date', 'end_date', 'allotment', 'description', 'record_manager')
 				}),
-				# (None, {
-				# 	'classes' : ('suit-tab', 'suit-tab-releases'),
-				# 	'fields' : ('allocation_summary',)
-				# }),
 			) + others
 
 		def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -71,6 +96,18 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 				if db_field.name == 'awardee':
 					is_person = 1
 					qs = Person.objects.filter(profile__role__in=tuple(eligible))
+					if my_profile.role == Profile.UNIV_ADMIN:
+						qs = qs.filter(profile__university__pk=my_profile.university.pk)
+					kwargs["queryset"] = qs.distinct()
+				elif db_field.name == 'host_univesity':
+					is_person = 2
+					qs = University.objects.filter(is_consortium=True)
+					if my_profile.role == Profile.UNIV_ADMIN:
+						qs = qs.filter(pk=my_profile.university.pk)
+					kwargs["queryset"] = qs
+				elif db_field.name == 'host_professor':
+					is_person = 1
+					qs = Person.objects.filter(profile__role=Profile.ADVISER)
 					if my_profile.role == Profile.UNIV_ADMIN:
 						qs = qs.filter(profile__university__pk=my_profile.university.pk)
 					kwargs["queryset"] = qs.distinct()
@@ -88,6 +125,25 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 			if obj:
 				tabs.append(('releases', 'Release Summary'))
 			return tabs
+
+		def save_model(self, request, obj, form, change):
+			if not obj.id:
+				obj.record_manager = Profile.objects.get(person__user=request.user.id, active=True).university
+			super(GrantModelAdmin, self).save_model(request, obj, form, change)
+
+		def get_queryset(self, request):
+			qs = super(GrantModelAdmin, self).get_queryset(request)
+
+			try:
+				my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+				if my_profile.role == Profile.UNIV_ADMIN:
+					qs = qs.filter(record_manager__pk=my_profile.university.pk)
+				elif my_profile.role == Profile.CENTRAL_OFFICE:
+					return qs
+			except Exception as e:
+				print 'Error at GrantModelAdmin:get_queryset:::', e
+			return Grant.objects.none()
+
 	return GrantModelAdmin
 
 
@@ -108,6 +164,9 @@ def lineItemInline_factory(choices):
 		max_num = len(choices)
 		suit_classes = 'suit-tab suit-tab-allocation'
 		verbose_name_plural = ''
+
+		def has_delete_permission(self, request, obj=None):
+			return False
 
 		def formfield_for_choice_field(self, db_field, request, **kwargs):
 			if db_field.name == 'name':

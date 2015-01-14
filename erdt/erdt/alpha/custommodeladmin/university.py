@@ -25,6 +25,9 @@ class DepartmentInline(TabularInline):
     verbose_name_plural = ''
     suit_classes = 'suit-tab suit-tab-department'
 
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 class SubjectInline(TabularInline):
     model = Subject
     verbose_name = 'Subject Offered'
@@ -51,6 +54,11 @@ class UniversityAdmin(ERDTModelAdmin):
     formfield_overrides = {
         models.ForeignKey: {'widget': LinkedSelect},
     }
+
+    def has_delete_permission(self, request, obj=None):
+        if obj and obj.is_consortium:
+            return False
+        return True
 
     def get_readonly_fields(self, request, obj=None):
         if obj:

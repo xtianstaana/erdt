@@ -3,7 +3,6 @@ from profiling.models import Grant_Allocation, Profile, FRDG, FRGT, \
 	Postdoctoral_Fellowship, Sandwich_Program, ERDT_Scholarship_Special, \
 	Visiting_Professor_Grant
 
-
 FRGTAdmin = grantModelAdmin_factory(FRGT, Grant_Allocation.FRGT_ALLOC_CHOICES, Profile.ADVISER)
 FRDGAdmin = grantModelAdmin_factory(FRDG, Grant_Allocation.FRDG_ALLOC_CHOICES, Profile.ADVISER)
 PostdoctoralAdmin = grantModelAdmin_factory(Postdoctoral_Fellowship, 
@@ -13,7 +12,7 @@ SandwichAdmin = grantModelAdmin_factory(Sandwich_Program,
 Scholarship2Admin = grantModelAdmin_factory(ERDT_Scholarship_Special, 
 	Grant_Allocation.SCHOLARSHIP2_ALLOC_CHOICES, Profile.ADVISER)
 _VisitingProfessorAdmin = grantModelAdmin_factory(Visiting_Professor_Grant, 
-	Grant_Allocation.VP_ALLOC_CHOICES, Profile.ADVISER)
+	Grant_Allocation.VP_ALLOC_CHOICES, Profile.VISITING)
 
 
 from django.forms import ModelForm
@@ -40,6 +39,9 @@ class MyVisitingProfessorForm(ModelForm):
 			'host_professor' : Select2Widget(select2_options={
 				'minimumInputLength' : 2,
 				'width':'200px'}),
+			'record_manager' : Select2Widget(select2_options={
+					'minimumInputLength' : 2,
+					'width':'200px'}),
 		}
 
 class VisitingProfessorAdmin(_VisitingProfessorAdmin):
@@ -51,4 +53,3 @@ class VisitingProfessorAdmin(_VisitingProfessorAdmin):
 		if obj:
 			return tuple(_ro) + _mro
 		return _ro
-

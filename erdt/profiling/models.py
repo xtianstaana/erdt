@@ -23,7 +23,7 @@ class Person(models.Model):
 		(MARRIED, 'Married'),
 	)
 
-	#erdt_id = models.CharField(max_length=100, unique=True, editable=False)
+	id_prefix = models.CharField(max_length=100, editable=False)
 	user = models.ForeignKey(User, verbose_name='User account', null=True, blank=True, unique=True) 
 	photo = models.ImageField(upload_to='img', null=True, blank=True)
 	first_name = models.CharField(max_length=50)
@@ -45,15 +45,27 @@ class Person(models.Model):
 		today = date.today()
 		return today.year - self.birthdate.year - ((today.month, today.day) < (self.birthdate.month, self.birthdate.day))
 
+	def my_id(self):
+		if self.id:
+			return '%s-%.4d' % (sef.erdt_id, self.id % 1000)
+		return ''
+	my_id.short_description = 'ERDT ID'
+	my_id.admin_order_field = 'id'
+
 	def my_link(self):
 		if self.id:
-			url = reverse('admin:profiling_person_change', args=(self.id,))
+			url = reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name), args=(self.id,))
 			return format_html(u'<a href="{}">%s</a>' % self.__unicode__(), url)
 		return self.__unicode__()
 
 	def clean(self):
 		if self.landline_number.strip() == '' and self.mobile_number.strip() == '' and self.email_address.strip() == '':
 			raise ValidationError('Provide at least one contact number or an email address.')
+
+	def save(self, *args, **kwargs):
+		if not self.id_prefix:
+			self.id_prefix = '%.2d' % (date.today().year % 1000)
+		super(Person, self).save(*args, **kwargs)
 
 	def __unicode__(self):
 		return '%s, %s %s' % (self.last_name, self.first_name, self.middle_name)
@@ -136,6 +148,8 @@ class Subject(models.Model):
 		ordering = ('title', 'university')
 
 	def __unicode__(self):
+		if self.code:
+			return '(%s) %s: %s' % (self.code, self.title, self.university.short_name)	
 		return '%s: %s' % (self.title, self.university.short_name)
 
 	def clean(self):
@@ -199,11 +213,12 @@ class Profile(models.Model):
 		super(Profile, self).save(*args, **kwargs)
 
 class Grant(PolymorphicModel):
-	awardee = models.ForeignKey(Person, related_name='awardee')
+	awardee = models.ForeignKey(Person, related_name='grants')
 	description = models.CharField(max_length=250, blank=True)
 	start_date = models.DateField(verbose_name='Start of contract', help_text='Format: YYYY-MM-DD')
 	end_date = models.DateField(verbose_name='End of contract', help_text='Format: YYYY-MM-DD')
 	allotment = models.FloatField(default=0.0, verbose_name='Budget', help_text='Must be the same as the total amount of the line items.')
+	record_manager = models.ForeignKey(University, limit_choices_to={'is_consortium':True}, null=True, blank=True, related_name='grants_managed')
 
 	class Meta:
 		verbose_name = 'Grant'
@@ -219,25 +234,14 @@ class Grant(PolymorphicModel):
 	awardee_link.short_description = 'Awardee'
 
 	def grant_link(self):
-		url = self.grant_type()
-
-		if self.__class__ == Scholarship:
-			url = reverse('admin:profiling_scholarship_change', args=(self.id,))
-		elif self.__class__ == Sandwich_Program:
-			url = reverse('admin:profiling_sandwich_program_change', args=(self.id,))
-		elif self.__class__ == ERDT_Scholarship_Special:
-			url = reverse('admin:profiling_erdt_scholarship_special_change', args=(self.id,))
-		elif self.__class__ == FRDG:
-			url = reverse('admin:profiling_frdg_change', args=(self.id,))
-		elif self.__class__ == FRGT:
-			url = reverse('admin:profiling_frgt_change', args=(self.id,))
-		elif self.__class__ == Postdoctoral_Fellowship:
-			url = reverse('admin:profiling_postdoctoral_fellowship_change', args=(self.id,))
-		elif self.__class__ == Visiting_Professor_Grant:
-			url = reverse('admin:profiling_visiting_professor_grant_change', args=(self.id,))
-		else:
-			return url
-		return format_html(u'<a href="{}">%s</a>' % self.grant_type(), url)
+		label = self.grant_type()
+		try:
+			url = reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name), args=(self.id,))
+			return format_html(u'<a href="{}">%s</a>' % label, url)
+		except:
+			pass
+		return label
+		
 	grant_link.short_description = 'Grant type'
 
 	def is_active(self):
@@ -295,7 +299,7 @@ class Grant(PolymorphicModel):
 	allocation_summary.short_description = 'Budget Summary'
 
 	def __unicode__(self):
-		return '%s: %s' % (self.grant_type(), self.awardee.__unicode__())
+		return self.grant_type()
 
 	def clean(self):
 		if self.start_date > self.end_date:
@@ -429,9 +433,9 @@ class Grant_Allocation_Release(PolymorphicModel):
 	ITEMTYPE_CHOICES_ALL = ITEMTYPE_CHOICES + ((RS, 'Reasearch Dissemination'), (EQUIPMENT, 'Equipment'),)
 
 	item_type = models.CharField(max_length=50, choices=ITEMTYPE_CHOICES_ALL, blank=True, verbose_name='Type', help_text='For research grant fund releases only. Leave blank otherwise.')
-	payee = models.ForeignKey(Person, related_name='payee')
+	payee = models.ForeignKey(Person, related_name='fund_releases')
 	grant = GF(Grant, chained_field='payee', chained_model_field='awardee', show_all=False, auto_choose=True, verbose_name='Funding grant')
-	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant', auto_choose=True, verbose_name='Funding grant allocation')
+	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant', auto_choose=True, verbose_name='Funding line item')
 	description = models.CharField(max_length=350, blank=True)
 	amount_released = models.FloatField(default=0.0, verbose_name='Released')
 	amount_liquidated = models.FloatField(default=0.0, verbose_name='Expenditure')
@@ -462,11 +466,7 @@ class Grant_Allocation_Release(PolymorphicModel):
 	payee_link.admin_order_field = 'payee'
 
 	def release_link(self):
-		url = reverse('admin:profiling_grant_allocation_release_change', args=(self.id,))
-		if self.item_type == self.EQUIPMENT:
-			url = reverse('admin:profiling_equipment_change', args=(self.id,))
-		elif self.item_type == self.RS:
-			url = reverse('admin:profiling_research_dissemination_change', args=(self.id,))
+		url = reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name), args=(self.id,))
 		return format_html(u'<a href="{}">%s</a>' % self.particular(), url)
 	release_link.short_description = 'Particular'	
 
@@ -523,7 +523,7 @@ class Scholarship(Grant):
 
 	university = models.ForeignKey(University, limit_choices_to={'is_consortium':True})
 	degree_program = GF(Degree_Program, chained_field='university', chained_model_field='department__university')
-	adviser = models.ForeignKey(Person, related_name='adviser', null=True, blank=True)
+	adviser = models.ForeignKey(Person, related_name='advisees', null=True, blank=True)
 	scholarship_status = models.CharField(max_length=5, choices=SCHOLARSHIP_STATUS_CHOICES, default=REG_ONGOING)
 	high_degree = models.CharField(max_length=5, choices=DEGREE_CHOICES, default=BS, verbose_name='Highest degree')
 	high_degree_univ = models.ForeignKey(University, related_name='high_degree_univ', verbose_name="Highest degree's University")
@@ -558,9 +558,6 @@ class Scholarship(Grant):
 			return 2
 		return super(Scholarship, self).is_active()
 
-	def __unicode__(self):
-		return self.grant_type()
-
 class ERDT_Scholarship_Special(Grant):
 	host_university = models.CharField(max_length=150)
 	host_professor = models.CharField(max_length=150)
@@ -572,9 +569,6 @@ class ERDT_Scholarship_Special(Grant):
 
 	def grant_type(self):
 		return 'Scholarship (Abroad PhD)'
-
-	def __unicode__(self):
-		return self.grant_type()
 
 class Sandwich_Program(Grant):
 	host_university = models.CharField(max_length=150)
@@ -588,14 +582,14 @@ class Sandwich_Program(Grant):
 	def grant_type(self):
 		return 'Sandwich %s' % str(self.start_date.year)
 
-	def __unicode__(self):
-		return self.grant_type()
-
 class Postdoctoral_Fellowship(Grant):
 	class Meta:
 		verbose_name = 'Postdoctoral Fellowship'
 		verbose_name_plural = 'Postdoctoral Fellowships'
 		ordering = ('-start_date', 'awardee',)
+
+	def grant_type(self):
+		return 'Postdoctoral %s' % str(self.start_date.year)
 
 class FRGT(Grant):
 	class Meta:
@@ -603,6 +597,8 @@ class FRGT(Grant):
 		verbose_name_plural = 'Faculty Research Grants'
 		ordering = ('-start_date', 'awardee',)
 
+	def grant_type(self):
+		return 'FRG %s' % str(self.start_date.year)
 
 class FRDG(Grant):
 	class Meta:
@@ -610,11 +606,14 @@ class FRDG(Grant):
 		verbose_name_plural = 'Faculty Research Diss Grants'
 		ordering = ('-start_date', 'awardee',)
 
+	def grant_type(self):
+		return 'FRDG %s' % str(self.start_date.year)
+
 class Visiting_Professor_Grant(Grant):
 	distinguished = models.BooleanField(default=False)
 	home_university = models.CharField(max_length=150)
 	host_university = models.ForeignKey(University, limit_choices_to={'is_consortium':True})
-	host_professor = models.ForeignKey(Person, related_name='host_professor')
+	host_professor = models.ForeignKey(Person, related_name='visiting_professor_guests')
 
 	class Meta:
 		verbose_name = 'Visiting Professor Grant'
@@ -624,8 +623,6 @@ class Visiting_Professor_Grant(Grant):
 	def grant_type(self):
 		return 'Visiting %s' % str(self.start_date.year)
 
-	def __unicode__(self):
-		return self.grant_type()
 
 #############################################################################################
 
@@ -640,7 +637,7 @@ class Equipment(Grant_Allocation_Release):
 	location = models.CharField(max_length=150)
 	property_no =  models.CharField(max_length=50, help_text='If funded by multiple grants, use the same property no for the same item.')
 	status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=WORKING)
-	accountable = models.ForeignKey(Person, related_name='accountable')
+	accountable = models.ForeignKey(Person, related_name='equipments')
 	surrendered = models.BooleanField(default=False, verbose_name='Donated')
 
 	def accountable_link(self):
@@ -656,7 +653,7 @@ class Equipment(Grant_Allocation_Release):
 	accountable_sub.admin_order_field = 'accountable'
 
 	def description_link(self):
-		url = reverse('admin:profiling_equipment_change', args=(self.id,))
+		url = reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name), args=(self.id,))
 		return format_html(u'<a href="{}">%s</a>' % self.description, url)
 	description_link.short_description = 'Description'
 

@@ -44,18 +44,21 @@ class GrantAllocationReleaseAdmin(ERDTModelAdmin):
                 return ('payee_link', 'grant_link', 'allocation', 'date_released','amount_released', 'amount_liquidated', 'item_type', 'description',)
         return ('payee', 'grant', 'allocation', 'date_released', 'amount_released', 'amount_liquidated', 'item_type', 'description',)
 
-    def formfield_for_choice_field(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
             if db_field.name == 'payee':
-                qs = Person.objects.filter(profile__role__in=(Profile.ADVISER, Profile.STUDENT, Profile.VISITING))
+                qs = Person.objects.filter(grants__isnull=False)
                 if my_profile.role == Profile.UNIV_ADMIN:
-                    qs = qs.filter(profile__university__pk=my_profile.university.pk)
+                    qs = qs.filter(profile__university__id=my_profile.university.id)
                 kwargs["queryset"] = qs.distinct()
-            elif db_field.name == 'item_type':
-                kwargs['choices'] = ((u'', '-'*10),) + Grant_Allocation_Release.ITEMTYPE_CHOICES
-        except:
+        except Exception as e:
             kwargs["queryset"] = Person.objects.none()
+        return super(GrantAllocationReleaseAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        if db_field.name == 'item_type':
+                kwargs['choices'] = ((u'', '-'*10),) + Grant_Allocation_Release.ITEMTYPE_CHOICES
         return super(GrantAllocationReleaseAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
 
     def get_readonly_fields(self, request, obj=None):
@@ -64,3 +67,15 @@ class GrantAllocationReleaseAdmin(ERDTModelAdmin):
                 return ('payee_link', 'allocation', 'item_type', 'grant_link')
             return ('payee_link', 'allocation', 'grant_link')
         return super(GrantAllocationReleaseAdmin, self).get_readonly_fields(request, obj)
+
+    def get_queryset(self, request):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if  my_profile.role == Profile.UNIV_ADMIN:
+                return Grant_Allocation_Release.objects.filter(
+                    grant__record_manger__id=my_profile.university.id).distinct()
+            elif my_profile.role == Profile.CENTRAL_OFFICE:
+                return Grant_Allocation_Release.objects.all()
+        except Exception as e:
+            print 'Error', e
+        return Grant_Allocation_Release.objects.none()

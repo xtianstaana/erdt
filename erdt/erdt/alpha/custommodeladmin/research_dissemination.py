@@ -44,7 +44,7 @@ class ResearchDisseminationAdmin(ERDTModelAdmin):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
             if db_field.name == 'payee':
-                qs = Person.objects.filter(profile__role__in=(Profile.ADVISER, Profile.STUDENT))
+                qs = Person.objects.filter(grants__isnull=False)
                 if my_profile.role == Profile.UNIV_ADMIN:
                     qs = qs.filter(profile__university__pk=my_profile.university.pk)
                 kwargs["queryset"] = qs.distinct()
@@ -53,19 +53,14 @@ class ResearchDisseminationAdmin(ERDTModelAdmin):
         return super(ResearchDisseminationAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
+        payee = 'payee'
+        grant = 'grant'
         if obj:
-            return (
-                (None, {
-                    'fields' : ('payee_link', 'grant_link', 'allocation', 'date_released', 'amount_released', 
-                        'amount_liquidated', 'description',)
-                    }),
-                ('Other Information', {
-                    'fields' : (('paper_title', 'conference_name', 'conference_loc', 'conference_date'))
-                    }),
-            )
+            payee = 'payee_link'
+            grant = 'grant_link'
         return (
             (None, {
-                'fields' : ('payee', 'grant', 'allocation', 'date_released', 'amount_released', 
+                'fields' : (payee, grant, 'allocation', 'date_released', 'amount_released', 
                     'amount_liquidated', 'description',)
                 }),
             ('Other Information', {
@@ -77,3 +72,15 @@ class ResearchDisseminationAdmin(ERDTModelAdmin):
         if obj:
             return ('payee_link', 'allocation', 'grant_link')
         return super(ResearchDisseminationAdmin, self).get_readonly_fields(request, obj)
+
+    def get_queryset(self, request):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if  my_profile.role == Profile.UNIV_ADMIN:
+                return Research_Dissemination.objects.filter(
+                    grant__record_manger__id=my_profile.university.id).distinct()
+            elif my_profile.role == Profile.CENTRAL_OFFICE:
+                return Research_Dissemination.objects.all()
+        except Exception as e:
+            print 'Error', e
+        return Research_Dissemination.objects.none()

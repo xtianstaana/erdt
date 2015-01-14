@@ -60,7 +60,7 @@ class PurchasedItemAdmin(ERDTModelAdmin):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
             if db_field.name == 'payee':
-                qs = Person.objects.filter(profile__role__in=(Profile.ADVISER, Profile.STUDENT))
+                qs = Person.objects.filter(grants__isnull=False)
                 if my_profile.role == Profile.UNIV_ADMIN:
                     qs = qs.filter(profile__university__pk=my_profile.university.pk)
                 kwargs["queryset"] = qs.distinct()
@@ -74,19 +74,14 @@ class PurchasedItemAdmin(ERDTModelAdmin):
         return super(PurchasedItemAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
+        payee = 'payee'
+        grant = 'grant'
         if obj:
-            return (
-                (None, {
-                    'fields' : ('payee_link', 'grant_link', 'allocation', 'date_released', 'amount_released', 
-                        'amount_liquidated', 'description',)
-                    }),
-                ('Other Information', {
-                    'fields' : ('property_no', 'location',  'status', 'accountable', 'surrendered', )
-                    }),
-            )
+            payee = 'payee_link'
+            grant = 'grant_link'
         return (
             (None, {
-                'fields' : ('payee', 'grant', 'allocation', 'date_released', 'amount_released', 
+                'fields' : (payee, grant, 'allocation', 'date_released', 'amount_released', 
                     'amount_liquidated', 'description',)
                 }),
             ('Other Information', {
@@ -99,3 +94,15 @@ class PurchasedItemAdmin(ERDTModelAdmin):
             return ('payee_link', 'allocation', 'grant_link')
         else:
             return super(PurchasedItemAdmin, self).get_readonly_fields(request, obj)
+
+    def get_queryset(self, request):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if  my_profile.role == Profile.UNIV_ADMIN:
+                return Equipment.objects.filter(
+                    grant__record_manger__id=my_profile.university.id).distinct()
+            elif my_profile.role == Profile.CENTRAL_OFFICE:
+                return Equipment.objects.all()
+        except Exception as e:
+            print 'Error', e
+        return Equipment.objects.none()

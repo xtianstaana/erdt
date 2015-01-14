@@ -9,6 +9,7 @@ from django.contrib.admin import StackedInline, TabularInline, HORIZONTAL, VERTI
 from django import forms
 from suit.widgets import *
 from django_select2.widgets import Select2Widget
+from grants_common import grantStackedInline_factory
 from profiling.models import *
 
 class GrantSummaryInline(TabularInline):
@@ -19,11 +20,22 @@ class GrantSummaryInline(TabularInline):
     verbose_name = 'Grant Awarded'
     verbose_name_plural = 'Grants Awarded'
     suit_classes = 'suit-tab suit-tab-grantsummary'
-    exclude = ('description', 'delete')
-    readonly_fields = ('grant_link', 'start_date', 'end_date', 'allotment', 'total_released', 'total_unexpended',
+    fields = ('grant_type', 'start_date', 'end_date', 'allotment', 'total_released', 'total_unexpended',
         'total_unreleased', 'is_active')
+    readonly_fields = fields + ('grant_link',)
 
-    def has_add_permission(self, request, obj=None):
+    def get_fields(self, request, obj=None):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role in (Profile.CENTRAL_OFFICE, Profile.UNIV_ADMIN):
+                return (
+                    'grant_link', 'start_date', 'end_date', 'allotment', 'total_released', 
+                    'total_unexpended','total_unreleased', 'is_active')
+        except:
+            pass
+        return super(GrantSummaryInline, self).get_fields(request, obj)
+
+    def has_add_permission(self, request):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
             if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
@@ -41,8 +53,21 @@ class ReleaseInline(TabularInline):
     fk_name = 'payee'
     extra = 0
     suit_classes = 'suit-tab suit-tab-grantsummary'
-    fields = ('date_released', 'release_link',  'amount_released', 'amount_liquidated', 'amount_unexpended')
-    readonly_fields = fields
+    fields = (
+        'date_released', 'particular',  'amount_released', 
+        'amount_liquidated', 'amount_unexpended')
+    readonly_fields = fields + ('release_link',)
+
+    def get_fields(self, request, obj=None):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role in (Profile.CENTRAL_OFFICE, Profile.UNIV_ADMIN):
+                return (
+                    'date_released', 'release_link',  'amount_released', 
+                    'amount_liquidated', 'amount_unexpended')
+        except:
+            pass
+        return super(ReleaseInline, self).get_fields(request, obj)
 
     def has_add_permission(self, request, obj=None):
         try:
@@ -64,8 +89,19 @@ class EquipmentIssuedInline(TabularInline):
     suit_classes = 'suit-tab suit-tab-grantsummary'
     verbose_name = 'Accountable Equipment'
     verbose_name_plural = 'Issued Equipments'
-    fields = ('date_released', 'property_no', 'description_link', 'status', 'accountable_link')
-    readonly_fields = fields
+    fields = ('date_released', 'property_no', 'description', 'status', 'accountable')
+    readonly_fields = fields + ('description_link', 'accountable_link')
+
+    def get_fields(self, request, obj=None):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role in (Profile.CENTRAL_OFFICE, Profile.UNIV_ADMIN):
+                return (
+                    'date_released', 'property_no', 'description_link', 'status', 
+                    'accountable_link')
+        except:
+            pass
+        return super(EquipmentIssuedInline, self).get_fields(request, obj)
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -78,117 +114,31 @@ class EquipmentAccountableInline(TabularInline):
     suit_classes = 'suit-tab suit-tab-grantsummary'
     verbose_name = 'Accountable Equipment'
     verbose_name_plural = 'Accountable Equipments'
-    fields = ('date_released', 'property_no', 'description_link', 'status', 'issued_to')
-    readonly_fields = fields
+    fields = ('date_released', 'property_no', 'description', 'status', 'issued_to')
+    readonly_fields = fields + ('description_link',)
 
     def issued_to(self, obj):
         return obj.payee
 
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-class ScholarshipInline(StackedInline):
-    model = Scholarship
-    fk_name = 'awardee'
-    template = 'admin/edit_inline_with_link/stacked_with_link.html'
-    extra = 0
-    max_num = 0
-    suit_classes = 'suit-tab suit-tab-scholarship'
-    fields = ('degree_program', 'scholarship_status', 'start_date', 'end_date', 'description', 'allotment', 'allocation_summary',
-        'entry_grad_program', 'end_grad_program', 'ce_schedule',  'lateral', 'adviser', 'thesis_status', 'thesis_title',
-        'thesis_topic', 'high_degree_univ', 'high_degree', 'cleared')
-    readonly_fields = fields
+    def get_fields(self, request, obj=None):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role in (Profile.CENTRAL_OFFICE, Profile.UNIV_ADMIN):
+                return ('date_released', 'property_no', 'description_link', 'status', 'issued_to')
+        except:
+            pass
+        return super(EquipmentAccountableInline, self).get_fields(request, obj)
 
     def has_delete_permission(self, request, obj=None):
         return False
 
-class SandwichInline(StackedInline):
-    model = Sandwich_Program
-    fk_name = 'awardee'
-    template = 'admin/edit_inline_with_link/stacked_with_link.html'
-    extra = 0
-    max_num = 0
-    verbose_name_plural = ''
-    suit_classes = 'suit-tab suit-tab-sandwich'
-
-    fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',
-        'host_university', 'host_professor',)
-    readonly_fields = fields
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-class Scholarship2Inline(StackedInline):
-    model = ERDT_Scholarship_Special
-    fk_name = 'awardee'
-    template = 'admin/edit_inline_with_link/stacked_with_link.html'
-    extra = 0
-    max_num = 0
-    suit_classes = 'suit-tab suit-tab-scholarship'
-
-    fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',
-        'host_university', 'host_professor',)
-    readonly_fields = fields
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-class FRDGInline(StackedInline):
-    model = FRDG
-    fk_name = 'awardee'
-    template = 'admin/edit_inline_with_link/stacked_with_link.html'
-    extra = 0
-    max_num = 0
-    fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',)
-    readonly_fields = fields
-    verbose_name_plural = ''
-    suit_classes = 'suit-tab suit-tab-frdg'
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-class FRGTInline(StackedInline):
-    model = FRGT
-    fk_name = 'awardee'
-    template = 'admin/edit_inline_with_link/stacked_with_link.html'
-    extra = 0
-    max_num = 0
-    fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',)
-    readonly_fields = fields
-    verbose_name_plural = ''
-    suit_classes = 'suit-tab suit-tab-frgt'
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-class PostdocInline(StackedInline):
-    model = Postdoctoral_Fellowship
-    fk_name = 'awardee'
-    template = 'admin/edit_inline_with_link/stacked_with_link.html'
-    extra = 0
-    max_num = 0
-    fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',)
-    readonly_fields = fields
-    verbose_name_plural = ''
-    suit_classes = 'suit-tab suit-tab-postdoc'
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-class VisitingInline(StackedInline):
-    model = Visiting_Professor_Grant
-    fk_name = 'awardee'
-    template = 'admin/edit_inline_with_link/stacked_with_link.html'
-    extra = 0
-    max_num = 0
-    fields = ('start_date', 'end_date',  'description', 'allotment', 'allocation_summary',
-        'distinguished', 'home_university', 'host_university', 'host_professor',)
-    readonly_fields = fields
-    verbose_name_plural = ''
-    suit_classes = 'suit-tab suit-tab-visiting'
-
-    def has_delete_permission(self, request, obj=None):
-        return False
+ScholarshipInline = grantStackedInline_factory(Scholarship, 'suit-tab-scholarship')
+SandwichInline = grantStackedInline_factory(Sandwich_Program, 'suit-tab-sandwich')
+Scholarship2Inline = grantStackedInline_factory(ERDT_Scholarship_Special, 'suit-tab-scholarship')
+FRDGInline = grantStackedInline_factory(FRDG, 'suit-tab-frdg')
+FRGTInline = grantStackedInline_factory(FRGT, 'suit-tab-frgt')
+PostdocInline = grantStackedInline_factory(Postdoctoral_Fellowship, 'suit-tab-postdoc')
+VisitingInline = grantStackedInline_factory(Visiting_Professor_Grant, 'suit-tab-visiting')
 
 class AdviseesInline(TabularInline):
     model = Scholarship
@@ -203,10 +153,11 @@ class AdviseesInline(TabularInline):
     max_num = 0
 
     def scholar(self, obj=None):
-        return obj.awardee_link()
+        return obj.awardee
 
     def has_delete_permission(self, request, obj=None):
         return False
+
 
 class EnrolledSubjectInline(TabularInline):
     model = Enrolled_Subject
@@ -219,11 +170,11 @@ class EnrolledSubjectInline(TabularInline):
     def get_readonly_fields(self, request, obj=None):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
-            if my_profile.role not in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
-                return ('subject', 'year_taken', 'eq_grade')
+            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
+                return super(EnrolledSubjectInline, self).get_readonly_fields(request, obj)
         except:
             pass
-        return super(EnrolledSubjectInline, self).get_readonly_fields(request, obj)
+        return ('subject', 'year_taken', 'eq_grade')
 
     def has_add_permission(self, request, obj=None):
         try:
@@ -245,8 +196,8 @@ class EnrolledSubjectInline(TabularInline):
 
 class ProfileInline(TabularInline):
     model = Profile
-    verbose_name_plural = 'Academic Profile'
-    verbose_name_plural = 'Academic Profiles'
+    verbose_name_plural = 'Role and Eligibility'
+    verbose_name_plural = 'Roles and Eligibilities'
     exclude = ('active',)
     extra = 0
     suit_classes = 'suit-tab suit-tab-general'
@@ -254,23 +205,13 @@ class ProfileInline(TabularInline):
     def get_readonly_fields(self, request, obj=None):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
-            if my_profile.role not in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
-                return ('role', 'university', )
+            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
+                return super(ProfileInline, self).get_readonly_fields(request, obj)
         except:
             pass
-        return super(ProfileInline, self).get_readonly_fields(request, obj)
+        return ('role', 'university', )
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        try:
-            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
-            if db_field.name == 'university':
-                if my_profile.role == Profile.UNIV_ADMIN:
-                    kwargs["queryset"] = University.objects.filter(pk=my_profile.university.pk)
-        except:
-            pass
-        return super(ProfileInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
-
-    def has_add_permission(self, request, obj=None):
+    def has_add_permission(self, request):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
             if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
@@ -288,14 +229,24 @@ class ProfileInline(TabularInline):
             pass
         return False
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if db_field.name == 'university':
+                if my_profile.role == Profile.UNIV_ADMIN:
+                    kwargs["queryset"] = University.objects.filter(pk=my_profile.university.pk)
+        except Exception as e:
+            print 'Error at ProfileInline', e
+        return super(ProfileInline, self).formfield_for_foreignkey(db_field, request, **kwargs)    
+
     def formfield_for_choice_field(self, db_field, request, **kwargs):
-        if db_field.name == 'role':
-            try:
+        try:
+            if db_field.name == 'role':
                 my_profile = Profile.objects.get(person__user=request.user.id, active=True)
                 if my_profile.role == Profile.UNIV_ADMIN:                        
                     kwargs['choices'] = Profile.ADMIN_ROLE_CHOICES
-            except Exception as e:
-                print 'Error at ProfileInline', e
+        except Exception as e:
+            print 'Error at ProfileInline', e
         return super(ProfileInline, self).formfield_for_choice_field(db_field, request, **kwargs)
 
 class MyPersonForm(forms.ModelForm):
@@ -308,12 +259,10 @@ class MyPersonForm(forms.ModelForm):
                 'width':'200px'}),
         }
 
-import threading
-_thread_locals = threading.local()
-
 class PersonAdmin(ERDTModelAdmin):
     form = MyPersonForm
-    inlines = (ProfileInline, AdviseesInline, GrantSummaryInline, ReleaseInline, EquipmentIssuedInline, 
+    inlines = (
+        ProfileInline, AdviseesInline, GrantSummaryInline, ReleaseInline, EquipmentIssuedInline, 
         EquipmentAccountableInline, Scholarship2Inline, ScholarshipInline, SandwichInline, 
         FRGTInline, FRDGInline, PostdocInline, VisitingInline, EnrolledSubjectInline)
     list_display = ('__unicode__', 'user', 'email_address', 'mobile_number')
@@ -325,7 +274,7 @@ class PersonAdmin(ERDTModelAdmin):
         ('Personal Information', {
             'classes' : ('suit-tab', 'suit-tab-general',),
             'fields': ('photo', 'first_name', 'middle_name', 'last_name', 'sex', 'civil_status',
-            ('birthdate', 'age'))
+            'birthdate', 'age')
             }),
         ('Contact Information', {
             'classes' : ('suit-tab', 'suit-tab-general', 'collapse'),
@@ -337,15 +286,34 @@ class PersonAdmin(ERDTModelAdmin):
             }),
     )
 
-    def get_form(self, request, obj=None):
-        _thread_locals.request = request
-        _thread_locals.obj = obj
-        return super(PersonAdmin, self).get_form(request, obj)
+    def has_delete_permission(self, request, obj=None):
+        return False
 
-    def _suit_form_tabs(self):
-        return self.get_suit_form_tabs(_thread_locals.request, _thread_locals.obj)
+    def has_add_permission(self, request):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
+                return True
+        except:
+            pass
+        return False
 
-    suit_form_tabs = property(_suit_form_tabs)
+    def get_readonly_fields(self, request, obj=None):
+        try:
+            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            if my_profile.role in (Profile.CENTRAL_OFFICE, Profile.UNIV_ADMIN):
+                return super(PersonAdmin, self).get_readonly_fields(request, obj)
+
+            if obj and (obj.id==my_profile.person.id) and my_profile.role in (Profile.STUDENT, Profile.ADVISER):
+                return (
+                    'photo', 'first_name', 'middle_name', 'last_name', 
+                    'sex', 'civil_status', 'birthdate', 'user', 'age', 'address', )
+        except:
+            pass
+        return (
+            'photo', 'first_name', 'middle_name', 'last_name', 
+            'sex', 'civil_status', 'birthdate', 'user', 'age', 'address', 
+            'address2', 'email_address', 'landline_number', 'mobile_number')
 
     def get_suit_form_tabs(self, request, obj=None):
         tabs = [('general', 'General')]
@@ -367,7 +335,7 @@ class PersonAdmin(ERDTModelAdmin):
                 if grants.instance_of(Sandwich_Program).exists():
                     tabs.append(('sandwich', 'Sandwich Programs'))
                 if grants.instance_of(FRGT).exists():
-                    tabs.append(('frgt', 'FRGTs'))
+                    tabs.append(('frgt', 'FRGs'))
                 if grants.instance_of(FRDG).exists():
                     tabs.append(('frdg', 'FRDGs'))
                 if grants.instance_of(Postdoctoral_Fellowship).exists():
@@ -390,9 +358,13 @@ class PersonAdmin(ERDTModelAdmin):
     """
     def get_queryset(self, request):
         try:
-            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            my_profile = Profile.objects.filter(person__user=request.user.id, active=True)
+            if my_profile.exists():
+                my_profile = my_profile[0]
+            else:
+                return Person.objects.filter(user__pk=request.user.pk)
 
-            if my_profile.role == Profile.STUDENT: # If User's profile is STUDENT
+            if my_profile.role in (Profile.STUDENT, Profile.ADVISER):
                 return Person.objects.filter(user__pk=request.user.pk)
             elif my_profile.role == Profile.UNIV_ADMIN: # If User's profile is UNIV_ADMIN
                 return Person.objects.filter(profile__university__pk=my_profile.university.pk).distinct()
