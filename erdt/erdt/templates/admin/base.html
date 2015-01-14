@@ -40,17 +40,17 @@
 
         <ul>
 
-          <li><a href="{% url 'admin:profiling_scholarship_add' %}" onclick="return showPopupSelected(this);">Local Scholarship</a></li>
+          <li><a href="{% url 'admin:profiling_scholarship_add' %}" onclick="return showPopupSelected(this);">Scholarship (Local)</a></li>
+
+          <li><a href="{% url 'admin:profiling_frdg_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Faculty Research Diss Grant</a></li>
+
+          <li><a href="{% url 'admin:profiling_frgt_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Faculty Research Grant</a></li>
+
+          <li><a href="{% url 'admin:profiling_postdoctoral_fellowship_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Postdoctoral Fellowship</a></li>
 
           <li><a href="{% url 'admin:profiling_sandwich_program_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Sandwich Program</a></li>
 
-          <li><a href="{% url 'admin:profiling_erdt_scholarship_special_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Abroad Scholarships</a></li>
-
-          <li><a href="{% url 'admin:profiling_frgt_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Faculty Research</a></li>
-
-          <li><a href="{% url 'admin:profiling_frdg_add' %}?_to_field=id" onclick="return showPopupSelected(this);">FRDG</a></li>
-
-          <li><a href="{% url 'admin:profiling_postdoctoral_fellowship_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Postdoctoral Fellowship</a></li>
+          <li><a href="{% url 'admin:profiling_erdt_scholarship_special_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Scholarship (PhD Abroad)</a></li>
 
           <li><a href="{% url 'admin:profiling_visiting_professor_grant_add' %}?_to_field=id" onclick="return showPopupSelected(this);">Visiting Professor</a></li>
 

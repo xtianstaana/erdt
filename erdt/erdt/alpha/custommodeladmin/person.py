@@ -35,6 +35,15 @@ class GrantSummaryInline(TabularInline):
             pass
         return super(GrantSummaryInline, self).get_fields(request, obj)
 
+    def get_max_num(self, request, obj=None, **kwargs):
+        if obj:
+            try:
+                if Profile.objects.filter(role__in=(Profile.STUDENT, Profile.ADVISER, Profile.VISITING), person_id=obj.id).exists():
+                    return None
+            except:
+                pass
+        return 0
+
     def has_add_permission(self, request):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
@@ -69,7 +78,17 @@ class ReleaseInline(TabularInline):
             pass
         return super(ReleaseInline, self).get_fields(request, obj)
 
-    def has_add_permission(self, request, obj=None):
+
+    def get_max_num(self, request, obj=None, **kwargs):
+        if obj:
+            try:
+                if Grant.objects.filter(awardee_id=obj.id).exists():
+                    return None
+            except:
+                pass
+        return 0
+
+    def has_add_permission(self, request):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
             if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
@@ -111,7 +130,7 @@ class EquipmentAccountableInline(TabularInline):
     fk_name = 'accountable'
     extra = 0
     max_num = 0
-    suit_classes = 'suit-tab suit-tab-grantsummary'
+    suit_classes = 'suit-tab suit-tab-advisees'
     verbose_name = 'Accountable Equipment'
     verbose_name_plural = 'Accountable Equipments'
     fields = ('date_released', 'property_no', 'description', 'status', 'issued_to')
@@ -147,7 +166,7 @@ class AdviseesInline(TabularInline):
     verbose_name_plural = 'Advisees'
     fields = ('scholar', 'degree_program', 'thesis_status', 'scholarship_status', 'end_date')
     readonly_fields = fields
-    verbose_name_plural = ''
+    verbose_name_plural = 'Advisees'
     suit_classes = 'suit-tab suit-tab-advisees'
     extra = 0
     max_num = 0
@@ -269,15 +288,16 @@ class PersonAdmin(ERDTModelAdmin):
         ProfileInline, AdviseesInline, GrantSummaryInline, ReleaseInline, EquipmentIssuedInline, 
         EquipmentAccountableInline, Scholarship2Inline, ScholarshipInline, SandwichInline, 
         FRGTInline, FRDGInline, PostdocInline, VisitingInline, EnrolledSubjectInline)
-    list_display = ('__unicode__', 'user', 'email_address', 'mobile_number')
-    readonly_fields = ('age', 'my_id')
+    list_display = ('erdt_id', '__unicode__', 'email_address', 'mobile_number', 'user')
+    list_display_links = ('__unicode__',)
+    readonly_fields = ('age', 'erdt_id')
     list_filter = ('profile__role', 'profile__university', )
-    search_fields = ('first_name', 'last_name', 'middle_name', 'user__username')
+    search_fields = ('first_name', 'last_name', 'middle_name', 'user__username', 'erdt_id')
     radio_fields =  {'sex' : HORIZONTAL, 'civil_status' : HORIZONTAL}
     fieldsets = (
         ('Personal Information', {
             'classes' : ('suit-tab', 'suit-tab-general',),
-            'fields': ('my_id', 'photo', 'first_name', 'middle_name', 'last_name', 'sex', 'civil_status',
+            'fields': ('erdt_id', 'photo', 'first_name', 'middle_name', 'last_name', 'sex', 'civil_status',
             'birthdate', 'age')
             }),
         ('Contact Information', {
@@ -311,27 +331,27 @@ class PersonAdmin(ERDTModelAdmin):
             if obj and (obj.id==my_profile.person.id) and my_profile.role in (Profile.STUDENT, Profile.ADVISER):
                 return (
                     'photo', 'first_name', 'middle_name', 'last_name', 
-                    'sex', 'civil_status', 'birthdate', 'user', 'age', 'address', 'my_id')
+                    'sex', 'civil_status', 'birthdate', 'user', 'age', 'address', 'erdt_id')
         except:
             pass
         return (
             'photo', 'first_name', 'middle_name', 'last_name', 
             'sex', 'civil_status', 'birthdate', 'user', 'age', 'address', 
-            'address2', 'email_address', 'landline_number', 'mobile_number', 'my_id')
+            'address2', 'email_address', 'landline_number', 'mobile_number', 'erdt_id')
 
     def get_suit_form_tabs(self, request, obj=None):
         tabs = [('general', 'General')]
         if obj:
             try:
                 profiles = Profile.objects.filter(person__pk=obj.pk)
-                is_student_faculty = profiles.filter(Q(role=Profile.STUDENT)|Q(role=Profile.ADVISER)).exists()
+                is_student_faculty = profiles.filter(role__in=(Profile.STUDENT, Profile.ADVISER, Profile.VISITING)).exists()
 
                 grants = Grant.objects.filter(awardee__pk=obj.pk)
 
-                if Scholarship.objects.filter(adviser__pk=obj.pk):
-                    tabs.append(('advisees', 'Advisees'), )
+                if Scholarship.objects.filter(adviser__pk=obj.pk).exists() or Equipment.objects.filter(accountable__pk=obj.pk).exists():
+                    tabs.append(('advisees', 'Accountabilities'), )
 
-                if is_student_faculty:
+                if grants.exists() or is_student_faculty:
                     tabs.append(('grantsummary', 'Grants Summary'))
                 
                 if grants.instance_of(Scholarship).exists() or grants.instance_of(ERDT_Scholarship_Special).exists():

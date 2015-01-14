@@ -23,7 +23,7 @@ class Person(models.Model):
 		(MARRIED, 'Married'),
 	)
 
-	id_prefix = models.CharField(max_length=100, editable=False)
+	erdt_id = models.CharField(max_length=100, editable=False, unique=True, verbose_name='ERDT ID')
 	user = models.ForeignKey(User, verbose_name='User account', null=True, blank=True, unique=True) 
 	photo = models.ImageField(upload_to='img', null=True, blank=True)
 	first_name = models.CharField(max_length=50)
@@ -39,18 +39,11 @@ class Person(models.Model):
 	mobile_number = models.CharField(max_length=100, blank=True)
 
 	class Meta:
-		ordering = ('last_name', 'first_name', 'middle_name')
+		ordering = ('last_name', 'first_name', 'middle_name', 'erdt_id')
 
 	def age(self):
 		today = date.today()
 		return today.year - self.birthdate.year - ((today.month, today.day) < (self.birthdate.month, self.birthdate.day))
-
-	def my_id(self):
-		if self.id:
-			return '%s-%.4d' % (self.id_prefix, self.id % 1000)
-		return ''
-	my_id.short_description = 'ERDT ID'
-	my_id.admin_order_field = 'id'
 
 	def my_link(self):
 		if self.id:
@@ -63,8 +56,11 @@ class Person(models.Model):
 			raise ValidationError('Provide at least one contact number or an email address.')
 
 	def save(self, *args, **kwargs):
-		if not self.id_prefix:
-			self.id_prefix = '%.2d' % (date.today().year % 1000)
+		if not self.id:
+			super(Person, self).save(*args, **kwargs)
+
+		if self.id and (not self.erdt_id):
+			self.erdt_id = '%.2d-%.4d' % (date.today().year % 1000, self.id % 1000)
 		super(Person, self).save(*args, **kwargs)
 
 	def __unicode__(self):
@@ -296,7 +292,7 @@ class Grant(PolymorphicModel):
 			</thread></table>' % (out, totals)
 
 		return format_html(mark_safe(out))
-	allocation_summary.short_description = 'Budget Summary'
+	allocation_summary.short_description = 'Budget summary'
 
 	def __unicode__(self):
 		return self.grant_type()
