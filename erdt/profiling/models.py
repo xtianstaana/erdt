@@ -47,7 +47,7 @@ class Person(models.Model):
 
 	def my_id(self):
 		if self.id:
-			return '%s-%.4d' % (sef.erdt_id, self.id % 1000)
+			return '%s-%.4d' % (self.id_prefix, self.id % 1000)
 		return ''
 	my_id.short_description = 'ERDT ID'
 	my_id.admin_order_field = 'id'

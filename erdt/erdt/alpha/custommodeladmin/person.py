@@ -205,7 +205,7 @@ class ProfileInline(TabularInline):
     def get_readonly_fields(self, request, obj=None):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
-            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
+            if my_profile.role in (Profile.CENTRAL_OFFICE, Profile.UNIV_ADMIN):
                 return super(ProfileInline, self).get_readonly_fields(request, obj)
         except:
             pass
@@ -232,8 +232,10 @@ class ProfileInline(TabularInline):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+            has_central = Profile.objects.filter(
+                person__user=request.user.id, role=Profile.CENTRAL_OFFICE).exists()
             if db_field.name == 'university':
-                if my_profile.role == Profile.UNIV_ADMIN:
+                if (my_profile.role == Profile.UNIV_ADMIN) and (not has_central):
                     kwargs["queryset"] = University.objects.filter(pk=my_profile.university.pk)
         except Exception as e:
             print 'Error at ProfileInline', e
@@ -243,7 +245,9 @@ class ProfileInline(TabularInline):
         try:
             if db_field.name == 'role':
                 my_profile = Profile.objects.get(person__user=request.user.id, active=True)
-                if my_profile.role == Profile.UNIV_ADMIN:                        
+                has_central = Profile.objects.filter(
+                    person__user=request.user.id, role=Profile.CENTRAL_OFFICE).exists()
+                if (my_profile.role == Profile.UNIV_ADMIN) and (not has_central):
                     kwargs['choices'] = Profile.ADMIN_ROLE_CHOICES
         except Exception as e:
             print 'Error at ProfileInline', e
@@ -266,14 +270,14 @@ class PersonAdmin(ERDTModelAdmin):
         EquipmentAccountableInline, Scholarship2Inline, ScholarshipInline, SandwichInline, 
         FRGTInline, FRDGInline, PostdocInline, VisitingInline, EnrolledSubjectInline)
     list_display = ('__unicode__', 'user', 'email_address', 'mobile_number')
-    readonly_fields = ('age',)
+    readonly_fields = ('age', 'my_id')
     list_filter = ('profile__role', 'profile__university', )
     search_fields = ('first_name', 'last_name', 'middle_name', 'user__username')
     radio_fields =  {'sex' : HORIZONTAL, 'civil_status' : HORIZONTAL}
     fieldsets = (
         ('Personal Information', {
             'classes' : ('suit-tab', 'suit-tab-general',),
-            'fields': ('photo', 'first_name', 'middle_name', 'last_name', 'sex', 'civil_status',
+            'fields': ('my_id', 'photo', 'first_name', 'middle_name', 'last_name', 'sex', 'civil_status',
             'birthdate', 'age')
             }),
         ('Contact Information', {
@@ -307,13 +311,13 @@ class PersonAdmin(ERDTModelAdmin):
             if obj and (obj.id==my_profile.person.id) and my_profile.role in (Profile.STUDENT, Profile.ADVISER):
                 return (
                     'photo', 'first_name', 'middle_name', 'last_name', 
-                    'sex', 'civil_status', 'birthdate', 'user', 'age', 'address', )
+                    'sex', 'civil_status', 'birthdate', 'user', 'age', 'address', 'my_id')
         except:
             pass
         return (
             'photo', 'first_name', 'middle_name', 'last_name', 
             'sex', 'civil_status', 'birthdate', 'user', 'age', 'address', 
-            'address2', 'email_address', 'landline_number', 'mobile_number')
+            'address2', 'email_address', 'landline_number', 'mobile_number', 'my_id')
 
     def get_suit_form_tabs(self, request, obj=None):
         tabs = [('general', 'General')]

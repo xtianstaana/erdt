@@ -16,6 +16,7 @@ class Report(models.Model):
 	)
 
 	name = models.CharField(max_length=250, unique=True, verbose_name='Report name')
+	description = models.CharField(max_length=250, blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 	report_type = models.CharField(max_length=50, choices=ALL_REPORT_CHOICES, verbose_name='Report type')
 	start_date = models.DateField(verbose_name='Start of period', help_text='Format: YYYY-MM-DD')
