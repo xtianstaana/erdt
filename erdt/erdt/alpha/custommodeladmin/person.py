@@ -164,7 +164,9 @@ class AdviseesInline(TabularInline):
     fk_name = 'adviser'
     verbose_name = 'Advisee'
     verbose_name_plural = 'Advisees'
-    fields = ('scholar', 'degree_program', 'thesis_status', 'scholarship_status', 'end_date')
+    fields = (
+        'scholar', 'degree_program', 'thesis_status', 'scholarship_status', 'end_date', 
+        'allocation_summary')
     readonly_fields = fields
     verbose_name_plural = 'Advisees'
     suit_classes = 'suit-tab suit-tab-advisees'
@@ -288,8 +290,8 @@ class PersonAdmin(ERDTModelAdmin):
         ProfileInline, AdviseesInline, GrantSummaryInline, ReleaseInline, EquipmentIssuedInline, 
         EquipmentAccountableInline, Scholarship2Inline, ScholarshipInline, SandwichInline, 
         FRGTInline, FRDGInline, PostdocInline, VisitingInline, EnrolledSubjectInline)
-    list_display = ('erdt_id', '__unicode__', 'email_address', 'mobile_number', 'user')
-    list_display_links = ('__unicode__',)
+    list_display = ('erdt_id', 'name', 'email_address', 'mobile_number', 'user')
+    list_display_links = ('name',)
     readonly_fields = ('age', 'erdt_id')
     list_filter = ('profile__role', 'profile__university', )
     search_fields = ('first_name', 'last_name', 'middle_name', 'user__username', 'erdt_id')

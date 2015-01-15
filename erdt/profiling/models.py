@@ -45,6 +45,9 @@ class Person(models.Model):
 		today = date.today()
 		return today.year - self.birthdate.year - ((today.month, today.day) < (self.birthdate.month, self.birthdate.day))
 
+	def name(self):
+		return '%s, %s %s' % (self.last_name, self.first_name, self.middle_name)
+
 	def my_link(self):
 		if self.id:
 			url = reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name), args=(self.id,))
@@ -59,12 +62,13 @@ class Person(models.Model):
 		if not self.id:
 			super(Person, self).save(*args, **kwargs)
 
-		if self.id and (not self.erdt_id):
-			self.erdt_id = '%.2d-%.4d' % (date.today().year % 1000, self.id % 1000)
+		if self.id and (not self.erdt_id) or len(self.erdt_id) == 7:
+			today = date.today()
+			self.erdt_id = '%.2d-%d%.4d' % (today.year % 1000, today.weekday()+1, self.id % 1000)
 		super(Person, self).save(*args, **kwargs)
 
 	def __unicode__(self):
-		return '%s, %s %s' % (self.last_name, self.first_name, self.middle_name)
+		return '%s, %s %s (%s)' % (self.last_name, self.first_name, self.middle_name, self.erdt_id)
 
 class University(models.Model):
 	photo = models.ImageField(upload_to='univ_seal', null=True, blank=True)
@@ -445,7 +449,8 @@ class Grant_Allocation_Release(PolymorphicModel):
 	def payee_sub(self):
 		""" Polymorphic model could not call overridden method if queried with payee. 
 			Use this medthod to display payee's name """
-		return '%s, %s %s' % (self.payee.last_name, self.payee.first_name, self.payee.middle_name)
+		return self.payee.name()
+		#return '%s, %s %s' % (self.payee.last_name, self.payee.first_name, self.payee.middle_name)
 	payee_sub.short_description = 'Payee'
 	payee_sub.admin_order_field = 'payee'
 
@@ -644,7 +649,8 @@ class Equipment(Grant_Allocation_Release):
 	def accountable_sub(self):
 		""" Polymorphic model could not call overridden method if queried with accountable. 
 			Use this medthod to display accountable's name """
-		return '%s, %s %s' % (self.accountable.last_name, self.accountable.first_name, self.accountable.middle_name)
+		return self.accountable.name()
+		#return '%s, %s %s' % (self.accountable.last_name, self.accountable.first_name, self.accountable.middle_name)
 	accountable_sub.short_description = 'Accountable'
 	accountable_sub.admin_order_field = 'accountable'
 

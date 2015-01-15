@@ -34,12 +34,13 @@ class MyEquipmentForm(ModelForm):
 class PurchasedItemAdmin(ERDTModelAdmin):
     form = MyEquipmentForm
 
-    list_display = ('date_released', 'release_link', 'payee_sub', 'accountable_univ', 'surrendered')
+    list_display = (
+        'date_released', 'property_no', 'release_link', 'payee_sub', 'accountable_univ',)
     list_display_links = None
-    search_fields = ('payee__first_name', 'payee__last_name', 'payee__middle_name', )
+    search_fields = ('property_no', 'description')
     exclude = ('item_type',)
 
-    list_filter = ('surrendered',)
+    list_filter = ('status', 'surrendered',)
 
     def accountable_univ(self, obj=None):
         try:
