@@ -30,7 +30,6 @@ class UserForm(ModelForm):
 
 
 class UserAdmin(ERDTModelAdmin):
-
     fieldsets = [
         ('Authentication', {'fields': ['username', 'password', 'email']}),
         ('Advanced Information', {

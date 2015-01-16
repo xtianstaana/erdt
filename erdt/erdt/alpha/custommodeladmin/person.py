@@ -165,8 +165,7 @@ class AdviseesInline(TabularInline):
     verbose_name = 'Advisee'
     verbose_name_plural = 'Advisees'
     fields = (
-        'scholar', 'degree_program', 'thesis_status', 'scholarship_status', 'end_date', 
-        'allocation_summary')
+        'scholar', 'degree_program', 'thesis_status', 'scholarship_status', 'end_date', )
     readonly_fields = fields
     verbose_name_plural = 'Advisees'
     suit_classes = 'suit-tab suit-tab-advisees'
@@ -174,7 +173,7 @@ class AdviseesInline(TabularInline):
     max_num = 0
 
     def scholar(self, obj=None):
-        return obj.awardee
+        return obj.awardee.name()
 
     def has_delete_permission(self, request, obj=None):
         return False

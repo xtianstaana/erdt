@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Q, F, Sum
+from django.db.models import Q, F, Sum, SET_NULL
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from polymorphic import PolymorphicModel
@@ -24,7 +24,7 @@ class Person(models.Model):
 	)
 
 	erdt_id = models.CharField(max_length=100, editable=False, unique=True, verbose_name='ERDT ID')
-	user = models.ForeignKey(User, verbose_name='User account', null=True, blank=True, unique=True) 
+	user = models.ForeignKey(User, verbose_name='User account', null=True, blank=True, unique=True, on_delete=SET_NULL) 
 	photo = models.ImageField(upload_to='img', null=True, blank=True)
 	first_name = models.CharField(max_length=50)
 	middle_name = models.CharField(max_length=50, blank=True)
@@ -62,7 +62,7 @@ class Person(models.Model):
 		if not self.id:
 			super(Person, self).save(*args, **kwargs)
 
-		if self.id and (not self.erdt_id) or len(self.erdt_id) == 7:
+		if self.id and (not self.erdt_id):
 			today = date.today()
 			self.erdt_id = '%.2d-%d%.4d' % (today.year % 1000, today.weekday()+1, self.id % 1000)
 		super(Person, self).save(*args, **kwargs)
@@ -197,9 +197,9 @@ class Profile(models.Model):
 
 	def __unicode__(self):
 		if self.university:
-			return '%s as %s %s' % (self.person, self.university.short_name, self.get_role_display())
+			return '%s as %s %s' % (self.person.name(), self.university.short_name, self.get_role_display())
 		else:
-			return '%s as %s' % (self.person, self.get_role_display())
+			return '%s as %s' % (self.person.name(), self.get_role_display())
 
 	def clean_fields(self, exclude=None):
 		super(Profile, self).clean_fields(exclude)
