@@ -392,7 +392,9 @@ class PersonAdmin(ERDTModelAdmin):
             if my_profile.role in (Profile.STUDENT, Profile.ADVISER):
                 return Person.objects.filter(user__pk=request.user.pk)
             elif my_profile.role == Profile.UNIV_ADMIN: # If User's profile is UNIV_ADMIN
-                return Person.objects.filter(profile__university__pk=my_profile.university.pk).distinct()
+                return Person.objects.filter(
+                    Q(profile__university__pk=my_profile.university.pk)|Q(profile__isnull=True)
+                    ).distinct()
             elif my_profile.role in (Profile.CENTRAL_OFFICE, Profile.DOST):
                 return Person.objects.all()
         except Exception as e:
