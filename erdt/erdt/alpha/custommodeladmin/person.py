@@ -173,7 +173,7 @@ class AdviseesInline(TabularInline):
     max_num = 0
 
     def scholar(self, obj=None):
-        return obj.awardee.name()
+        return obj.awardee.my_link()
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -389,8 +389,12 @@ class PersonAdmin(ERDTModelAdmin):
             else:
                 return Person.objects.filter(user__pk=request.user.pk)
 
-            if my_profile.role in (Profile.STUDENT, Profile.ADVISER):
+            if my_profile.role == Profile.STUDENT:
                 return Person.objects.filter(user__pk=request.user.pk)
+            elif my_profile.role == Profile.ADVISER:
+                iam = Person.objects.filter(user__pk=request.user.pk)
+                advisees = Person.objects.filter(grants__in=iam[0].advisees.all())
+                return (iam|advisees).distinct()
             elif my_profile.role == Profile.UNIV_ADMIN: # If User's profile is UNIV_ADMIN
                 return Person.objects.filter(
                     Q(profile__university__pk=my_profile.university.pk)|Q(profile__isnull=True)

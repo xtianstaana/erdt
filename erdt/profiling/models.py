@@ -544,6 +544,9 @@ class Scholarship(Grant):
 	def clean(self):
 		super(Scholarship, self).clean()
 
+		if self.adviser:
+			if not self.adviser.profile_set.filter(role=Profile.ADVISER, university=self.university).exists():
+				raise ValidationError('Adviser must have be a faculty member of %s' % self.university.name)	
 		if self.adviser == self.awardee:
 			raise ValidationError('Scholarship grant awardee and adviser fields can not be the same.')
 		if self.start_date == self.entry_grad_program and self.lateral:
