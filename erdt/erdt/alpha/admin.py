@@ -106,6 +106,7 @@ admin_site = ERDTAdminSite()
 admin_site.register(User, UserAdmin)
 
 # Programatically create permissions
+print 'Create Readonly'
 create_readonly_permissions()
 
 admin_site.register(Sandwich_Program, SandwichAdmin)

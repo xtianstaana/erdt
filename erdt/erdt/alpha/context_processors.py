@@ -73,6 +73,7 @@ def multi_profile(request):
 
     userProfiles = None
     activeProfile = None
+    activeRole = None
 
     try:
         currentUserPerson = Person.objects.get(user = currentUser.id)
@@ -84,7 +85,8 @@ def multi_profile(request):
         if(len(userProfiles) > 1):            
             for profile in userProfiles:
                 if(profile.active == True):
-                    activeProfile = profile    
+                    activeProfile = profile 
+                    activeRole = profile.role   
         elif(len(userProfiles) == 1):
             activeProfile = userProfiles[0]
 
@@ -95,7 +97,7 @@ def multi_profile(request):
     multi_profile = {
         'profiles' : userProfiles,
         'active_profile' : activeProfile,
-
+        'active_role' : activeRole
     }
 
     return {

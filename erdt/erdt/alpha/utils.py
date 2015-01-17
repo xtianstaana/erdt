@@ -61,11 +61,15 @@ def create_readonly_permissions():
                                                     name=('Can view user'),
                                                     content_type=user_content_type)
 
+        print 'Creating readonly permissions'
+
         for model in models:
             # Create permissions for profiling models
             content_type = ContentType.objects.get_for_model(model)
 
-            permission = Permission.objects.create(codename=('view_%s' % model._meta.verbose_name.lower().replace(' ', '_') ),
+            print ('%s' % model._meta.model_name)
+
+            permission = Permission.objects.create(codename=('view_%s' % model._meta.model_name ),
                                                     name=('Can view %s' % model._meta.verbose_name),
                                                     content_type=content_type)
 
@@ -104,11 +108,17 @@ def get_permissions():
 
         for model in models:
             if not model._meta.db_table in permissions:
+                
                 permissions[model._meta.db_table] = {}
-                permissions[model._meta.db_table]['view'] = Permission.objects.get(codename = ('view_%s' % model._meta.verbose_name.lower().replace(' ', '_') ))
-                permissions[model._meta.db_table]['change'] = Permission.objects.get(codename = ('change_%s' % model._meta.verbose_name.lower().replace(' ', '_') ))
-                permissions[model._meta.db_table]['add'] = Permission.objects.get(codename = ('add_%s' % model._meta.verbose_name.lower().replace(' ', '_') ))
-                permissions[model._meta.db_table]['delete'] = Permission.objects.get(codename = ('delete_%s' % model._meta.verbose_name.lower().replace(' ', '_') ))
+                
+                permissions[model._meta.db_table]['view'] = Permission.objects.get(codename = ('view_%s' % model._meta.model_name ))
+                
+                permissions[model._meta.db_table]['change'] = Permission.objects.get(codename = ('change_%s' % model._meta.model_name ))
+                
+                permissions[model._meta.db_table]['add'] = Permission.objects.get(codename = ('add_%s' % model._meta.model_name ))
+                
+                permissions[model._meta.db_table]['delete'] = Permission.objects.get(codename = ('delete_%s' % model._meta.model_name ))
+                
 
         return permissions
 
@@ -145,19 +155,26 @@ def generate_permissions(user_id, role):
 
             current_user.user_permissions.add(permissions['profiling_person']['view'])
             current_user.user_permissions.add(permissions['profiling_person']['change'])
-            current_user.user_permissions.add(permissions['profiling_scholarship']['view'])
-            current_user.user_permissions.add(permissions['profiling_enrolled_subject']['view'])
 
-        if(role == Profile.STUDENT): # Give permissions of a ADVISER
-            # Same as STUDENT permissions temporarily
+        if(role == Profile.ADVISER): # Give permissions of a ADVISER
+
             current_user.is_superuser = False
 
             current_user.user_permissions.clear()
 
             current_user.user_permissions.add(permissions['profiling_person']['view'])
             current_user.user_permissions.add(permissions['profiling_person']['change'])
-            current_user.user_permissions.add(permissions['profiling_scholarship']['view'])
-            current_user.user_permissions.add(permissions['profiling_enrolled_subject']['view'])
+
+        #if(role == Profile.STUDENT): # Give permissions of a ADVISER
+            # Same as STUDENT permissions temporarily
+        #    current_user.is_superuser = False
+        #
+        #    current_user.user_permissions.clear()
+        #
+        #    current_user.user_permissions.add(permissions['profiling_person']['view'])
+        #    current_user.user_permissions.add(permissions['profiling_person']['change'])
+        #    current_user.user_permissions.add(permissions['profiling_scholarship']['view'])
+        #    current_user.user_permissions.add(permissions['profiling_enrolled_subject']['view'])
 
         if(role == Profile.UNIV_ADMIN): # Give permissions of a UNIV_ADMIN
 
