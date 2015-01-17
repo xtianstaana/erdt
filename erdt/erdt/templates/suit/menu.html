@@ -59,14 +59,16 @@
                     </li>
                   {% endif %}
 
-                  {% if model.label == 'Universities' %}  
-                    {% if "/profiling/university/" in request.get_full_path %} 
-                    <li class="active"> 
-                    {% else %}
-                    <li>
+                  {% if multi_profile.active_role != 'STU' and multi_profile.active_role != 'ADV' %} 
+                    {% if model.label == 'Universities' %} 
+                      {% if "/profiling/university/" in request.get_full_path %} 
+                      <li class="active"> 
+                      {% else %}
+                      <li>
+                      {% endif %}
+                      <a href="{% url 'admin:profiling_university_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                      </li>
                     {% endif %}
-                    <a href="{% url 'admin:profiling_university_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
-                    </li>
                   {% endif %}
 
                   {% if model.label == 'Degree Programs' %}  
