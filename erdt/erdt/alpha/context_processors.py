@@ -44,6 +44,7 @@ def constants(request):
 
         'apps': {
             'profiling': 'profiling',
+            'reporting': 'reporting',
             'authentication': 'auth'
         },
  

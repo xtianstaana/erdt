@@ -51,9 +51,11 @@ Revisions:
 def create_readonly_permissions():
 
     try:
+        reporting_app = get_app(constants['constants']['apps']['reporting'])
         profiling_app = get_app(constants['constants']['apps']['profiling'])
 
-        models = get_models(profiling_app)
+        models = get_models(reporting_app) + get_models(profiling_app)
+   
 
         # Create permissions for user
         user_content_type = ContentType.objects.get_for_model(User)
@@ -110,7 +112,7 @@ def get_permissions():
             if not model._meta.db_table in permissions:
                 
                 permissions[model._meta.db_table] = {}
-                
+
                 permissions[model._meta.db_table]['view'] = Permission.objects.get(codename = ('view_%s' % model._meta.model_name ))
                 
                 permissions[model._meta.db_table]['change'] = Permission.objects.get(codename = ('change_%s' % model._meta.model_name ))
@@ -225,6 +227,14 @@ def generate_permissions(user_id, role):
             current_user.user_permissions.add(permissions['profiling_equipment']['delete'])
             current_user.user_permissions.add(permissions['profiling_subject']['delete'])
             current_user.user_permissions.add(permissions['profiling_enrolled_subject']['delete'])
+
+            current_user.user_permissions.add(permissions['reporting_individual_report']['view'])
+            current_user.user_permissions.add(permissions['reporting_individual_report']['change'])
+            current_user.user_permissions.add(permissions['reporting_individual_report']['delete'])
+
+            current_user.user_permissions.add(permissions['reporting_university_report']['view'])
+            current_user.user_permissions.add(permissions['reporting_university_report']['change'])
+            current_user.user_permissions.add(permissions['reporting_university_report']['delete'])
         
         if(role == Profile.CENTRAL_OFFICE): # Give permissions of a CENTRAL OFFICE
             current_user.is_superuser = True 
