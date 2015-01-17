@@ -325,10 +325,10 @@ class ERDTModelAdmin(ModelAdmin):
         
         return self.readonly_fields
 
-    def get_form(self, request, obj=None):
+    def get_form(self, request, obj=None, **kwargs):
         _thread_locals.request = request
         _thread_locals.obj = obj
-        return super(ERDTModelAdmin, self).get_form(request, obj)
+        return super(ERDTModelAdmin, self).get_form(request, obj, **kwargs)
 
     def _suit_form_tabs(self):
         return self.get_suit_form_tabs(_thread_locals.request, _thread_locals.obj)

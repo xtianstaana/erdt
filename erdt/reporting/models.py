@@ -55,7 +55,7 @@ class Grant_Report(Report):
 		return ''
 
 class University_Report(Report):
-	university = models.ForeignKey(University)
+	university = models.ForeignKey(University, limit_choices_to={'is_consortium':True})
 
 	class Meta:
 		verbose_name = 'University Report'
