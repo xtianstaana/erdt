@@ -46,13 +46,23 @@ class Individual_Report(Report):
 		except Exception as e:
 			print 'Error at Individual_Report'
 		return out
-	create_report.short_description = ''
+
+	def report_link(self):
+		if self.id:
+			url = '/create_individual_report_pdf/%d' % self.id
+			return format_html(u'<a href="{}">%s</a>' % 'Report link', url)
+
+	def __unicode__(self):
+		return self.name
 
 class Grant_Report(Report):
 	grant = models.ForeignKey(Grant)
 
 	def create_report(self):
 		return ''
+
+	def __unicode__(self):
+		return self.name
 
 class University_Report(Report):
 	university = models.ForeignKey(University, limit_choices_to={'is_consortium':True})
@@ -67,8 +77,19 @@ class University_Report(Report):
 		out = format_html(mark_safe(out))
 		return out
 
+	def report_link(self):
+		if self.id:
+			url = '/create_university_report_pdf/%d' % self.id
+			return format_html(u'<a href="{}">%s</a>' % 'Report link', url)
+
+	def __unicode__(self):
+		return self.name
+
 class Consolidated_Report(Report):
 	pass
 
 	def create_report(self):
 		return ''
+
+	def __unicode__(self):
+		return self.name

@@ -20,6 +20,6 @@ def create_individual_report_pdf(request, individual_report_id):
 
     context = {'report' : report.create_report}
 
-    return create_pdf(context, 'Indiv Report')
+    return PDFTemplateResponse(request, 'admin/reporting/change_form_pdf.html', context, 'test.pdf', 200, footer_template='admin/reporting/footer.html', header_template='admin/reporting/header.html')
 
 
