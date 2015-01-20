@@ -1,5 +1,4 @@
 Django
-psycopg2
 django-polymorphic==0.6
 django-autocomplete-light==2.0.3
 django-smart-selects==1.0.9
