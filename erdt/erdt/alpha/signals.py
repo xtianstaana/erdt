@@ -61,7 +61,7 @@ def person_postsave_handler(sender, **kwargs):
             user_scholarship = Scholarship.objects.get(scholar = saved_person.pk) 
 
             if(user_scholarship):
-                student_profile.university = user_scholarship.high_degree_univ
+                student_profile.university = user_scholarship.university
 
             student_profile.save()
         else:
@@ -69,7 +69,7 @@ def person_postsave_handler(sender, **kwargs):
             user_scholarship = Scholarship.objects.get(scholar = saved_person.pk) 
 
             if(user_scholarship):
-                existing_student_profile.university = user_scholarship.high_degree_univ
+                existing_student_profile.university = user_scholarship.university
 
             existing_student_profile.save()
     except Exception as e:
@@ -106,7 +106,7 @@ def scholarship_postsave_sch(sender, **kwargs):
         if(has_existing_adviser_profile is False):
             # Create adviser profile for user
             adviser_profile = Profile(role = Profile.ADVISER, person = target_person, 
-                university = saved_scholarship.high_degree_univ)
+                university = saved_scholarship.university)
 
             # Set all profiles as inactive
             for user_profile in user_profiles:
@@ -118,8 +118,8 @@ def scholarship_postsave_sch(sender, **kwargs):
             adviser_profile.save()  
         else:
             # Save current adviser profile with university
-            if(saved_scholarship.high_degree_univ):
-                existing_adviser_profile.university = saved_scholarship.high_degree_univ
+            if(saved_scholarship.university):
+                existing_adviser_profile.university = saved_scholarship.university
                 existing_adviser_profile.save()
 
         # Change university of student profile if university is different
@@ -139,8 +139,8 @@ def scholarship_postsave_sch(sender, **kwargs):
                     student_university = user_profile.university
                     student_profile = user_profile
 
-        if(has_existing_student_profile and student_university != saved_scholarship.high_degree_univ):
-            student_profile.university = saved_scholarship.high_degree_univ
+        if(has_existing_student_profile and student_university != saved_scholarship.university):
+            student_profile.university = saved_scholarship.university
             student_profile.save()
 
     except Exception as e:

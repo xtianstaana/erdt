@@ -32,6 +32,8 @@ class DegreeProgramAdmin(ERDTModelAdmin):
     list_display = ('program', 'degree', 'department', )
     list_filter = ('department__university', 'degree',)
 
+    def has_delete_permission(self, request, obj=None):
+        return False
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         try:
