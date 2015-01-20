@@ -104,9 +104,10 @@ def get_permissions():
             }
         }
 
+        reporting_app = get_app(constants['constants']['apps']['reporting'])
         profiling_app = get_app(constants['constants']['apps']['profiling'])
 
-        models = get_models(profiling_app)
+        models = get_models(profiling_app) + get_models(reporting_app)
 
         for model in models:
             if not model._meta.db_table in permissions:
@@ -235,6 +236,46 @@ def generate_permissions(user_id, role):
             current_user.user_permissions.add(permissions['reporting_university_report']['view'])
             current_user.user_permissions.add(permissions['reporting_university_report']['change'])
             current_user.user_permissions.add(permissions['reporting_university_report']['delete'])
+
+            # For Grants
+            current_user.user_permissions.add(permissions['profiling_frdg']['view'])
+            current_user.user_permissions.add(permissions['profiling_frdg']['change'])
+            current_user.user_permissions.add(permissions['profiling_frdg']['delete'])
+
+            current_user.user_permissions.add(permissions['profiling_frgt']['view'])
+            current_user.user_permissions.add(permissions['profiling_frgt']['change'])
+            current_user.user_permissions.add(permissions['profiling_frgt']['delete'])
+
+            current_user.user_permissions.add(permissions['profiling_postdoctoral_fellowship']['view'])
+            current_user.user_permissions.add(permissions['profiling_postdoctoral_fellowship']['change'])
+            current_user.user_permissions.add(permissions['profiling_postdoctoral_fellowship']['delete'])
+
+            current_user.user_permissions.add(permissions['profiling_sandwich_program']['view'])
+            current_user.user_permissions.add(permissions['profiling_sandwich_program']['change'])
+            current_user.user_permissions.add(permissions['profiling_sandwich_program']['delete'])
+
+            current_user.user_permissions.add(permissions['profiling_erdt_scholarship_special']['view'])
+            current_user.user_permissions.add(permissions['profiling_erdt_scholarship_special']['change'])
+            current_user.user_permissions.add(permissions['profiling_erdt_scholarship_special']['delete'])
+
+            current_user.user_permissions.add(permissions['profiling_visiting_professor_grant']['view'])
+            current_user.user_permissions.add(permissions['profiling_visiting_professor_grant']['change'])
+            current_user.user_permissions.add(permissions['profiling_visiting_professor_grant']['delete'])
+
+            # Fund Release
+
+            current_user.user_permissions.add(permissions['profiling_grant_allocation_release']['view'])
+            current_user.user_permissions.add(permissions['profiling_grant_allocation_release']['change'])
+            current_user.user_permissions.add(permissions['profiling_grant_allocation_release']['delete'])
+
+            current_user.user_permissions.add(permissions['profiling_research_dissemination']['view'])
+            current_user.user_permissions.add(permissions['profiling_research_dissemination']['change'])
+            current_user.user_permissions.add(permissions['profiling_research_dissemination']['delete'])
+
+            current_user.user_permissions.add(permissions['profiling_grant_allocation']['view'])
+            current_user.user_permissions.add(permissions['profiling_grant_allocation']['change'])
+            current_user.user_permissions.add(permissions['profiling_grant_allocation']['delete'])
+
         
         if(role == Profile.CENTRAL_OFFICE): # Give permissions of a CENTRAL OFFICE
             current_user.is_superuser = True 
