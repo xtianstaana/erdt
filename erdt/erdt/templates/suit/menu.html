@@ -106,6 +106,7 @@
         {% if app.separator %}
           <li class="separator"></li>
         {% elif app.label == 'Profiling' %}
+        {% if multi_profile.active_role == 'ADMIN' or multi_profile.active_role == 'CENT' %}
           <li 
           {% if "/profiling/erdt_scholarship_special/" in request.get_full_path %}
             class="active"
@@ -209,6 +210,7 @@
               </ul>
             
           </li>
+          {% endif %}
         {% endif %}
       {% endfor %}
     {% endif %}
@@ -220,6 +222,7 @@
         {% if app.separator %}
           <li class="separator"></li>
         {% elif app.label == 'Profiling' %}
+        {% if multi_profile.active_role == 'ADMIN' or multi_profile.active_role == 'CENT' %}
           <li
           {% if "/profiling/grant_allocation_release/" in request.get_full_path %}
             class="active"
@@ -271,6 +274,7 @@
               </ul>
             
           </li>
+          {% endif %}
         {% endif %}
       {% endfor %}
     {% endif %}

@@ -111,3 +111,10 @@ tr.form-row.for-extension td {
 table.table-bordered td {
     box-shadow: none;
 }
+
+p.errornote {
+    position: relative;
+    top: 380px;
+    left: -180px;
+    width: 260px !important;
+}
