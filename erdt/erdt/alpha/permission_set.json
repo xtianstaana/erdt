@@ -1,0 +1,133 @@
+{
+	"university" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST"],
+		"delete" : []
+	},
+
+	"department" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST"],
+		"delete" : []
+	},
+
+	"subject" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST"],
+		"delete" : []
+	},
+
+	"degree_program" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST"],
+		"delete" : []
+	},
+
+	"grant" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+
+	"person" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : []
+	},
+
+	"profile" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+	
+	"enrolled_subject" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+
+	"scholarship" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+
+	"erdt_scholarship_special" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+
+	"frdg" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+
+	"frgt" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+
+	"postdoctoral_fellowship" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+
+	"sandwich_program" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+
+	"visiting_professor_grant" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+	
+	"grant_allocation" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+
+	"grant_allocation_release" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+
+	"equipment" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+
+	"research_dissemination" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+	
+	"user" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+
+	"individual_report" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST"],
+		"delete" : ["CENT", "ADMIN"]
+	},
+	
+	"university_report" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST"],
+		"delete" : ["CENT", "ADMIN"]
+	}
+}

@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Q, F, Sum, SET_NULL
+from django.db.models import Q, F, Sum, SET_NULL, PROTECT
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from polymorphic import PolymorphicModel
@@ -24,7 +24,8 @@ class Person(models.Model):
 	)
 
 	erdt_id = models.CharField(max_length=100, editable=False, unique=True, verbose_name='ERDT ID')
-	user = models.ForeignKey(User, verbose_name='User account', null=True, blank=True, unique=True, on_delete=SET_NULL) 
+	user = models.ForeignKey(
+		User, verbose_name='User account', null=True, blank=True, unique=True, on_delete=SET_NULL)
 	photo = models.ImageField(upload_to='img', null=True, blank=True)
 	first_name = models.CharField(max_length=50)
 	middle_name = models.CharField(max_length=50, blank=True)
@@ -103,7 +104,7 @@ class Department(models.Model):
 	name = models.CharField(max_length=150)
 	email_address = models.EmailField(blank=True)
 	landline_number = models.CharField(max_length=50, blank=True)
-	university = models.ForeignKey(University, limit_choices_to={'is_consortium':True})
+	university = models.ForeignKey(University, limit_choices_to={'is_consortium':True}, on_delete=PROTECT)
 
 	class Meta:
 		ordering = ('university', 'name')
@@ -127,7 +128,7 @@ class Degree_Program(models.Model):
 	degree = models.CharField(max_length=5, choices=DEGREE_CHOICES)
 	program = models.CharField(max_length=150)
 	no_semester = models.IntegerField(default=6, verbose_name='No of semester including summer')
-	department = models.ForeignKey(Department)
+	department = models.ForeignKey(Department, on_delete=PROTECT)
 
 	class Meta:
 		verbose_name = 'Degree Program'
@@ -138,7 +139,7 @@ class Degree_Program(models.Model):
 		return '%s %s, %s' % (self.degree, self.program, self.department.university.short_name)
 
 class Subject(models.Model):
-	university = models.ForeignKey(University, limit_choices_to={'is_consortium':True})
+	university = models.ForeignKey(University, limit_choices_to={'is_consortium':True}, on_delete=PROTECT)
 	title = models.CharField(max_length=100, verbose_name='Course title')
 	code = models.CharField(max_length=20, blank=True, verbose_name='Course code')
 	description = models.CharField(max_length=250, blank=True)
@@ -157,8 +158,8 @@ class Subject(models.Model):
 			raise ValidationError('University must be an ERDT consortium member to add subjects.')
 
 class Enrolled_Subject(models.Model):
-	subject = models.ForeignKey(Subject)
-	scholar = models.ForeignKey(Person)
+	subject = models.ForeignKey(Subject, on_delete=PROTECT)
+	scholar = models.ForeignKey(Person, on_delete=PROTECT)
 	year_taken = models.DateField(help_text='Format: YYYY-MM-DD')
 	eq_grade = models.FloatField(default=0.0, verbose_name='Grade')
 
@@ -188,7 +189,9 @@ class Profile(models.Model):
 
 	role = models.CharField(max_length=5, choices=ALL_ROLE_CHOICES, default=STUDENT)
 	person = models.ForeignKey(Person)
-	university = models.ForeignKey(University, limit_choices_to={'is_consortium':True}, help_text='Leave blank for DOST or ERDT Central Office role.', null=True, blank=True)	
+	university = models.ForeignKey(
+		University, limit_choices_to={'is_consortium':True}, 
+		help_text='Leave blank for DOST or ERDT Central Office role.', null=True, blank=True)
 	active = models.BooleanField(default=False)
 
 	class Meta:
@@ -218,7 +221,7 @@ class Grant(PolymorphicModel):
 	start_date = models.DateField(verbose_name='Start of contract', help_text='Format: YYYY-MM-DD')
 	end_date = models.DateField(verbose_name='End of contract', help_text='Format: YYYY-MM-DD')
 	allotment = models.FloatField(default=0.0, verbose_name='Budget', help_text='Must be the same as the total amount of the line items.')
-	record_manager = models.ForeignKey(University, limit_choices_to={'is_consortium':True}, null=True, blank=True, related_name='grants_managed')
+	record_manager = models.ForeignKey(University, limit_choices_to={'is_consortium':True}, null=True, blank=True, related_name='grants_managed', on_delete=SET_NULL)
 
 	class Meta:
 		verbose_name = 'Grant'
@@ -522,18 +525,29 @@ class Scholarship(Grant):
 		(GRADUATE, 'Graduate'),
 	)
 
-	university = models.ForeignKey(University, limit_choices_to={'is_consortium':True})
-	degree_program = GF(Degree_Program, chained_field='university', chained_model_field='department__university')
-	adviser = models.ForeignKey(Person, related_name='advisees', null=True, blank=True)
-	scholarship_status = models.CharField(max_length=5, choices=SCHOLARSHIP_STATUS_CHOICES, default=REG_ONGOING)
-	high_degree = models.CharField(max_length=5, choices=DEGREE_CHOICES, default=BS, verbose_name='Highest degree')
-	high_degree_univ = models.ForeignKey(University, related_name='high_degree_univ', verbose_name="Highest degree's University")
+	university = models.ForeignKey(
+		University, limit_choices_to={'is_consortium':True}, on_delete=PROTECT)
+	degree_program = GF(
+		Degree_Program, chained_field='university', chained_model_field='department__university', 
+		on_delete=PROTECT)
+	adviser = models.ForeignKey(
+		Person, related_name='advisees', null=True, blank=True, on_delete=PROTECT)
+	scholarship_status = models.CharField(
+		max_length=5, choices=SCHOLARSHIP_STATUS_CHOICES, default=REG_ONGOING)
+	high_degree = models.CharField(
+		max_length=5, choices=DEGREE_CHOICES, default=BS, verbose_name='Highest degree')
+	high_degree_univ = models.ForeignKey(
+		University, related_name='high_degree_univ', verbose_name="Highest degree's University", 
+		on_delete=PROTECT)
 	thesis_topic = models.CharField(max_length=350, blank=True)
 	thesis_title = models.CharField(max_length=350, blank=True)
 	thesis_status = models.CharField(max_length=5, choices=THESIS_STATUS_CHOICES, default=PROPOSAL)
-	ce_schedule = models.DateField(null=True, blank=True, verbose_name='Candidacy Exam schedule', help_text='Format: YYYY-MM-DD')
-	entry_grad_program = models.DateField(verbose_name='Entry to graduate program', help_text='Format: YYYY-MM-DD')
-	end_grad_program = models.DateField(verbose_name='Date of graduation', help_text='Format: YYYY-MM-DD')
+	ce_schedule = models.DateField(null=True, blank=True, verbose_name='Candidacy Exam schedule', 
+		help_text='Format: YYYY-MM-DD')
+	entry_grad_program = models.DateField(verbose_name='Entry to graduate program', 
+		help_text='Format: YYYY-MM-DD')
+	end_grad_program = models.DateField(verbose_name='Date of graduation', 
+		help_text='Format: YYYY-MM-DD')
 	lateral = models.BooleanField(default=False)
 	cleared = models.BooleanField(default=False)
 
@@ -613,8 +627,8 @@ class FRDG(Grant):
 class Visiting_Professor_Grant(Grant):
 	distinguished = models.BooleanField(default=False)
 	home_university = models.CharField(max_length=150)
-	host_university = models.ForeignKey(University, limit_choices_to={'is_consortium':True})
-	host_professor = models.ForeignKey(Person, related_name='visiting_professor_guests')
+	host_university = models.ForeignKey(University, limit_choices_to={'is_consortium':True}, on_delete=PROTECT)
+	host_professor = models.ForeignKey(Person, related_name='visiting_professor_guests', on_delete=PROTECT)
 
 	class Meta:
 		verbose_name = 'Visiting Professor Grant'
@@ -638,7 +652,7 @@ class Equipment(Grant_Allocation_Release):
 	location = models.CharField(max_length=150)
 	property_no =  models.CharField(max_length=50, help_text='If funded by multiple grants, use the same property no for the same item.')
 	status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=WORKING)
-	accountable = models.ForeignKey(Person, related_name='equipments')
+	accountable = models.ForeignKey(Person, related_name='equipments', on_delete=PROTECT)
 	surrendered = models.BooleanField(default=False, verbose_name='Donated')
 
 	def accountable_link(self):

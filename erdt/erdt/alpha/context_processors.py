@@ -6,7 +6,7 @@ Description: Context Processors for ERDT Admin Template
 
 from django.shortcuts import *
 from profiling.models import (Profile, Person)
-import sys
+
 """
 Author: Christian Sta.Ana
 Date: Wed Jul 23 2014
@@ -50,7 +50,7 @@ def constants(request):
  
         'profiles': {
             'student': 'Student',
-            'faculty_adviser': 'Faculty Adviser',
+            'faculty_adviser': 'Faculty',
             'consortium_admin': 'Consortium Administrator',
             'erdt_central_office': 'ERDT Central Office',
             'dost_office': 'DOST Office'
@@ -72,38 +72,29 @@ def multi_profile(request):
 
     currentUser = request.user
 
-    userProfiles = None
-    activeProfile = None
-    activeRole = None
-
     try:
         currentUserPerson = Person.objects.get(user = currentUser.id)
-
-        # Get all profiles of user
         userProfiles = currentUserPerson.profile_set.all()
+        activeProfile = userProfiles.get(active=True)
+        activeRole = activeProfile.role
+        is_admin = activeRole in (Profile.CENTRAL_OFFICE, Profile.UNIV_ADMIN, Profile.DOST)
 
-        # Get the active profile
-        if(len(userProfiles) > 1):            
-            for profile in userProfiles:
-                if(profile.active == True):
-                    activeProfile = profile 
-                    activeRole = profile.role   
-        elif(len(userProfiles) == 1):
-            activeProfile = userProfiles[0]
-
-    except:
-        e = sys.exc_info()[0]
-        print("**********Error: %s" % e)
+    except Exception as e:
+        userProfiles = None
+        activeProfile = None
+        activeRole = None
+        is_admin = None
+        print("**********Error at context_processor: %s" % e)
 
     multi_profile = {
         'profiles' : userProfiles,
         'active_profile' : activeProfile,
-        'active_role' : activeRole
+        'active_role' : activeRole,
+        'is_admin' : is_admin,
     }
 
     return {
-        'multi_profile' : multi_profile
-
+        'multi_profile' : multi_profile,
     }
 
 

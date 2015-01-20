@@ -59,7 +59,7 @@
                     </li>
                   {% endif %}
 
-                  {% if multi_profile.active_role != 'STU' and multi_profile.active_role != 'ADV' %} 
+                  {% if multi_profile.is_admin %}
                     {% if model.label == 'Universities' %} 
                       {% if "/profiling/university/" in request.get_full_path %} 
                       <li class="active"> 
@@ -106,7 +106,7 @@
         {% if app.separator %}
           <li class="separator"></li>
         {% elif app.label == 'Profiling' %}
-        {% if multi_profile.active_role == 'ADMIN' or multi_profile.active_role == 'CENT' %}
+        {% if multi_profile.is_admin %}
           <li 
           {% if "/profiling/erdt_scholarship_special/" in request.get_full_path %}
             class="active"
@@ -222,7 +222,7 @@
         {% if app.separator %}
           <li class="separator"></li>
         {% elif app.label == 'Profiling' %}
-        {% if multi_profile.active_role == 'ADMIN' or multi_profile.active_role == 'CENT' %}
+        {% if multi_profile.is_admin %}
           <li
           {% if "/profiling/grant_allocation_release/" in request.get_full_path %}
             class="active"

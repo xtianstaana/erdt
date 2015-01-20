@@ -168,17 +168,14 @@ def profile_presave_handler(sender, **kwargs):
         if(saved_profile.pk is None):
             print 'newly created profile, set as active'
             # Set all profiles as inactive
-            for user_profile in target_person.profile_set.all():
-                user_profile.active = False
-                user_profile.save()
 
-            saved_profile.active = True
+            if not target_person.profile_set.filter(active=True).exists():
+                saved_profile.active = True
 
-            generate_permissions(target_person.user.pk, saved_profile.role)
+                if target_person.user:
+                    generate_permissions(target_person.user.pk, saved_profile.role)
 
 
     except Exception as e:
         #print e
         pass
-
-

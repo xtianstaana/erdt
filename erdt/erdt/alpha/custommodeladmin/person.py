@@ -35,15 +35,6 @@ class GrantSummaryInline(TabularInline):
             pass
         return super(GrantSummaryInline, self).get_fields(request, obj)
 
-    def get_max_num(self, request, obj=None, **kwargs):
-        if obj:
-            try:
-                if Profile.objects.filter(role__in=(Profile.STUDENT, Profile.ADVISER, Profile.VISITING), person_id=obj.id).exists():
-                    return None
-            except:
-                pass
-        return 0
-
     def has_add_permission(self, request):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
@@ -82,8 +73,10 @@ class ReleaseInline(TabularInline):
     def get_max_num(self, request, obj=None, **kwargs):
         if obj:
             try:
-                if Grant.objects.filter(awardee_id=obj.id).exists():
-                    return None
+                my_profile = Profile.objects.get(person__user=request.user.id, active=True)
+                if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
+                    if Grant.objects.filter(awardee_id=obj.id).exists():
+                        return None
             except:
                 pass
         return 0
@@ -196,7 +189,7 @@ class EnrolledSubjectInline(TabularInline):
             pass
         return ('subject', 'year_taken', 'eq_grade')
 
-    def has_add_permission(self, request, obj=None):
+    def has_add_permission(self, request):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
             if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
