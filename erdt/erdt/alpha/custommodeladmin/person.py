@@ -35,15 +35,6 @@ class GrantSummaryInline(TabularInline):
             pass
         return super(GrantSummaryInline, self).get_fields(request, obj)
 
-    def has_add_permission(self, request):
-        try:
-            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
-            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
-                return True
-        except:
-            pass
-        return False
-
     def has_delete_permission(self, request, obj=None):
         return False
 
@@ -80,15 +71,6 @@ class ReleaseInline(TabularInline):
             except:
                 pass
         return 0
-
-    def has_add_permission(self, request):
-        try:
-            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
-            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
-                return True
-        except:
-            pass
-        return False
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -189,24 +171,6 @@ class EnrolledSubjectInline(TabularInline):
             pass
         return ('subject', 'year_taken', 'eq_grade')
 
-    def has_add_permission(self, request):
-        try:
-            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
-            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
-                return True
-        except:
-            pass
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        try:
-            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
-            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
-                return True
-        except:
-            pass
-        return False
-
 class ProfileInline(TabularInline):
     model = Profile
     verbose_name_plural = 'Role and Eligibility'
@@ -223,24 +187,6 @@ class ProfileInline(TabularInline):
         except:
             pass
         return ('role', 'university', )
-
-    def has_add_permission(self, request):
-        try:
-            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
-            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
-                return True
-        except:
-            pass
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        try:
-            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
-            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
-                return True
-        except:
-            pass
-        return False
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         try:
@@ -303,18 +249,6 @@ class PersonAdmin(ERDTModelAdmin):
             'fields':('user', ),
             }),
     )
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request):
-        try:
-            my_profile = Profile.objects.get(person__user=request.user.id, active=True)
-            if my_profile.role in (Profile.UNIV_ADMIN, Profile.CENTRAL_OFFICE):
-                return True
-        except:
-            pass
-        return False
 
     def get_readonly_fields(self, request, obj=None):
         try:

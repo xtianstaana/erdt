@@ -141,14 +141,13 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 				my_profile = Profile.objects.get(person__user=request.user.id, active=True)
 				if my_profile.role == Profile.UNIV_ADMIN:
 					qs = qs.filter(record_manager__pk=my_profile.university.pk)
-				elif my_profile.role == Profile.CENTRAL_OFFICE:
+				elif my_profile.role in (Profile.CENTRAL_OFFICE, Profile.DOST):
 					return qs
 			except Exception as e:
 				print 'Error at GrantModelAdmin:get_queryset:::', e
 			return Grant.objects.none()
 
 	return GrantModelAdmin
-
 
 def lineItemInline_factory(choices):
 	class MyForm(ModelForm):
@@ -167,9 +166,6 @@ def lineItemInline_factory(choices):
 		max_num = len(choices)
 		suit_classes = 'suit-tab suit-tab-allocation'
 		verbose_name_plural = ''
-
-		def has_delete_permission(self, request, obj=None):
-			return False
 
 		def formfield_for_choice_field(self, db_field, request, **kwargs):
 			if db_field.name == 'name':

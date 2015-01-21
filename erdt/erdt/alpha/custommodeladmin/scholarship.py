@@ -120,8 +120,8 @@ class ScholarshipAdmin(ERDTModelAdmin):
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
 
             if my_profile.role == Profile.UNIV_ADMIN: # If User's profile is UNIV_ADMIN
-                return Scholarship.objects.filter(record_manager__pk=my_profile.university.pk).distinct()
-            elif my_profile.role == Profile.CENTRAL_OFFICE:
+                return Scholarship.objects.filter(record_manager__pk=my_profile.university.pk)
+            elif my_profile.role in (Profile.CENTRAL_OFFICE, Profile.DOST):
                 return Scholarship.objects.all()
         except Exception as e:
             print 'Error at ScholarshipAdmin', e

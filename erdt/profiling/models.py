@@ -436,9 +436,9 @@ class Grant_Allocation_Release(PolymorphicModel):
 	ITEMTYPE_CHOICES_ALL = ITEMTYPE_CHOICES + ((RS, 'Reasearch Dissemination'), (EQUIPMENT, 'Equipment'),)
 
 	item_type = models.CharField(max_length=50, choices=ITEMTYPE_CHOICES_ALL, blank=True, verbose_name='Type', help_text='For research grant fund releases only. Leave blank otherwise.')
-	payee = models.ForeignKey(Person, related_name='fund_releases')
-	grant = GF(Grant, chained_field='payee', chained_model_field='awardee', show_all=False, auto_choose=True, verbose_name='Funding grant')
-	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant', auto_choose=True, verbose_name='Funding line item')
+	payee = models.ForeignKey(Person, related_name='fund_releases', on_delete=PROTECT)
+	grant = GF(Grant, chained_field='payee', chained_model_field='awardee', show_all=False, auto_choose=True, verbose_name='Funding grant', on_delete=PROTECT)
+	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant', auto_choose=True, verbose_name='Funding line item', on_delete=PROTECT)
 	description = models.CharField(max_length=350, blank=True)
 	amount_released = models.FloatField(default=0.0, verbose_name='Released')
 	amount_liquidated = models.FloatField(default=0.0, verbose_name='Expenditure')

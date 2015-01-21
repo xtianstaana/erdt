@@ -102,7 +102,7 @@ class PurchasedItemAdmin(ERDTModelAdmin):
             if  my_profile.role == Profile.UNIV_ADMIN:
                 return Equipment.objects.filter(
                     grant__record_manger__id=my_profile.university.id).distinct()
-            elif my_profile.role == Profile.CENTRAL_OFFICE:
+            elif my_profile.role in (Profile.CENTRAL_OFFICE, Profile.DOST):
                 return Equipment.objects.all()
         except Exception as e:
             print 'Error', e

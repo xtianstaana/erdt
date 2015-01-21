@@ -53,12 +53,10 @@ class DegreeProgramAdmin(ERDTModelAdmin):
     Returns: default
     """
     def get_queryset(self, request):
-        qs = super(DegreeProgramAdmin, self).get_queryset(request)
-
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active = True)
             if my_profile.role == Profile.UNIV_ADMIN:
-                return qs.filter(department__university_id=my_profile.university.id)
+                return Degree_Program.objects.filter(department__university_id=my_profile.university.id)
             elif my_profile.role in (Profile.CENTRAL_OFFICE, Profile.DOST):
                 return Degree_Program.objects.all()
         except Exception as e:

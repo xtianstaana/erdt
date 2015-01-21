@@ -15,8 +15,6 @@ from suit.widgets import *
 from profiling.models import (Profile, University, Department, Subject)
 
 from django.http import HttpResponseRedirect
-import threading
-_thread_locals = threading.local()
 
 class DepartmentInline(TabularInline):
     model = Department
@@ -80,16 +78,6 @@ class UniversityAdmin(ERDTModelAdmin):
                 pass
         return super(UniversityAdmin, self).get_fieldsets(request, obj)
 
-    def get_form(self, request, obj=None):
-        _thread_locals.request = request
-        _thread_locals.obj = obj
-        return super(UniversityAdmin, self).get_form(request, obj)
-
-    def _suit_form_tabs(self):
-        return self.get_suit_form_tabs(_thread_locals.request, _thread_locals.obj)
-
-    suit_form_tabs = property(_suit_form_tabs)
-
     def get_suit_form_tabs(self, request, obj=None):
         if not obj:
             try:
@@ -99,7 +87,6 @@ class UniversityAdmin(ERDTModelAdmin):
             except:
                 pass
         return (('general', 'General'), ('department', 'Departments'), ('subject', 'Subjects Offered'))
-
 
     """
     Author: Christian Sta.Ana

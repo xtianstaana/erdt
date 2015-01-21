@@ -26,14 +26,8 @@
             {% if "/profiling/person/" in request.get_full_path and app.label == 'Profiling' %}
               class="active"
             {% endif %}
-            {% if "/profiling/university/" in request.get_full_path and app.label == 'Profiling' %}
-              class="active"
-            {% endif %}
-            {% if "/profiling/degree_program/" in request.get_full_path and app.label == 'Profiling' %}
-              class="active"
-            {% endif %}
           >
-            <a href="{{ app.url }}"{{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}
+            <a href="/profiling/person/"{{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}
             </a>
             {% if app.models %}
               <ul>
