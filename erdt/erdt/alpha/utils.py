@@ -143,13 +143,13 @@ def generate_permissions(user_id, role):
     return False
 
 def force_update_permissions():
-    user_roles = [(p.user.pk, p.profile_set.get(active=True).role) for p in Person.objects.filter(user__isnull=False)]
+    user_roles = [(p.user.pk, p.profile_set.get(active=True).role) for p in Person.objects.filter(user__isnull=False, profile__isnull=False).distinct()]
 
     for user_role in user_roles:
         generate_permissions(*user_role)
 
 def force_one_profile_active():
-    persons = Person.objects.filter(profile__isnull=False)
+    persons = Person.objects.filter(profile__isnull=False).distinct()
 
     for person in persons:
         active_profiles =  person.profile_set.filter(active=True)
