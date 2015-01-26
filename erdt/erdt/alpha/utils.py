@@ -156,11 +156,10 @@ def force_one_profile_active():
         first_profile = person.profile_set.first()
 
         if active_profiles.count() > 1:
-            person.profile_set.update(active=False)
+            print 'multiple active profiles of', person
+            person.profile_set.exclude(id=first_profile.id).update(active=False)
 
         if active_profiles.count() != 1:
+            print 'setting first profile to active'
             first_profile.active = True
             first_profile.save()
-        
-            
-
