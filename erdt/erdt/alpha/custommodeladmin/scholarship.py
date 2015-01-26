@@ -29,6 +29,12 @@ class MyScholarshipForm(forms.ModelForm):
             'description' : AutosizedTextarea(attrs={
                 'rows': 4, 
                 'class': 'input-xlarge'}),
+            'thesis_title' : AutosizedTextarea(attrs={
+                'rows': 4, 
+                'class': 'input-xlarge'}),
+            'thesis_topic' : AutosizedTextarea(attrs={
+                'rows': 4, 
+                'class': 'input-xlarge'}),
             'allotment' : EnclosedInput(prepend=u'\u20b1'),
             'start_date' : SuitDateWidget,
             'end_date' : SuitDateWidget,
@@ -50,7 +56,7 @@ class ScholarshipAdmin(ERDTModelAdmin):
         ReleaseSummaryInline, ReleaseInline]
     list_display = ('awardee', 'degree_program', 'start_date', 'adviser')
     list_filter = (
-        'degree_program__department__university__name', 'degree_program', 'start_date',
+        'university__name', 'degree_program', 'start_date',
         'scholarship_status')
     search_fields = ('awardee__first_name', 'awardee__last_name', 'awardee__middle_name', 'awardee__erdt_id')
 
@@ -84,7 +90,7 @@ class ScholarshipAdmin(ERDTModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ('awardee_link', 'university', 'degree_program', 'record_manager')
+            return ('awardee_link', 'university', 'record_manager', 'degree_program')
         return super(ScholarshipAdmin, self).get_readonly_fields(request, obj)
 
     def get_suit_form_tabs(self, request, obj=None):

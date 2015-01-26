@@ -220,6 +220,13 @@ class MyPersonForm(forms.ModelForm):
             'user' : Select2Widget(select2_options={
                 'minimumInputLength' : 2,
                 'width':'200px'}),
+            'address' : AutosizedTextarea(attrs={
+                'rows': 4, 
+                'class': 'input-xlarge'}),
+            'address2' : AutosizedTextarea(attrs={
+                'rows': 4, 
+                'class': 'input-xlarge'}),
+            'birthdate' : SuitDateWidget,
         }
 
 class PersonAdmin(ERDTModelAdmin):
