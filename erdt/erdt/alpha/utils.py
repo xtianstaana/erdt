@@ -147,3 +147,20 @@ def force_update_permissions():
 
     for user_role in user_roles:
         generate_permissions(*user_role)
+
+def force_one_profile_active():
+    persons = Person.objects.filter(profile__isnull=False)
+
+    for person in persons:
+        active_profiles =  person.profile_set.filter(active=True)
+        first_profile = person.profile_set.first()
+
+        if active_profiles.count() > 1:
+            person.profile_set.update(active=False)
+
+        if active_profiles.count() != 1:
+            first_profile.active = True
+            first_profile.save()
+        
+            
+
