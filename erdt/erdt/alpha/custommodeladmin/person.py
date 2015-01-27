@@ -284,7 +284,7 @@ class PersonAdmin(ERDTModelAdmin):
                 grants = Grant.objects.filter(awardee__pk=obj.pk)
 
                 if Scholarship.objects.filter(adviser__pk=obj.pk).exists() or Equipment.objects.filter(accountable__pk=obj.pk).exists():
-                    tabs.append(('advisees', 'Accountabilities'), )
+                    tabs.append(('advisees', 'Accountability'), )
 
                 if grants.exists() or is_student_faculty:
                     tabs.append(('grantsummary', 'Grants Summary'))
