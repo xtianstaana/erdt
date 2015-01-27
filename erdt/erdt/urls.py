@@ -3,6 +3,7 @@ from erdt.alpha.admin import admin_site
 from erdt.alpha import views as alpha_views
 from django.conf import settings
 import smart_selects, django_select2
+from erdt.alpha import signals
 
 urlpatterns = patterns('',
     # Examples:
