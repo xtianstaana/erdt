@@ -30,6 +30,7 @@ class UserForm(ModelForm):
 
 
 class UserAdmin(ERDTModelAdmin):
+    search_fields = ('username', )
     fieldsets = [
         ('Authentication', {'fields': ['username', 'password', 'email']}),
         ('Advanced Information', {
@@ -51,8 +52,9 @@ class UserAdmin(ERDTModelAdmin):
         qs = super(UserAdmin, self).get_queryset(request)
         try:
             profile = Profile.objects.get(person__user=request.user.id, active=True) 
-            if profile.role == Profile.UNIV_ADMIN: # If User's profile is CONSORTIUM
-                
+            if profile.role in (Profile.CENTRAL_OFFICE, Profile.DOST):
+                return qs
+            elif profile.role == Profile.UNIV_ADMIN: # If User's profile is CONSORTIUM)
                 # Get each user's person record 
                 output_qs = set()
                 for qs_user in qs:
@@ -65,8 +67,8 @@ class UserAdmin(ERDTModelAdmin):
                         print 'Error getting a person in user queryset'
 
                 return qs.filter(pk__in = output_qs)
-            else:
-                return qs
+                
         except:
-            return qs
+            pass
+        return User.objects.none()
 
