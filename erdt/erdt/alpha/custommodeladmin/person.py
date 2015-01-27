@@ -248,11 +248,11 @@ class PersonAdmin(ERDTModelAdmin):
             'birthdate', 'age')
             }),
         ('Contact Information', {
-            'classes' : ('suit-tab', 'suit-tab-general', 'collapse'),
+            'classes' : ('suit-tab', 'suit-tab-general'),
             'fields':('address', 'address2', 'email_address', 'landline_number', 'mobile_number'),
             }),
         ('User Account', {
-            'classes' : ('suit-tab', 'suit-tab-general'),
+            'classes' : ('suit-tab', 'suit-tab-general', 'collapse'),
             'fields':('user', ),
             }),
     )
