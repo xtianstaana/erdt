@@ -35,7 +35,7 @@ class PurchasedItemAdmin(ERDTModelAdmin):
     form = MyEquipmentForm
 
     list_display = (
-        'date_released', 'property_no', 'release_link', 'payee_sub', 'accountable_univ',)
+        'date_released', 'property_no', 'description_link', 'payee_sub', 'accountable_univ',)
     list_display_links = None
     search_fields = ('property_no', 'description')
     exclude = ('item_type',)
