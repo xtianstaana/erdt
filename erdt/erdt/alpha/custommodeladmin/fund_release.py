@@ -73,7 +73,7 @@ class GrantAllocationReleaseAdmin(ERDTModelAdmin):
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
             if  my_profile.role == Profile.UNIV_ADMIN:
                 return Grant_Allocation_Release.objects.filter(
-                    grant__record_manger__id=my_profile.university.id).distinct()
+                    grant__record_manager__id=my_profile.university.id).distinct()
             elif my_profile.role in (Profile.CENTRAL_OFFICE, Profile.DOST):
                 return Grant_Allocation_Release.objects.all()
         except Exception as e:

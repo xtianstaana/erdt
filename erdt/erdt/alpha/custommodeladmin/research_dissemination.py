@@ -78,7 +78,7 @@ class ResearchDisseminationAdmin(ERDTModelAdmin):
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
             if  my_profile.role == Profile.UNIV_ADMIN:
                 return Research_Dissemination.objects.filter(
-                    grant__record_manger__id=my_profile.university.id).distinct()
+                    grant__record_manager__id=my_profile.university.id).distinct()
             elif my_profile.role == Profile.CENTRAL_OFFICE:
                 return Research_Dissemination.objects.all()
         except Exception as e:
