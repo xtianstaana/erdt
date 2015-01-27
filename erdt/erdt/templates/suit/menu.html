@@ -27,8 +27,13 @@
               class="active"
             {% endif %}
           >
-            <a href="/profiling/person/"{{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}
-            </a>
+            {% if app.label == 'Authentication and Authorization' %}
+              <a href="/auth/user/"{{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}
+              </a>
+            {% else %}
+              <a href="/profiling/person/"{{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}
+              </a>
+            {% endif %}
             {% if app.models %}
               <ul>
                 {% for model in app.models %}
