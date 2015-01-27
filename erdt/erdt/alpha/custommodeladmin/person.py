@@ -20,16 +20,16 @@ class GrantSummaryInline(TabularInline):
     verbose_name = 'Grant Awarded'
     verbose_name_plural = 'Grants Awarded'
     suit_classes = 'suit-tab suit-tab-grantsummary'
-    fields = ('grant_type', 'start_date', 'end_date', 'allotment', 'total_released', 'total_unexpended',
+    fields = ('grant_type', 'start_date', 'end_date', 'total_released', 'total_unexpended',
         'total_unreleased', 'is_active')
-    readonly_fields = fields + ('grant_link',)
+    readonly_fields = fields + ('grant_link', 'total_budget')
 
     def get_fields(self, request, obj=None):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
             if my_profile.role in (Profile.CENTRAL_OFFICE, Profile.UNIV_ADMIN):
                 return (
-                    'grant_link', 'start_date', 'end_date', 'allotment', 'total_released', 
+                    'grant_link', 'start_date', 'end_date', 'total_budget', 'total_released', 
                     'total_unexpended','total_unreleased', 'is_active')
         except:
             pass

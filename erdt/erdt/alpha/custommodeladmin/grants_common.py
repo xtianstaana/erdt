@@ -17,7 +17,7 @@ def grantStackedInline_factory(my_grant, my_tab):
 			fld.name for fld in my_grant._meta.fields 
 				if (fld not in Grant._meta.fields) and fld.name != 'grant_ptr')
 
-		fields = ('start_date', 'end_date',  'description', 'allotment') + other_fields + ('allocation_summary',)
+		fields = ('start_date', 'end_date',  'description') + other_fields + ('allocation_summary',)
 		readonly_fields = fields
 		verbose_name_plural = ''
 		suit_classes = 'suit-tab %s' % my_tab
@@ -42,8 +42,6 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 				'description' : AutosizedTextarea(attrs={
 					'rows': 4, 
 					'class': 'input-xlarge'}),
-				'allotment' : EnclosedInput(prepend=u'\u20b1',
-					attrs={'class': 'input-small'}),
 				'start_date' : SuitDateWidget,
 				'end_date' : SuitDateWidget,
 				'record_manager' : Select2Widget(select2_options={
@@ -88,7 +86,7 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 			return (
 				(None, {
 					'classes' : ('suit-tab', 'suit-tab-general'),
-					'fields' : (awardee, 'start_date', 'end_date', 'allotment', 'description', 'record_manager')
+					'fields' : (awardee, 'start_date', 'end_date', 'description', 'record_manager')
 				}),
 			) + others
 

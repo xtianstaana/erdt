@@ -30,7 +30,6 @@ class MyVisitingProfessorForm(ModelForm):
 			'description' : AutosizedTextarea(attrs={
 				'rows': 4, 
 				'class': 'input-xlarge'}),
-			'allotment' : EnclosedInput(prepend=u'\u20b1'),
 			'start_date' : SuitDateWidget,
 			'end_date' : SuitDateWidget,
 			'host_university' : Select2Widget(select2_options={

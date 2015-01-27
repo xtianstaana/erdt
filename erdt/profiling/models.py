@@ -220,7 +220,6 @@ class Grant(PolymorphicModel):
 	description = models.CharField(max_length=250, blank=True)
 	start_date = models.DateField(verbose_name='Start of contract', help_text='Format: YYYY-MM-DD')
 	end_date = models.DateField(verbose_name='End of contract', help_text='Format: YYYY-MM-DD')
-	allotment = models.FloatField(default=0.0, verbose_name='Budget', help_text='Must be the same as the total amount of the line items.')
 	record_manager = models.ForeignKey(University, limit_choices_to={'is_consortium':True}, null=True, blank=True, related_name='grants_managed', on_delete=SET_NULL)
 
 	class Meta:
@@ -253,6 +252,11 @@ class Grant(PolymorphicModel):
 		today = date.today()
 		return 1 if self.start_date <= today <= self.end_date else 0
 
+	def total_budget(self):
+		total_amount = self.grant_allocation_set.aggregate(Sum('amount')).values()[0]
+		return total_amount if total_amount else 0.0
+	total_budget.short_description = 'Budget'
+
 	def total_released(self):
 		total_amount = self.grant_allocation_release_set.aggregate(Sum('amount_released')).values()[0]
 		return total_amount if total_amount else 0.0
@@ -271,7 +275,7 @@ class Grant(PolymorphicModel):
 	total_unexpended.short_description = 'Unexpended'
 
 	def total_unreleased(self):
-		return self.allotment - self.total_released() + self.total_unexpended()
+		return self.total_budget() - self.total_released() + self.total_unexpended()
 	total_unreleased.short_description = 'Unreleased'
 
 	def allocation_summary(self):

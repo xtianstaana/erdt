@@ -35,7 +35,6 @@ class MyScholarshipForm(forms.ModelForm):
             'thesis_topic' : AutosizedTextarea(attrs={
                 'rows': 4, 
                 'class': 'input-xlarge'}),
-            'allotment' : EnclosedInput(prepend=u'\u20b1'),
             'start_date' : SuitDateWidget,
             'end_date' : SuitDateWidget,
             'entry_grad_program' : SuitDateWidget,
@@ -69,7 +68,7 @@ class ScholarshipAdmin(ERDTModelAdmin):
         return (
             (None, {
                 'classes' : ('suit-tab', 'suit-tab-general'),
-                'fields' : (awardee, 'start_date', 'end_date', 'allotment','description', 
+                'fields' : (awardee, 'start_date', 'end_date', 'description', 
                             'scholarship_status'),
                 }),
             ('Program Detail', {
