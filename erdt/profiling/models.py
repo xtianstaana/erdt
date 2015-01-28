@@ -279,25 +279,29 @@ class Grant(PolymorphicModel):
 	total_unreleased.short_description = 'Unreleased'
 
 	def allocation_summary(self):
-		out = u'<tr> <th><b>Line Item</b></th> <th><b>App. Budget</b></th>  \
-			<th><b>Released</b></th> <th><b>Unexpended</b></th> <th><b>Unreleased</b></th> </tr>'
+		out = u'<tr> <td><b>Line Item</b></td> <td><b>App. Budget</b></td>  \
+			<td><b>Released</b></td> <td><b>Unexpended</b></td> <td><b>Unreleased</b></td> </tr>'
 
-		_temp = '<td> %s </td> ' * 5
+		_temp =  '<td> %s </td>' + ('<td class="numeric"> %s </td> ' * 4)
 
 		t_allotment, t_released, t_unexpended, t_unreleased = (0.0, 0.0, 0.0, 0.0)
 
 		for allocation in self.grant_allocation_set.all():
 			alloc_comps = allocation.get_computations().split()
-			out = out + '<tr> %s </tr>' % (_temp % (allocation.get_name_display(), str(allocation.amount), 
-				alloc_comps[0], alloc_comps[2], alloc_comps[3]))
 
-			t_allotment += + allocation.amount
+			f_released = float(alloc_comps[0])
+			f_unxpended = float(alloc_comps[2])
+			f_unreleased = float(alloc_comps[3])
+ 			out = out + '<tr> %s </tr>' % (_temp % (allocation.get_name_display(), '%.2f' % allocation.amount, 
+				'%.2f' % f_released, '%.2f' % f_unxpended, '%.2f' % f_unreleased))
+
+			t_allotment += allocation.amount
 			t_released += float(alloc_comps[0])
 			t_unexpended += float(alloc_comps[2])
 			t_unreleased += float(alloc_comps[3])
 
-		totals = ('<tr> %s </tr>' % _temp) % ('<b>Total</b>', '<b>%s</b>' % t_allotment, 
-			'<b>%s</b>' % t_released, '<b>%s</b>' % t_unexpended, '<b>%s</b>' % t_unreleased)
+		totals = ('<tr> %s </tr>' % _temp) % ('<b>Total</b>', '<b>%.2f</b>' % t_allotment, 
+			'<b>%.2f</b>' % t_released, '<b>%.2f</b>' % t_unexpended, '<b>%.2f</b>' % t_unreleased)
 
 		out = u'<table class="table table-bordered table-condensed table-striped"><thread> %s %s \
 			</thread></table>' % (out, totals)
@@ -445,7 +449,7 @@ class Grant_Allocation_Release(PolymorphicModel):
 	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant', auto_choose=True, verbose_name='Funding line item', on_delete=PROTECT)
 	description = models.CharField(max_length=350, blank=True)
 	amount_released = models.FloatField(default=0.0, verbose_name='Released')
-	amount_liquidated = models.FloatField(default=0.0, verbose_name='Expenditure')
+	amount_liquidated = models.FloatField(default=0.0, verbose_name='Expenditure', help_text='0.0 means unliquidated.')
 	date_released = models.DateField(help_text='Format: YYYY-MM-DD', verbose_name='Date Released')
 
 	class Meta:

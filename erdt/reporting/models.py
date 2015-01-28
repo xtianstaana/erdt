@@ -1,12 +1,7 @@
 from django.db import models
 from profiling.models import *
-from django.db.models import Q, F, Sum
 from django.utils.html import format_html, mark_safe
-from django.core.urlresolvers import reverse
-from django.core.exceptions import ValidationError
-
-# Create your models here.
-
+from datetime import datetime
 
 class Report(models.Model):
 	SUMMARY, FUND_RELEASES = 'SUMMARY', 'FUND_RELEASES'
@@ -34,14 +29,38 @@ class Individual_Report(Report):
 		verbose_name_plural = 'Individual Reports'
 
 	def create_report(self):
-		out = u'<h2>%s</h2><p>Report created at %s.</p><h3>Grants Awarded</h3>' % (self.person.__unicode__(), 
-			self.created_at)
+		out = u'<br/><br/><h3>%s</h3><p>Report type: %s<br/>Generated on: %s</p>' % (self.person.__unicode__(), 
+			self.get_report_type_display(), datetime.today().ctime())
 		try:
 			my_grants = Grant.objects.filter(awardee_id=self.person.id)
+
 			_inner_table =  ''
+
 			for g in my_grants:
-				_inner_table += '<tr><td><b>%s</b></td></tr><tr><td>%s</td></tr>' % (g.__unicode__(),g.allocation_summary())
-			out += '<table>%s</table>' % _inner_table
+				grant_name = g.__unicode__()
+				contract_period = '%s<br/>%s' % (g.start_date.strftime('%Y %b-%d'),g.end_date.strftime('%Y %b-%d'))
+				summary = g.allocation_summary()
+				_inner_table += '<tr><td><b>%s</b></td><td class="numeric">%s</td></tr><tr><td colspan="2">%s</td></tr>' % (grant_name, contract_period, summary)
+
+			if my_grants.exists():
+				out += '<h4>Grants Awarded</h4>'
+				out += '<table class="sub-table">%s</table>' % _inner_table
+
+			my_releases = Grant_Allocation_Release.objects.filter(payee_id=self.person.id)
+
+			_inner_table = '<tr><td><b>Date Released</b></td><td><b>Particular</b></td><td><b>Released</b></td><td><b>Expenditure</b></td><td><b>Unexpended</b></td></tr>'
+
+			for f in my_releases:
+				date_released = f.date_released.strftime('%Y %b-%d')
+				released = '%.2f' % f.amount_released
+				expenditure = '%.2f' % f.amount_liquidated
+				unexpended = '%.2f' % f.amount_unexpended()
+				_inner_table += '<tr><td>%s</td><td>%s</td><td class="numeric">%s</td><td class="numeric">%s</td><td class="numeric">%s</td></tr>' % (date_released, f.particular(), released, expenditure, unexpended)
+
+			if my_releases.exists():
+				out += '<h4>Fund Releases</h4>'
+				out += '<table class="sub-table table-bordered">%s</table>' % _inner_table
+
 			out = format_html(mark_safe(out))
 		except Exception as e:
 			print 'Error at Individual_Report'
