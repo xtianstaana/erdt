@@ -449,7 +449,7 @@ class Grant_Allocation_Release(PolymorphicModel):
 	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant', auto_choose=True, verbose_name='Funding line item', on_delete=PROTECT)
 	description = models.CharField(max_length=350, blank=True)
 	amount_released = models.FloatField(default=0.0, verbose_name='Released')
-	amount_liquidated = models.FloatField(default=0.0, verbose_name='Expenditure', help_text='0.0 means unliquidated.')
+	amount_liquidated = models.FloatField(default=0.0, verbose_name='Liquidated', help_text='0.0 means unliquidated.')
 	date_released = models.DateField(help_text='Format: YYYY-MM-DD', verbose_name='Date Released')
 
 	class Meta:
