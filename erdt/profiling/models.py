@@ -366,6 +366,7 @@ class Grant_Allocation(models.Model):
 		(TUITION_FEE, 'Tuition Fees'),
 		(PRETRAVEL_EXPENSES, 'Pre-travel Expenses'),
 		(AIRFARE, 'Airfare'),
+		(RELOCATE_ALLOWANCE, 'Relocation Allowance'),
 		(BOOK_ALLOWANCE, 'Book Allowance'),
 		(STIPEND, 'Stipend'),
 		(MEDICAL_TRAVEL_INSURANCE, 'Medical/Travel Insur.'),
