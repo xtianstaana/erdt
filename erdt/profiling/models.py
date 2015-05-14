@@ -65,7 +65,7 @@ class Person(models.Model):
 
 		if self.id and (not self.erdt_id):
 			today = date.today()
-			self.erdt_id = '%.2d-%d%.4d' % (today.year % 1000, today.weekday()+1, self.id % 1000)
+			self.erdt_id = '%.2d-%d%.4d' % ((today.year + 1) % 1000, today.weekday()+1, self.id % 1000)
 		super(Person, self).save(*args, **kwargs)
 
 	def __unicode__(self):
