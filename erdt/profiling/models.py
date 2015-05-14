@@ -357,6 +357,7 @@ class Grant_Allocation(models.Model):
 	)
 	SANDWICH_ALLOC_CHOICES = (
 		(AIRFARE, 'Airfare'),
+		(MEDICAL_INSURANCE, 'Health Insurance'),
 		(RESEARCH_EXPENSES, 'Research Expenses'),
 		(PRETRAVEL_EXPENSES, 'Pre-travel Expenses'),
 		(LIVING_EXPENSES, 'Living Expenses'),
