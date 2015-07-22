@@ -142,7 +142,7 @@ class Subject(models.Model):
 	university = models.ForeignKey(University, limit_choices_to={'is_consortium':True}, on_delete=PROTECT)
 	title = models.CharField(max_length=100, verbose_name='Course title')
 	code = models.CharField(max_length=20, blank=True, verbose_name='Course code')
-	description = models.CharField(max_length=250, blank=True)
+	description = models.CharField(max_length=500, blank=True)
 	units = models.FloatField(default=3.0)
 
 	class Meta:
@@ -217,7 +217,7 @@ class Profile(models.Model):
 
 class Grant(PolymorphicModel):
 	awardee = models.ForeignKey(Person, related_name='grants')
-	description = models.CharField(max_length=250, blank=True)
+	description = models.CharField(max_length=500, blank=True)
 	start_date = models.DateField(verbose_name='Start of contract', help_text='Format: YYYY-MM-DD')
 	end_date = models.DateField(verbose_name='End of contract', help_text='Format: YYYY-MM-DD')
 	record_manager = models.ForeignKey(University, limit_choices_to={'is_consortium':True}, null=True, blank=True, related_name='grants_managed', on_delete=SET_NULL)
@@ -399,7 +399,7 @@ class Grant_Allocation(models.Model):
 
 	grant = models.ForeignKey(Grant)
 	name = models.CharField(max_length=150, choices=GRANT_ALLOC_CHOICES,verbose_name="Line item")
-	description = models.CharField(max_length=350, blank=True)
+	description = models.CharField(max_length=500, blank=True)
 	amount = models.FloatField(default=0.0)
 
 	class Meta:
@@ -449,7 +449,7 @@ class Grant_Allocation_Release(PolymorphicModel):
 	payee = models.ForeignKey(Person, related_name='fund_releases', on_delete=PROTECT)
 	grant = GF(Grant, chained_field='payee', chained_model_field='awardee', show_all=False, auto_choose=True, verbose_name='Funding grant', on_delete=PROTECT)
 	allocation = GF(Grant_Allocation, chained_field='grant', chained_model_field='grant', auto_choose=True, verbose_name='Funding line item', on_delete=PROTECT)
-	description = models.CharField(max_length=350, blank=True)
+	description = models.CharField(max_length=500, blank=True)
 	amount_released = models.FloatField(default=0.0, verbose_name='Released')
 	amount_liquidated = models.FloatField(default=0.0, verbose_name='Liquidated', help_text='0.0 means unliquidated.')
 	date_released = models.DateField(help_text='Format: YYYY-MM-DD', verbose_name='Date Released')
@@ -574,6 +574,9 @@ class Scholarship(Grant):
 			raise ValidationError('Entry to graduate and scholarship program can not be the same if lateral.')
 		if self.start_date != self.entry_grad_program and not self.lateral:
 			raise ValidationError('Entry to graduate and scholarship program must be the same if not lateral.')
+
+	def email(self):
+		return self.awardee.email_address
 
 	def grant_type(self):
 		return 'Scholarship (%s, %s)' % (self.degree_program.degree, self.degree_program.department.university.short_name)

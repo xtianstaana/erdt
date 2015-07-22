@@ -53,7 +53,7 @@ class ScholarshipAdmin(ERDTModelAdmin):
     inlines = [
         lineItemInline_factory(Grant_Allocation.SCHOLARSHIP_ALLOC_CHOICES), 
         ReleaseSummaryInline, ReleaseInline]
-    list_display = ('awardee', 'degree_program', 'start_date', 'adviser')
+    list_display = ('awardee', 'email', 'degree_program', 'start_date', 'adviser')
     list_filter = (
         'university__name', 'degree_program', 'start_date',
         'scholarship_status')
