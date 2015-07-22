@@ -35,7 +35,7 @@ class PurchasedItemAdmin(ERDTModelAdmin):
     form = MyEquipmentForm
 
     list_display = (
-        'date_released', 'property_no', 'description_link', 'payee_sub', 'accountable_univ',)
+        'date_released', 'property_no', 'description_link', 'payee_sub',  'accountable_sub','accountable_univ')
     list_display_links = None
     search_fields = ('property_no', 'description')
     exclude = ('item_type',)
@@ -46,11 +46,11 @@ class PurchasedItemAdmin(ERDTModelAdmin):
         try:
             if obj:
                 p = Profile.objects.get(person__pk=obj.accountable.pk, role=Profile.ADVISER)
-                return '%s / %s' % (obj.accountable_sub(), p.university.short_name)
+                return '%s' % p.university.short_name
         except:
             pass
         return 'Unknown'
-    accountable_univ.short_description = 'Accountable'
+    accountable_univ.short_description = 'University'
     accountable_univ.admin_order_field = 'accountable'
 
     def grant_link(self, obj=None):
