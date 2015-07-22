@@ -48,6 +48,33 @@ class MyScholarshipForm(forms.ModelForm):
                 'width':'200px'}),
         }
 
+from django.contrib.admin import SimpleListFilter
+from django.utils.translation import ugettext_lazy as _
+
+
+class ProgramFilter(SimpleListFilter):
+    title = _('program')
+    parameter_name = 'program'
+
+    def lookups(self, request, model_admin):
+        try:
+            q = Degree_Program.objects.order_by('program').values_list('program').distinct()
+        except:
+            q = ('',)
+
+        choices = tuple((c[0], c[0]) for c in q)
+        for i in choices:
+            print i
+        return (
+            choices
+        )
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(degree_program__program=self.value())
+        else:
+            return queryset
+
 class ScholarshipAdmin(ERDTModelAdmin):
     form = MyScholarshipForm
     inlines = [
@@ -55,7 +82,7 @@ class ScholarshipAdmin(ERDTModelAdmin):
         ReleaseSummaryInline, ReleaseInline]
     list_display = ('awardee', 'email', 'degree_program', 'start_date', 'adviser')
     list_filter = (
-        'university__name', 'degree_program', 'start_date',
+        'university', 'degree_program__degree', ProgramFilter, 'start_date',
         'scholarship_status')
     search_fields = ('awardee__first_name', 'awardee__last_name', 'awardee__middle_name', 'awardee__erdt_id')
 
