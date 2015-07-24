@@ -47,6 +47,12 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 				'record_manager' : Select2Widget(select2_options={
 					'minimumInputLength' : 2,
 					'width':'200px'}),
+				'university' : Select2Widget(select2_options={
+					'minimumInputLength' : 2,
+					'width':'200px'}),
+				'adviser' : Select2Widget(select2_options={
+					'minimumInputLength' : 2,
+					'width':'200px'}),
 			}
 
 	class GrantModelAdmin(ERDTModelAdmin):
@@ -109,6 +115,22 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 						qs = qs.filter(pk=my_profile.university.pk)
 					kwargs["queryset"] = qs
 				elif db_field.name == 'host_professor':
+					is_person = 1
+					qs = Person.objects.filter(profile__role=Profile.ADVISER)
+					if my_profile.role == Profile.UNIV_ADMIN:
+						qs = qs.filter(profile__university__pk=my_profile.university.pk)
+					kwargs["queryset"] = qs.distinct()
+				elif db_field.name == 'adviser':
+					qs = Person.objects.filter(profile__role=Profile.ADVISER)
+					if my_profile.role == Profile.UNIV_ADMIN:
+						qs = qs.filter(profile__university__pk=my_profile.university.pk)
+					kwargs["queryset"] = qs.distinct()
+				elif db_field.name == 'university':
+					is_person = 2
+					qs = University.objects.filter(is_consortium=True)
+					if my_profile.role == Profile.UNIV_ADMIN:
+						kwargs["queryset"] = University.objects.filter(pk=my_profile.university.pk)
+				elif db_field.name == 'adviser':
 					is_person = 1
 					qs = Person.objects.filter(profile__role=Profile.ADVISER)
 					if my_profile.role == Profile.UNIV_ADMIN:

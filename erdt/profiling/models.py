@@ -220,7 +220,15 @@ class Grant(PolymorphicModel):
 	description = models.CharField(max_length=500, blank=True)
 	start_date = models.DateField(verbose_name='Start of contract', help_text='Format: YYYY-MM-DD')
 	end_date = models.DateField(verbose_name='End of contract', help_text='Format: YYYY-MM-DD')
-	record_manager = models.ForeignKey(University, limit_choices_to={'is_consortium':True}, null=True, blank=True, related_name='grants_managed', on_delete=SET_NULL)
+	record_manager = models.ForeignKey(
+		University, 
+		limit_choices_to={'is_consortium':True}, 
+		null=True, 
+		blank=True, 
+		related_name='grants_managed', 
+		on_delete=SET_NULL,
+		help_text='Universty that manages this record. May only be changed by ERDT Central Office.'
+	)
 
 	class Meta:
 		verbose_name = 'Grant'
@@ -620,6 +628,30 @@ class Postdoctoral_Fellowship(Grant):
 		return 'Postdoctoral %s' % str(self.start_date.year)
 
 class FRGT(Grant):
+	university = models.ForeignKey(
+		University, 
+		limit_choices_to={'is_consortium':True}, 
+		on_delete=PROTECT, 
+		blank=True, 
+		null=True
+	)
+	degree_program = GF(
+		Degree_Program, 
+		chained_field='university', 
+		chained_model_field='department__university', 
+		on_delete=PROTECT, 
+		blank=True, 
+		null=True
+	)
+	adviser = models.ForeignKey(
+		Person, 
+		related_name='frgt_advisees', 
+		on_delete=PROTECT,  
+		blank=True,
+		null=True
+	)
+	thesis_title = models.CharField(max_length=350, blank=True)
+
 	class Meta:
 		verbose_name = 'Faculty Research Grant'
 		verbose_name_plural = 'Faculty Research Grants'
