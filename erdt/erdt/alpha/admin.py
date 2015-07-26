@@ -34,6 +34,7 @@ from custommodeladmin.degree_program import DegreeProgramAdmin
 from custommodeladmin.fund_release import GrantAllocationReleaseAdmin
 from custommodeladmin.equipment import PurchasedItemAdmin
 from custommodeladmin.research_dissemination import ResearchDisseminationAdmin
+from custommodeladmin.fund_release_batchtools import FundReleaseBatchtoolsAdmin
 
 from custommodeladmin.grants import *
 from custommodeladmin.scholarship import ScholarshipAdmin
@@ -41,6 +42,7 @@ from custommodeladmin.scholarship import ScholarshipAdmin
 
 from custommodeladmin.university_report import UniversityReportAdmin
 from custommodeladmin.individual_report import IndividualReportAdmin
+
 
 """
 Author: Christian Sta.Ana
@@ -123,3 +125,4 @@ admin_site.register(FRDG, FRDGAdmin)
 admin_site.register(FRGT, FRGTAdmin)
 admin_site.register(Individual_Report, IndividualReportAdmin)
 admin_site.register(University_Report, UniversityReportAdmin)
+admin_site.register(Fund_Release_Batchtools, FundReleaseBatchtoolsAdmin)

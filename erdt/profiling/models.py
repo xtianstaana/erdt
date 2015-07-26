@@ -753,4 +753,71 @@ class Research_Dissemination(Grant_Allocation_Release):
 		self.item_type = Grant_Allocation_Release.RS
 		super(Research_Dissemination, self).save(*args, **kwargs)
 
+class Fund_Release_Batchtools(models.Model):
+	LINE_ITEM_CHOICES = (
+		(Grant_Allocation.BOOK_ALLOWANCE, 'Book Allowance'),
+		(Grant_Allocation.STIPEND, 'Stipend'),
+	)
+
+	start_date = models.DateField(verbose_name='From', help_text='Format: YYYY-MM-DD')
+	end_date = models.DateField(verbose_name='To', help_text='Format: YYYY-MM-DD')
+	scholarship_status = models.CharField(
+		max_length=5, choices=Scholarship.SCHOLARSHIP_STATUS_CHOICES, default=Scholarship.REG_ONGOING
+	) 
+	university = models.ForeignKey(
+		University, limit_choices_to={'is_consortium':True}, on_delete=PROTECT
+	)
+	degree_program = GF(
+		Degree_Program, chained_field='university', chained_model_field='department__university', 
+		on_delete=PROTECT
+	)
+
+	line_item = models.CharField(max_length=150, choices=LINE_ITEM_CHOICES,verbose_name="Line item")
+	amount_released = models.FloatField(default=0.0, verbose_name='Released')
+	amount_liquidated = models.FloatField(default=0.0, verbose_name='Liquidated', help_text='0.0 means unliquidated.')
+	date_released = models.DateField(help_text='Format: YYYY-MM-DD', verbose_name='Date Released')
+	description = models.CharField(max_length=500, blank=True)
+	
+	receipt = models.CharField(max_length=10000, editable=False, blank=True)
+
+	class Meta:
+		verbose_name = 'Fund Batch Release'
+		verbose_name_plural = 'Fund Batch Releases'
+
+	def save(self, *args, **kwargs):
+		try:
+			scholarships = Scholarship.objects.filter(
+				start_date__gte=self.start_date,
+				end_date__lte=self.end_date,
+				scholarship_status=self.scholarship_status,
+				university=self.university, degree_program=self.degree_program
+			)
+			self.receipt = ''
+			for s in scholarships:
+				try:
+					alloc = s.grant_allocation_set.get(name=self.line_item)
+					
+					s.grant_allocation_release_set.create(
+						item_type=Grant_Allocation_Release.OTHER,
+						payee=s.awardee,
+						allocation=alloc,
+						date_released=self.date_released,
+						amount_released=self.amount_released,
+						amount_liquidated=self.amount_liquidated,
+						description=self.description,
+					)
+					self.receipt += ('%d ' % s.id)
+				except Exception as t:
+					print t
+			
+		except Exception as e:
+			print e
+
+		if not self.id:
+			super(Fund_Release_Batchtools, self).save(*args, **kwargs)
+			print '***********'
+		
+			
+
+
 ###

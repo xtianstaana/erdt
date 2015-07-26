@@ -229,6 +229,9 @@
           {% if "/profiling/equipment/" in request.get_full_path %}
             class="active"
           {% endif %}
+          {% if "/profiling/fund_release_batchtools/" in request.get_full_path %}
+            class="active"
+          {% endif %}
           {% if "/profiling/research_dissemination/" in request.get_full_path %}
             class="active"
           {% endif %}
@@ -256,6 +259,16 @@
                     <li>
                     {% endif %}
                     <a href="{% url 'admin:profiling_grant_allocation_release_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                    </li>
+                  {% endif %}
+
+                  {% if model.label == 'Fund Batch Releases' %}  
+                    {% if "/profiling/fund_release_batchtools/" in request.get_full_path %} 
+                    <li class="active"> 
+                    {% else %}
+                    <li>
+                    {% endif %}
+                    <a href="{% url 'admin:profiling_fund_release_batchtools_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
                     </li>
                   {% endif %}
 
