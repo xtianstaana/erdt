@@ -30,7 +30,7 @@ class GrantAllocationReleaseAdmin(ERDTModelAdmin):
     list_display = ('date_released', 'release_link', 'payee_sub', )
     list_display_links = None
     list_filter = ('item_type',)
-    search_fields = ('payee__first_name', 'payee__last_name', 'payee__middle_name', 'description')
+    search_fields = ('payee__first_name', 'payee__last_name', 'payee__middle_name', 'description', 'allocation__name')
 
     def grant_link(self, obj=None):
         return obj.grant.grant_link()
