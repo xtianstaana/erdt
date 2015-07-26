@@ -694,8 +694,16 @@ class Equipment(Grant_Allocation_Release):
 		(CONDEMNED,' Condemned'),
 	)
 
+	university = models.ForeignKey(
+		University, 
+		limit_choices_to={'is_consortium':True}, 
+		on_delete=PROTECT
+	)
 	location = models.CharField(max_length=150)
-	property_no =  models.CharField(max_length=50, help_text='If funded by multiple grants, use the same property no for the same item.')
+	property_no =  models.CharField(
+		max_length=50, 
+		help_text='If funded by multiple grants, use the same property no for the same item.'
+	)
 	status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=WORKING)
 	accountable = models.ForeignKey(Person, related_name='equipments', on_delete=PROTECT)
 	surrendered = models.BooleanField(default=False, verbose_name='Donated')

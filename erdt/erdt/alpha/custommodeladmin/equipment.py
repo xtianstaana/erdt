@@ -35,9 +35,9 @@ class PurchasedItemAdmin(ERDTModelAdmin):
     form = MyEquipmentForm
 
     list_display = (
-        'date_released', 'property_no', 'description_link', 'payee_sub',  'accountable_sub','accountable_univ')
+        'date_released', 'property_no', 'description_link', 'payee_sub', 'university')
     list_display_links = None
-    search_fields = ('property_no', 'description')
+    search_fields = ('property_no', 'description', 'university', 'payee')
     exclude = ('item_type',)
 
     list_filter = ('status', 'surrendered',)
@@ -46,11 +46,11 @@ class PurchasedItemAdmin(ERDTModelAdmin):
         try:
             if obj:
                 p = Profile.objects.get(person__pk=obj.accountable.pk, role=Profile.ADVISER)
-                return '%s' % p.university.short_name
+                return '%s / %s' % (obj.accountable, p.university.short_name)
         except:
             pass
         return 'Unknown'
-    accountable_univ.short_description = 'University'
+    accountable_univ.short_description = 'Accountable'
     accountable_univ.admin_order_field = 'accountable'
 
     def grant_link(self, obj=None):
@@ -61,15 +61,22 @@ class PurchasedItemAdmin(ERDTModelAdmin):
         try:
             my_profile = Profile.objects.get(person__user=request.user.id, active=True)
             if db_field.name == 'payee':
+                is_person = 1
                 qs = Person.objects.filter(grants__isnull=False)
                 if my_profile.role == Profile.UNIV_ADMIN:
                     qs = qs.filter(profile__university__pk=my_profile.university.pk)
                 kwargs["queryset"] = qs.distinct()
             elif db_field.name == 'accountable':
+                is_person = 0
                 qs = Person.objects.filter(profile__role=Profile.ADVISER)
                 if my_profile.role == Profile.UNIV_ADMIN:
                     qs = qs.filter(profile__university__pk=my_profile.university.pk)
                 kwargs["queryset"] = qs.distinct()
+            elif db_field.name == 'university':
+                is_person = 2
+                qs = University.objects.filter(is_consortium=True)
+                if my_profile.role == Profile.UNIV_ADMIN:
+                    kwargs["queryset"] = University.objects.filter(pk=my_profile.university.pk)
         except:
             kwargs["queryset"] = Person.objects.none()
         return super(PurchasedItemAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
@@ -86,7 +93,7 @@ class PurchasedItemAdmin(ERDTModelAdmin):
                     'amount_liquidated', 'description',)
                 }),
             ('Other Information', {
-                'fields' : ('property_no', 'location',  'status', 'accountable', 'surrendered', )
+                'fields' : ('property_no', 'university', 'location',  'status', 'accountable', 'surrendered', )
                 }),
         )
 
