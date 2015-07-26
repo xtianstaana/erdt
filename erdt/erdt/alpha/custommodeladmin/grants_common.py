@@ -62,7 +62,11 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 		inlines =[LineItemInline, ReleaseSummaryInline, ReleaseInline]
 		list_display = ('awardee', 'start_date', 'end_date', )
 		search_fields = (
-			'awardee__first_name', 'awardee__last_name', 'awardee__middle_name', 'awardee__erdt_id')
+			'awardee__first_name', 
+			'awardee__last_name', 
+			'awardee__middle_name', 
+			'awardee__erdt_id',
+			)
 		list_filter = ('record_manager',)
 
 		def get_readonly_fields(self, request, obj=None):

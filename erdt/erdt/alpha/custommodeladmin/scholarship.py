@@ -79,7 +79,17 @@ class ScholarshipAdmin(ERDTModelAdmin):
     list_filter = (
         'university', 'degree_program__degree', ProgramFilter, ('start_date', DateFieldListFilter),
         'scholarship_status')
-    search_fields = ('awardee__first_name', 'awardee__last_name', 'awardee__middle_name', 'awardee__erdt_id')
+    search_fields = (
+        '=awardee__first_name', 
+        '=awardee__last_name', 
+        '=awardee__middle_name', 
+        '=awardee__erdt_id',
+        'scholarship_status',
+        'university__name',
+        '=university__short_name',
+        'degree_program__degree',
+        'degree_program__program'
+        )
 
     readonly_fields = ('awardee_link',)
 
