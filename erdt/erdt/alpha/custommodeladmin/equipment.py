@@ -42,17 +42,6 @@ class PurchasedItemAdmin(ERDTModelAdmin):
 
     list_filter = ('university', 'status', 'surrendered', )
 
-    def accountable_univ(self, obj=None):
-        try:
-            if obj:
-                p = Profile.objects.get(person__pk=obj.accountable.pk, role=Profile.ADVISER)
-                return '%s / %s' % (obj.accountable, p.university.short_name)
-        except:
-            pass
-        return 'Unknown'
-    accountable_univ.short_description = 'Accountable'
-    accountable_univ.admin_order_field = 'accountable'
-
     def grant_link(self, obj=None):
         return obj.grant.grant_link()
     grant_link.short_description = 'Funding grant'
@@ -67,7 +56,7 @@ class PurchasedItemAdmin(ERDTModelAdmin):
                     qs = qs.filter(profile__university__pk=my_profile.university.pk)
                 kwargs["queryset"] = qs.distinct()
             elif db_field.name == 'accountable':
-                is_person = 0
+                is_person = 1
                 qs = Person.objects.filter(profile__role=Profile.ADVISER)
                 if my_profile.role == Profile.UNIV_ADMIN:
                     qs = qs.filter(profile__university__pk=my_profile.university.pk)
@@ -78,7 +67,10 @@ class PurchasedItemAdmin(ERDTModelAdmin):
                 if my_profile.role == Profile.UNIV_ADMIN:
                     kwargs["queryset"] = University.objects.filter(pk=my_profile.university.pk)
         except:
-            kwargs["queryset"] = Person.objects.none()
+            if is_person == 1:
+                kwargs["queryset"] = Person.objects.none()
+            elif is_person == 2:
+                kwargs["queryset"] = University.objects.none()
         return super(PurchasedItemAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
