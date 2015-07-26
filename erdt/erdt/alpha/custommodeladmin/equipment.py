@@ -37,10 +37,10 @@ class PurchasedItemAdmin(ERDTModelAdmin):
     list_display = (
         'date_released', 'property_no', 'description_link', 'payee_sub', 'university')
     list_display_links = None
-    search_fields = ('property_no', 'description', 'university', 'payee')
+    search_fields = ('property_no', 'description', 'university__name', 'university__short_name')
     exclude = ('item_type',)
 
-    list_filter = ('status', 'surrendered',)
+    list_filter = ('university', 'status', 'surrendered', )
 
     def accountable_univ(self, obj=None):
         try:
