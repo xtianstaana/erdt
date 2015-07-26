@@ -818,7 +818,7 @@ class Fund_Release_Batchtools(models.Model):
 					alloc = s.grant_allocation_set.get(name=self.line_item)
 					
 					s.grant_allocation_release_set.create(
-						item_type=Grant_Allocation_Release.OTHER,
+						item_type='',
 						payee=s.awardee,
 						allocation=alloc,
 						date_released=self.date_released,
