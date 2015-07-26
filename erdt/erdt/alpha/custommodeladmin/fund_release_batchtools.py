@@ -46,7 +46,7 @@ class FundReleaseBatchtoolsAdmin(ERDTModelAdmin):
     def get_fieldsets(self, request, obj=None):
         if obj:
             return (
-                ('Scholarship (Local) Contract Period', {
+                ('Scholarship (Local)', {
                     'fields' : ('scholarship_status', 'start_date', 'end_date',)
                     }),
                 ('Degree Program', {
@@ -56,7 +56,7 @@ class FundReleaseBatchtoolsAdmin(ERDTModelAdmin):
                 	'fields' : ('line_item', 'date_released', 'amount_released', 'amount_liquidated', 'description')
                     }),
                 ('Receipt', {
-                	'fields': ('receipt',)
+                	'fields': ('receipt_links',)
                 	}),
             )
         return (
@@ -76,7 +76,7 @@ class FundReleaseBatchtoolsAdmin(ERDTModelAdmin):
             return (
             	'start_date', 'end_date', 'scholarship_status', 'university', 'degree_program', 
             	'line_item', 'date_released', 'amount_released', 'amount_liquidated', 'description', 
-            	'receipt',)
+            	'receipt_links',)
         else:
             return super(FundReleaseBatchtoolsAdmin, self).get_readonly_fields(request, obj)
 

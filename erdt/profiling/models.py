@@ -243,11 +243,14 @@ class Grant(PolymorphicModel):
 		return self.awardee.my_link()
 	awardee_link.short_description = 'Awardee'
 
-	def grant_link(self):
+	def grant_link(self, full=False):
 		label = self.grant_type()
 		try:
 			url = reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name), args=(self.id,))
-			return format_html(u'<a href="{}">%s</a>' % label, url)
+			if full:
+				return format_html(u'<a href="{}">%s, %s</a>' % (self.awardee.__unicode__(), label), url) 
+			else:
+				return format_html(u'<a href="{}">%s</a>' % label, url)
 		except:
 			pass
 		return label
@@ -781,10 +784,27 @@ class Fund_Release_Batchtools(models.Model):
 	receipt = models.CharField(max_length=10000, editable=False, blank=True)
 
 	class Meta:
-		verbose_name = 'Fund Batch Release'
-		verbose_name_plural = 'Fund Batch Releases'
+		verbose_name = 'Batch Fund Release'
+		verbose_name_plural = 'Batch Fund Releases'
+
+	def __unicode__(self):
+		return '%s - %s' % (self.date_released, self.get_line_item_display())
+
+	def receipt_links(self):
+		if self.receipt:
+			ret = u''
+			for i in self.receipt.split():
+				scholar = Scholarship.objects.get(pk=int(i))
+				ret += u'%s %s' % (scholar.grant_link(True), '<br>') 
+			return ret
+		return ''
+	receipt_links.short_description = 'Affected records'
+
+
 
 	def save(self, *args, **kwargs):
+		if self.id:
+			return
 		try:
 			scholarships = Scholarship.objects.filter(
 				start_date__gte=self.start_date,
@@ -808,16 +828,12 @@ class Fund_Release_Batchtools(models.Model):
 					)
 					self.receipt += ('%d ' % s.id)
 				except Exception as t:
-					print t
+					print t, s.id
 			
 		except Exception as e:
 			print e
 
-		if not self.id:
-			super(Fund_Release_Batchtools, self).save(*args, **kwargs)
-			print '***********'
-		
-			
+		super(Fund_Release_Batchtools, self).save(*args, **kwargs)			
 
 
 ###
