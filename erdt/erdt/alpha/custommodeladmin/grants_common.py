@@ -166,7 +166,7 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 			try:
 				my_profile = Profile.objects.get(person__user=request.user.id, active=True)
 				if my_profile.role == Profile.UNIV_ADMIN:
-					qs = qs.filter(record_manager__pk=my_profile.university.pk)
+					return qs.filter(record_manager__pk=my_profile.university.pk)
 				elif my_profile.role in (Profile.CENTRAL_OFFICE, Profile.DOST):
 					return qs
 			except Exception as e:
