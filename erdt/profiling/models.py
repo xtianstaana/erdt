@@ -55,6 +55,13 @@ class Person(models.Model):
 			return format_html(u'<a href="{}">%s</a>' % self.__unicode__(), url)
 		return self.__unicode__()
 
+	def faculty_advisees_link(self):
+		if self.id:
+			url = '/faculty_advisees/%d' % self.id
+			return format_html(u'<a href="{}">%s</a>' % 'Click to download list of advisees', url)
+		return ''
+	faculty_advisees_link.short_description = 'Link'
+
 	def clean(self):
 		if self.landline_number.strip() == '' and self.mobile_number.strip() == '' and self.email_address.strip() == '':
 			raise ValidationError('Provide at least one contact number or an email address.')
