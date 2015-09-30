@@ -10,6 +10,9 @@ class MyFundReleaseBatchtoolsForm(ModelForm):
         model = Fund_Release_Batchtools
         fields = '__all__'
         widgets = {
+            'post_release_note' : AutosizedTextarea(attrs={
+                'rows': 4, 
+                'class': 'input-xlarge'}),
             'description' : AutosizedTextarea(attrs={
                 'rows': 4, 
                 'class': 'input-xlarge'}),
@@ -56,7 +59,7 @@ class FundReleaseBatchtoolsAdmin(ERDTModelAdmin):
                 	'fields' : ('line_item', 'date_released', 'amount_released', 'amount_liquidated', 'description')
                     }),
                 ('Receipt', {
-                	'fields': ('receipt_links',)
+                	'fields': ('receipt_links', 'post_release_note')
                 	}),
             )
         return (
