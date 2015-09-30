@@ -81,6 +81,7 @@ class ScholarshipAdmin(ERDTModelAdmin):
         'university', 'degree_program__degree', ProgramFilter, ('start_date', DateFieldListFilter),
         'scholarship_status')
     actions = ['export_csv'] 
+    list_max_show_all = 10000000
 
     readonly_fields = ('awardee_link',)
 
