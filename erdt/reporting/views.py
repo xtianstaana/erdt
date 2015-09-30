@@ -31,7 +31,6 @@ def create_list_advisees(request, faculty_id):
     
     f_profile = Profile.objects.filter(person__pk=faculty_id, role=Profile.ADVISER)
     default = HttpResponse("You do not have the right permission to perform this action. This incident has been reported.", content_type="text/plain")
-    default2 = HttpResponse("dfd", content_type="text/plain")
 
     if my_profile.exists() and f_profile.exists():
         my_profile = my_profile[0]
@@ -53,7 +52,7 @@ def create_list_advisees(request, faculty_id):
                         sch.awardee.__str__(), 
                         sch.awardee.email_address, 
                         sch.get_scholarship_status_display(), 
-                        sch.degree_program.__unicode__(),
+                        sch.degree_program.__str__(),
                         sch.lateral,
                         sch.start_date.isoformat(),
                         sch.end_date.isoformat(),
