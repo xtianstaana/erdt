@@ -15,8 +15,9 @@ from django_select2.widgets import *
 # Import Profiling Module Models 
 from profiling.models import *
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from grants_common import *
+import csv
 
 class MyScholarshipForm(forms.ModelForm):
     class Meta:
@@ -79,14 +80,31 @@ class ScholarshipAdmin(ERDTModelAdmin):
     list_filter = (
         'university', 'degree_program__degree', ProgramFilter, ('start_date', DateFieldListFilter),
         'scholarship_status')
-    search_fields = (
-        'awardee__first_name', 
-        'awardee__last_name', 
-        'awardee__middle_name', 
-        'awardee__erdt_id',
-    )
+    actions = ['export_csv'] 
 
     readonly_fields = ('awardee_link',)
+
+    def export_csv(self, request, queryset):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment;filename="scholar_list.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['ERDTScholarship (Local) List'])
+        writer.writerow([])
+        writer.writerow(['Name', 'Email', 'Degree Program', 'Scholarship Status', 'Adviser'])
+        for q in queryset:
+            write = [
+                q.awardee.__str__(),
+                q.awardee.email_address,
+                q.degree_program.__str__(),
+                q.get_scholarship_status_display()
+                ]
+            if q.adviser:
+                write.append(q.adviser.__str__())
+            writer.writerow(write)
+        return response
+
+    export_csv.short_description = 'Export list to CSV'
 
     def get_fieldsets(self, request, obj=None):
         awardee = 'awardee'
