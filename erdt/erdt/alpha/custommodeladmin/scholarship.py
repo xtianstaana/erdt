@@ -76,14 +76,25 @@ class ScholarshipAdmin(ERDTModelAdmin):
     inlines = [
         lineItemInline_factory(Grant_Allocation.SCHOLARSHIP_ALLOC_CHOICES), 
         ReleaseSummaryInline, ReleaseInline]
-    list_display = ('awardee', 'email', 'degree_program', 'start_date', 'adviser')
+    list_display = ('awardee', 'email', 'degree_program', 'start_date', 'end_date', 'adviser')
     list_filter = (
-        'university', 'degree_program__degree', ProgramFilter, ('start_date', DateFieldListFilter),
+        'university', 'degree_program__degree', ProgramFilter,
         'scholarship_status')
-    actions = ['export_csv'] 
+    actions = ('export_csv',)
+    search_fields = ('start_date',)
     list_max_show_all = 10000000
 
     readonly_fields = ('awardee_link',)
+
+    def get_search_results(self, request, queryset, search_term):
+        if search_term:
+            try:
+                start_date, end_date = search_term.split()
+                return Scholarship.objects.filter(start_date__gte=start_date, end_date__lte=end_date), True
+            except Exception as e:
+                return Scholarship.objects.none(), True
+        else:
+            return queryset, False
 
     def export_csv(self, request, queryset):
         response = HttpResponse(content_type='text/csv')
@@ -105,7 +116,7 @@ class ScholarshipAdmin(ERDTModelAdmin):
             writer.writerow(write)
         return response
 
-    export_csv.short_description = 'Export list to CSV'
+    export_csv.short_description = 'Export Selected Scholarship (Local) to CSV'
 
     def get_fieldsets(self, request, obj=None):
         awardee = 'awardee'
