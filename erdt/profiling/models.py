@@ -30,7 +30,7 @@ class Person(models.Model):
 	first_name = models.CharField(max_length=50)
 	middle_name = models.CharField(max_length=50, blank=True)
 	last_name = models.CharField(max_length=50)
-	birthdate = models.DateField(help_text='Format: YYYY-MM-DD')
+	birthdate = models.DateField(help_text='Format: YYYY-MM-DD', null=True)
 	sex = models.CharField(max_length=1, choices=SEX_CHOICES, default=MALE)
 	civil_status = models.CharField(max_length=1, choices=CIVIL_STATUS_CHOICES, default=SINGLE)
 	address = models.CharField(max_length=250, verbose_name='Permanent address')
@@ -179,7 +179,7 @@ class Enrolled_Subject(models.Model):
 		return '%s: %s' % (self.scholar.__unicode__(), self.subject.__unicode__())
 
 class Profile(models.Model):
-	STUDENT, ADVISER, UNIV_ADMIN, CENTRAL_OFFICE, DOST, VISITING = 'STU', 'ADV', 'ADMIN', 'CENT', 'DOST', 'VISIT'
+	STUDENT, ADVISER, UNIV_ADMIN, CENTRAL_OFFICE, DOST, VISITING, REGISTRANT = 'STU', 'ADV', 'ADMIN', 'CENT', 'DOST', 'VISIT', 'REGISTRANT'
 	ALL_ROLE_CHOICES = (
 		(STUDENT, 'Student'),
 		(ADVISER, 'Faculty'),
@@ -187,6 +187,7 @@ class Profile(models.Model):
 		(UNIV_ADMIN, 'Consortium Administrator'),
 		(CENTRAL_OFFICE, 'ERDT Central Office'),
 		(DOST, 'DOST Office'),
+		(REGISTRANT, 'Registrant'),
 	)
 	ADMIN_ROLE_CHOICES = (
 		(STUDENT, 'Student'),

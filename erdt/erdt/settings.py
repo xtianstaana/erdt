@@ -45,7 +45,8 @@ INSTALLED_APPS = (
     'profiling',
     'reporting',
     'reportlab',
-    'wkhtmltopdf'
+    'wkhtmltopdf',
+    'applicationforms'
 )
 
 MIDDLEWARE_CLASSES = (
