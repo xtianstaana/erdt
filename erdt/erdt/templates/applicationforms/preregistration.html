@@ -1,7 +1,25 @@
-<form action="{% url 'submit-preregistration'%}" method="post">
-    {% csrf_token %}
-    {% for field in form %}
-        <p>{{ field.label_tag }} {{ field }}</p>
-    {% endfor %}
-    <input type="submit" value="Submit" />
-</form>
+{% extends "admin/base_site2.html" %}
+{% load uni_form_tags %}
+{% load i18n admin_static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+
+  <div id="content-main">
+    <div class="form-block full-width">
+        <form action="{% url 'submit-preregistration'%}" method="post">
+           {% uni_form form form.helper %}
+        </form>
+    </div>
+  </div>
+
+{% endblock %}

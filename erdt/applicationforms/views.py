@@ -70,5 +70,14 @@ def submit_prereg_form(request):
         raise Http404("Error on submission")
 
 def confirm_registration(request, confirmation_token):
+    if confirmation_token is not None:
+        username = base64.b64decode(confirmation_token)
+
+        user = User.objects.get(username = username)
+        user.is_active = True
+        user.save()
+
+    else :
+        raise Http404("Error: %s" % e.message)
     # To be done: complete this method
-    return HttpResponse("Your token: %s" % confirmation_token)
+    return render(request, 'applicationforms/preregistration_finished.html', {})
