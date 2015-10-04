@@ -788,6 +788,7 @@ class Fund_Release_Batchtools(models.Model):
 	amount_liquidated = models.FloatField(default=0.0, verbose_name='Liquidated', help_text='0.0 means unliquidated.')
 	date_released = models.DateField(help_text='Format: YYYY-MM-DD', verbose_name='Date Released')
 	description = models.CharField(max_length=500, blank=True)
+	post_release_note = models.CharField(max_length=500, blank=True)
 	
 	receipt = models.CharField(max_length=10000, editable=False, blank=True)
 

@@ -15,8 +15,9 @@ from django_select2.widgets import *
 # Import Profiling Module Models 
 from profiling.models import *
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from grants_common import *
+import csv
 
 class MyScholarshipForm(forms.ModelForm):
     class Meta:
@@ -75,18 +76,47 @@ class ScholarshipAdmin(ERDTModelAdmin):
     inlines = [
         lineItemInline_factory(Grant_Allocation.SCHOLARSHIP_ALLOC_CHOICES), 
         ReleaseSummaryInline, ReleaseInline]
-    list_display = ('awardee', 'email', 'degree_program', 'start_date', 'adviser')
+    list_display = ('awardee', 'email', 'degree_program', 'start_date', 'end_date', 'adviser')
     list_filter = (
-        'university', 'degree_program__degree', ProgramFilter, ('start_date', DateFieldListFilter),
+        'university', 'degree_program__degree', ProgramFilter,
         'scholarship_status')
-    search_fields = (
-        'awardee__first_name', 
-        'awardee__last_name', 
-        'awardee__middle_name', 
-        'awardee__erdt_id',
-    )
+    actions = ('export_csv',)
+    search_fields = ('start_date',)
+    list_max_show_all = 10000000
 
     readonly_fields = ('awardee_link',)
+
+    def get_search_results(self, request, queryset, search_term):
+        if search_term:
+            try:
+                start_date, end_date = search_term.split()
+                return Scholarship.objects.filter(start_date__gte=start_date, end_date__lte=end_date), True
+            except Exception as e:
+                return Scholarship.objects.none(), True
+        else:
+            return queryset, False
+
+    def export_csv(self, request, queryset):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment;filename="scholar_list.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['ERDTScholarship (Local) List'])
+        writer.writerow([])
+        writer.writerow(['Name', 'Email', 'Degree Program', 'Scholarship Status', 'Adviser'])
+        for q in queryset:
+            write = [
+                q.awardee.__str__(),
+                q.awardee.email_address,
+                q.degree_program.__str__(),
+                q.get_scholarship_status_display()
+                ]
+            if q.adviser:
+                write.append(q.adviser.__str__())
+            writer.writerow(write)
+        return response
+
+    export_csv.short_description = 'Export Selected Scholarship (Local) to CSV'
 
     def get_fieldsets(self, request, obj=None):
         awardee = 'awardee'
