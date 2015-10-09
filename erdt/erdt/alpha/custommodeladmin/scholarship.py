@@ -90,7 +90,7 @@ class ScholarshipAdmin(ERDTModelAdmin):
         if search_term:
             try:
                 start_date, end_date = search_term.split()
-                return Scholarship.objects.filter(start_date__gte=start_date, end_date__lte=end_date), True
+                return queryset.filter(start_date__gte=start_date, end_date__lte=end_date), True
             except Exception as e:
                 return Scholarship.objects.none(), True
         else:
