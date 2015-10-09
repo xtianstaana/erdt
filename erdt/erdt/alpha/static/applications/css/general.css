@@ -1,0 +1,22 @@
+/**********************************************
+Applications General Components Style
+Author: Christian Sta.Ana
+Date: Oct 4 2015
+**********************************************/
+
+#wrap {
+    background: #DDD;
+    background-image: none;
+}
+
+.form-block {
+    background: #FFF;
+    border: 1px solid #CCC;
+    padding: 20px;
+    margin: 20px;
+    width: 100%;
+}
+
+.form-block.full-width {
+    width: 800px;
+}

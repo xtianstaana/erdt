@@ -3,6 +3,7 @@ from erdt.alpha.admin import admin_site
 from erdt.alpha import views as alpha_views
 from django.conf import settings
 import smart_selects, django_select2
+import applicationforms
 from erdt.alpha import signals
 
 urlpatterns = patterns('',
@@ -18,4 +19,5 @@ urlpatterns = patterns('',
     url(r'^chaining/', include('smart_selects.urls')),
     url(r'^select2/', include('django_select2.urls')),
     #url(r'^community/', include('django_website.aggregator.urls', namespace='community')),
+    url(r'^applications/', include('applicationforms.urls')),
 )

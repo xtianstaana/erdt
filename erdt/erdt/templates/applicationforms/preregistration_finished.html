@@ -1,0 +1,24 @@
+{% extends "admin/base_site2.html" %}
+{% load i18n admin_static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+
+  <div id="content-main">
+    Your registration is confirmed and your user has been activated. Please log in <a href="/">here</a>
+  </div>
+
+{% endblock %}
+
+
+
+
