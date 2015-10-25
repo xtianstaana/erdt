@@ -7,12 +7,26 @@ class Token(models.Model):
     created_date = models.DateTimeField()
     code = models.CharField(max_length=100, unique=True)
 
+class ApplicationPeriod(models.Model):
+    name = models.CharField(max_length=250)
+    created_date = models.DateTimeField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Application Period'
+        verbose_name_plural = 'Application Periods'
+
 class RecommendationForm(models.Model):
     IN_PROGRESS, SUBMITTED = 'In Progress', 'Submitted'
     STATUS_CHOICES = (
         (IN_PROGRESS, IN_PROGRESS),
         (SUBMITTED, SUBMITTED),
     )
+
+    application_period = models.ForeignKey(
+        ApplicationPeriod, verbose_name='Application Period', null=True, blank=True, unique=True, on_delete=SET_NULL)
 
     # System Fields
     token = models.ForeignKey(Token)
@@ -37,10 +51,15 @@ class ERDTForm(models.Model):
         (PHD_SCH, PHD_SCH),
     )
 
+    application_period = models.ForeignKey(
+        ApplicationPeriod, verbose_name='Application Period', null=True, blank=True, unique=True, on_delete=SET_NULL)
+
+
     # System Fields
     created_by = models.ForeignKey(
         User, verbose_name='Created by', null=True, blank=True, unique=True, on_delete=SET_NULL)
     created_date = models.DateTimeField()
+    last_modified_date = models.DateTimeField()
     status = models.CharField(choices=STATUS_CHOICES, max_length=100)
 
     # Form Fields
@@ -49,8 +68,18 @@ class ERDTForm(models.Model):
 
 
 class Recommendation(models.Model):
+    NOT_STARTED, IN_PROGRESS, SUBMITTED = 'Not Started', 'In Progress', 'Submitted'
+    STATUS_CHOICES = (
+        (IN_PROGRESS, IN_PROGRESS),
+        (SUBMITTED, SUBMITTED),
+        (NOT_STARTED, NOT_STARTED)
+    )
+
     erdt_form = models.ForeignKey(ERDTForm)
 
+    sent_by = models.ForeignKey(
+        User, verbose_name='Sent by', null=True, blank=True, unique=True, on_delete=SET_NULL)
     professor_email = models.EmailField()
     recommendation_form = models.ForeignKey(RecommendationForm)
-
+    status = models.CharField(choices=STATUS_CHOICES, max_length=100)
+    sent_date = models.DateTimeField()

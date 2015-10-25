@@ -115,6 +115,8 @@ TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     "erdt.alpha.context_processors.multi_profile"
 )
 
+LOGIN_URL = '/login'
+
 
 try:
   from local_settings import *

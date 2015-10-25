@@ -118,3 +118,21 @@ p.errornote {
     left: -180px;
     width: 260px !important;
 }
+
+.applicationforms-block table th{
+width: 200px;
+background: #EEE;
+}
+
+.applicationforms-block table td, .applicationforms-block table th {
+text-align: center;
+}
+
+
+.applicationforms-block table td.left, .applicationforms-block table th.left {
+text-align: left;
+}
+
+.applicationforms-block table td.center, .applicationforms-block table th.center {
+text-align: center;
+}

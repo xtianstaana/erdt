@@ -27,3 +27,11 @@ Date: Fri Jul 18
     width: 270px !important;
     left: 0px !important;
 }
+
+#application-notice {
+    position: relative;
+    top: 400px;
+    left: -200px;
+    width: 295px;
+    text-align: center;
+}

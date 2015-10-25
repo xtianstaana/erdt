@@ -31,13 +31,13 @@
 
 	"person" : {
 		"add" : ["CENT", "ADMIN"],
-		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV", "REGISTRANT"],
 		"delete" : []
 	},
 
 	"profile" : {
 		"add" : ["CENT", "ADMIN"],
-		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV"],
+		"change" : ["CENT", "ADMIN", "DOST", "STU", "ADV", "REGISTRANT"],
 		"delete" : ["CENT", "ADMIN"]
 	},
 	

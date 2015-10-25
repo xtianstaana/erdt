@@ -1,0 +1,70 @@
+{% extends "admin/base_site2.html" %}
+{% load uni_form_tags %}
+{% load i18n admin_static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+
+  <div id="content-main" class="applicationforms-block">
+    <div id="form-selection" class="block-selection">
+        <h4>ERDT Form</h4>
+        {% if erdt_form != None %}
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                    <th>Last Modified Date</th>
+                </tr>
+                <tr>
+                    <td>
+                    {% if erdt_form.status == 'In Progress' %}    
+                        <a href="{% url 'edit-erdt-form'%}">ERDT Application Form</a>
+                    {% else %}
+                        ERDT Application Form
+                    {% endif %}
+                    </td>
+                    <td>{{ erdt_form.status }}</td>
+                    <td>{{ erdt_form.created_date }}</td>
+                    <td>{{ erdt_form.last_modified_date }}</td>
+                </tr>
+            </table>
+        {% else %}
+            No ERDT Form created for this Application period yet. Create one <a href="{% url 'edit-erdt-form'%}">here</a>
+        {% endif %}
+
+        <hr>
+
+        <h4>Recommendations</h4>
+        {% if recommendation_forms != None %}
+            <table>
+                <tr>
+                    <th>Professor Name</th>
+                    <th>Status</th>
+                    <th>Sent Date</th>
+                </tr>
+                {% for recommendation_form in recommendation_forms %}
+                    <tr>
+                        <td><a href="#">{{ recommendation_form.professor_email }}</a></td>
+                        <td>{{ recommendation_form.status }}</td>
+                        <td>{{ recommendation_form.date_sent }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            No recommendations incoming for you yet. Click <a href="#">here</a>
+        {% endif %}
+
+    </div>
+  </div>
+
+{% endblock %}

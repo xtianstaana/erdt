@@ -327,7 +327,7 @@ class PersonAdmin(ERDTModelAdmin):
             else:
                 return Person.objects.filter(user__pk=request.user.pk)
 
-            if my_profile.role == Profile.STUDENT:
+            if my_profile.role == Profile.STUDENT or my_profile.role == Profile.REGISTRANT:
                 return Person.objects.filter(user__pk=request.user.pk)
             elif my_profile.role == Profile.ADVISER:
                 iam = Person.objects.filter(user__pk=request.user.pk)
