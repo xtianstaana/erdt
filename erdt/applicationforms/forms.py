@@ -57,3 +57,34 @@ class ERDTFormApplicationForm(forms.ModelForm):
         )
         return super(ERDTFormApplicationForm, self).__init__(*args, **kwargs)
 
+
+class RecommendationFormApplicationForm(forms.ModelForm):
+
+    recommendation_box = forms.CharField( widget=forms.Textarea )
+
+    class Meta:
+        model = RecommendationForm
+        fields = ['recommendation_box', 'status']
+
+    def __init__(self, *args, **kwargs):
+
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Fieldset(
+                "Sample Section",
+                HTML("""
+                    <p>Description here...</p>
+                """),
+                'recommendation_box'),
+            Fieldset(
+                "Form Details",
+                HTML("""
+                    <p style='color: red;'>If finished, set status to <b>Submitted</b>. Note that you will be unable to edit the form once submitted</p>
+                """),
+                'status'),
+            ButtonHolder(
+                Submit('submit', 'Submit', css_class='button white')
+            )
+        )
+        return super(RecommendationFormApplicationForm, self).__init__(*args, **kwargs)
+

@@ -7,6 +7,7 @@ from datetime import datetime, date
 from smart_selects.db_fields import ChainedForeignKey as GF
 from django.utils.html import format_html, mark_safe
 from django.core.urlresolvers import reverse
+from applicationforms.models import Token
 
 # Create your models here.
 

@@ -1,0 +1,30 @@
+{% extends "admin/base_site2.html" %}
+{% load uni_form_tags %}
+{% load i18n admin_static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+
+  <div id="content-main">
+    <div class="form-block full-width">
+        <h1>Recommendation Form</h1>
+        <br/>
+        {{form.errors}}
+        {{error_message}}
+        <form action="{{ request.get_full_path }}" method="post">
+          <input type="hidden" name="token" value="{{ token }}" />
+           {% uni_form form form.helper %}
+        </form>
+    </div>
+  </div>
+
+{% endblock %}

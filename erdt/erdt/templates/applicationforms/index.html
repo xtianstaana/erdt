@@ -49,19 +49,23 @@
             <table>
                 <tr>
                     <th>Professor Name</th>
+                    <th>Email</th>
                     <th>Status</th>
                     <th>Sent Date</th>
                 </tr>
                 {% for recommendation_form in recommendation_forms %}
                     <tr>
+                        <td>{{ recommendation_form.professor_name }}</td>
                         <td><a href="#">{{ recommendation_form.professor_email }}</a></td>
                         <td>{{ recommendation_form.status }}</td>
-                        <td>{{ recommendation_form.date_sent }}</td>
+                        <td>{{ recommendation_form.sent_date }}</td>
                     </tr>
                 {% endfor %}
             </table>
+            <br/>
+            <p><a href="{% url 'add-recommendation-form'%}">Send another</a></p>
         {% else %}
-            No recommendations incoming for you yet. Click <a href="#">here</a>
+            No recommendation links sent yet. Create one <a href="{% url 'add-recommendation-form'%}">here</a>
         {% endif %}
 
     </div>

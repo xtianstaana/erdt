@@ -19,21 +19,31 @@ class ApplicationPeriod(models.Model):
         verbose_name_plural = 'Application Periods'
 
 class RecommendationForm(models.Model):
-    IN_PROGRESS, SUBMITTED = 'In Progress', 'Submitted'
+    NOT_STARTED, IN_PROGRESS, SUBMITTED = 'Not Started', 'In Progress', 'Submitted'
     STATUS_CHOICES = (
         (IN_PROGRESS, IN_PROGRESS),
         (SUBMITTED, SUBMITTED),
+        (NOT_STARTED, NOT_STARTED)
     )
 
     application_period = models.ForeignKey(
-        ApplicationPeriod, verbose_name='Application Period', null=True, blank=True, unique=True, on_delete=SET_NULL)
+        ApplicationPeriod, verbose_name='Application Period', null=True, blank=True, unique=False, on_delete=SET_NULL)
 
     # System Fields
     token = models.ForeignKey(Token)
     created_by = models.ForeignKey(
-        User, verbose_name='Created by', null=True, blank=True, unique=True, on_delete=SET_NULL)
+        User, verbose_name='Created by', null=True, blank=True, unique=False, on_delete=SET_NULL, related_name='recommendationforms_created')
     created_date = models.DateTimeField()
     status = models.CharField(choices=STATUS_CHOICES, max_length=100)
+    sent_by = models.ForeignKey(
+        User, verbose_name='Sent by', null=True, blank=True, unique=False, on_delete=SET_NULL, related_name='recommendationforms_sent')
+    sent_date = models.DateTimeField()
+
+    professor_email = models.EmailField()
+    professor_name = models.CharField(max_length=250)
+
+    # Form fields
+    recommendation_box = models.CharField(verbose_name='Recommendation', max_length=500, blank=True)
 
 class ERDTForm(models.Model):
     
@@ -52,12 +62,12 @@ class ERDTForm(models.Model):
     )
 
     application_period = models.ForeignKey(
-        ApplicationPeriod, verbose_name='Application Period', null=True, blank=True, unique=True, on_delete=SET_NULL)
+        ApplicationPeriod, verbose_name='Application Period', null=True, blank=True, unique=False, on_delete=SET_NULL)
 
 
     # System Fields
     created_by = models.ForeignKey(
-        User, verbose_name='Created by', null=True, blank=True, unique=True, on_delete=SET_NULL)
+        User, verbose_name='Created by', null=True, blank=True, unique=False, on_delete=SET_NULL)
     created_date = models.DateTimeField()
     last_modified_date = models.DateTimeField()
     status = models.CharField(choices=STATUS_CHOICES, max_length=100)
@@ -66,20 +76,3 @@ class ERDTForm(models.Model):
     scholarship_applied_for = models.CharField(choices=SCHOLARSHIP_CHOICES, max_length=100)
     program_of_study = models.CharField(max_length=250)
 
-
-class Recommendation(models.Model):
-    NOT_STARTED, IN_PROGRESS, SUBMITTED = 'Not Started', 'In Progress', 'Submitted'
-    STATUS_CHOICES = (
-        (IN_PROGRESS, IN_PROGRESS),
-        (SUBMITTED, SUBMITTED),
-        (NOT_STARTED, NOT_STARTED)
-    )
-
-    erdt_form = models.ForeignKey(ERDTForm)
-
-    sent_by = models.ForeignKey(
-        User, verbose_name='Sent by', null=True, blank=True, unique=True, on_delete=SET_NULL)
-    professor_email = models.EmailField()
-    recommendation_form = models.ForeignKey(RecommendationForm)
-    status = models.CharField(choices=STATUS_CHOICES, max_length=100)
-    sent_date = models.DateTimeField()

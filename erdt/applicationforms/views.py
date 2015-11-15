@@ -12,7 +12,9 @@ import sys
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.contrib.auth.decorators import login_required
+import uuid
 import datetime
+import time
 
 # Create your views here.
 def confirm_registration_dummy(request):
@@ -55,10 +57,15 @@ def submit_prereg_form(request):
             # Send email
             body = ("Dear %s %s \n" % (firstname, lastname))
             
-            generated_token = base64.b64encode(username)
-            confirm_link = reverse('confirm-preregistration-dummy')
-            confirm_link += generated_token
-            
+            # generate token
+            generated_token = str(uuid.uuid1()) + "-" + base64.b64encode(username)
+            print generated_token
+
+            #confirm_link = reverse('confirm-preregistration-dummy')
+            #confirm_link += generated_token
+            confirm_link = reverse('confirm-preregistration', kwargs={'confirmation_token':'TOKEN'})
+            confirm_link = confirm_link.replace('TOKEN', generated_token)
+
             body += "Confirmation link: %s" % (request.build_absolute_uri(confirm_link))
 
             print body
@@ -82,7 +89,9 @@ def submit_prereg_form(request):
 
 def confirm_registration(request, confirmation_token):
     if confirmation_token is not None:
-        username = base64.b64decode(confirmation_token)
+        splitted = (base64.b64decode(confirmation_token)).split("-")
+
+        username = splitted[len(splitted)-1]
 
         print "Username: %s" % username
 
@@ -157,7 +166,7 @@ def edit_erdt_form(request):
 
     form = forms.ERDTFormApplicationForm(instance = erdt_form)
 
-    if erdt_form.status == 'In Progress':
+    if erdt_form.status != 'Submitted':
         return render(request, 'applicationforms/erdt_form.html', {'form' : form})
     else:
         index(request)
@@ -190,3 +199,135 @@ def confirm_erdt_form(request):
         return edit_erdt_form(request)
 
     return index(request)
+
+
+@login_required
+def add_recommendation_form(request):
+
+    current_date = datetime.date.today()
+    current_user = request.user
+    
+    try:
+        application_period = ApplicationPeriod.objects.get(active = True, start_date__lte = current_date, end_date__gte = current_date)
+    except Exception as e:
+            raise Http404("Error: %s" % e.message)
+
+    # Get Recommendation forms for this application period
+    try:
+        recommendation_forms = RecommendationForm.objects.filter(application_period_id = application_period.id, sent_by_id = current_user.id)
+    
+        if len(recommendation_forms) == 0:
+            recommendation_forms = None
+
+    except Exception as e:
+        recommendation_forms = None
+
+    return render(request, 'applicationforms/add_recommendation_form.html', {'recommendation_forms':recommendation_forms})
+
+@login_required
+def send_recommendation_form(request):
+
+    current_date = datetime.date.today()
+    current_user = request.user
+    
+    try:
+        application_period = ApplicationPeriod.objects.get(active = True, start_date__lte = current_date, end_date__gte = current_date)
+    except Exception as e:
+            raise Http404("Error: %s" % e.message)
+
+    if request.method == "POST":
+        email = request.POST.get("email")
+        fullname = request.POST.get("name")
+
+        try:
+            # generate token
+            generated_token = uuid.uuid1()
+            token = Token(created_date = current_date, code = generated_token)
+            token.save()
+
+            # create recommendation form
+            recommendation = RecommendationForm()
+            recommendation.token = token
+            recommendation.sent_by = current_user
+            recommendation.created_by = current_user
+            recommendation.status = RecommendationForm.NOT_STARTED
+            recommendation.professor_email = email
+            recommendation.professor_name = fullname
+            recommendation.created_date = datetime.datetime.now()
+            recommendation.sent_date = datetime.datetime.now()
+            recommendation.application_period = application_period
+            recommendation.save()
+
+            # send to email
+            edit_link = reverse('edit-recommendation-form', kwargs={'token_str':generated_token})
+            #edit_link += generated_token
+            
+            body = "Fill recommendation: %s" % (request.build_absolute_uri(edit_link))
+
+            print body
+            
+            #result = send_mail('[DOST ERDT] Confirm your registration', body, settings.EMAIL_HOST_USER, [email])
+            msg = EmailMessage('[DOST ERDT] Recommendation', body, settings.EMAIL_HOST_USER, [email])
+            result = msg.send()
+
+            print ("Result: %s" % result)
+
+
+        except Exception as e:
+            print("Error: %s" % e)
+
+    return add_recommendation_form(request)
+
+def edit_recommendation_form(request, token_str):
+
+    current_date = datetime.date.today()
+    
+    try:
+        application_period = ApplicationPeriod.objects.get(active = True, start_date__lte = current_date, end_date__gte = current_date)
+    
+        # Query recommendation form
+        recommendation_form = RecommendationForm.objects.get(application_period_id = application_period.id, token__code = token_str)
+
+        if request.method == 'POST':
+            edited_recommendation_form = forms.RecommendationFormApplicationForm(request.POST, instance = recommendation_form)
+            if edited_recommendation_form.is_valid():
+                saved_recommendation_form = edited_recommendation_form.save()
+
+        form = forms.RecommendationFormApplicationForm(instance = recommendation_form)
+
+        if recommendation_form.status != 'Submitted':
+            return render(request, 'applicationforms/recommendation_form.html', {'form' : form, 'token' : recommendation_form.token.code})
+        else:
+            return render(request, 'applicationforms/submitted_recommendation_form.html', {})
+
+    except Exception as e:
+            raise Http404("Error: %s" % e.message)
+
+@login_required
+def delete_recommendation_form(request):
+    return index(request)
+
+
+def confirm_recommendation_form(request):
+    current_date = datetime.date.today()
+    try:
+        application_period = ApplicationPeriod.objects.get(active = True, start_date__lte = current_date, end_date__gte = current_date)
+    except Exception as e:
+            raise Http404("Error: %s" % e.message)
+
+    token = request.POST.get('token')
+
+    # Query recommendation form
+    recommendation_form = RecommendationForm.objects.get(application_period_id = application_period.id, token__code = request.POST.get('token'))
+
+    form = forms.RecommendationFormApplicationForm(instance = recommendation_form)
+
+    edited_recommendation_form = forms.RecommendationFormApplicationForm(request.POST, instance = recommendation_form)
+    
+    if edited_recommendation_form.is_valid():
+        saved_recommendation_form = edited_recommendation_form.save()
+    else:
+        return edit_recommendation_form(request)
+
+    return edit_recommendation_form(request)
+

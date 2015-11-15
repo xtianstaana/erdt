@@ -1,0 +1,54 @@
+{% extends "admin/base_site2.html" %}
+{% load uni_form_tags %}
+{% load i18n admin_static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+
+  <div id="content-main">
+    <div class="form-block full-width">
+        <form action="{% url 'send-recommendation-form' %}" method="POST">
+        {% csrf_token %}
+        Full Name: <input type="text" name="name" /><br/>
+        Email address: <input type="text" name="email" /><br/>
+        <input type="submit" name="submit" value="Send" />
+        </form>
+        <hr/>
+        <h4>Recommendations sent:</h4>
+        <div class="recommendation-list">
+            {% if recommendation_forms != None %}
+            <table>
+                <tr>
+                    <th>Professor Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Sent Date</th>
+                </tr>
+                {% for recommendation_form in recommendation_forms %}
+                    <tr>
+                        <td>{{ recommendation_form.professor_name }}</td>
+                        <td><a href="#">{{ recommendation_form.professor_email }}</a></td>
+                        <td>{{ recommendation_form.status }}</td>
+                        <td>{{ recommendation_form.sent_date }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                None
+            {% endif %}
+        </div>
+        <hr/>
+        <a href="{% url 'applications-index' %}">Click here to go back</a> 
+    </div>
+  </div>
+
+{% endblock %}
