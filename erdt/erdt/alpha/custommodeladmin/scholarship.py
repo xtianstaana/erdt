@@ -101,22 +101,25 @@ class ScholarshipAdmin(ERDTModelAdmin):
         response['Content-Disposition'] = 'attachment;filename="scholar_list.csv"'
         
         writer = csv.writer(response)
-        writer.writerow(['ERDTScholarship (Local) List'])
+        writer.writerow(['ERDT Scholarship (Local) List'])
         writer.writerow([])
-        writer.writerow(['Name', 'Email', 'Degree Program', 'Scholarship Status', 'Adviser'])
+        writer.writerow(['Name', 'Email', 'Degree Program', 'Scholarship Status', 'Start Date', 'End Date', 'Lateral', 'Adviser'])
         for q in queryset:
             write = [
                 q.awardee.__str__(),
                 q.awardee.email_address,
                 q.degree_program.__str__(),
-                q.get_scholarship_status_display()
+                q.get_scholarship_status_display(),
+                q.start_date.__str__(),
+                q.end_date.__str__(),
+                q.lateral
                 ]
             if q.adviser:
                 write.append(q.adviser.__str__())
             writer.writerow(write)
         return response
 
-    export_csv.short_description = 'Export Selected Scholarship (Local) to CSV'
+    export_csv.short_description = 'Export selected Scholarship (Local) to CSV'
 
     def get_fieldsets(self, request, obj=None):
         awardee = 'awardee'

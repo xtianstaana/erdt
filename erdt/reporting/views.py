@@ -46,7 +46,7 @@ def create_list_advisees(request, faculty_id):
             writer.writerow([])
             writer.writerow(['Scholar', 'Email Address', 'Scholarship Status', 'Degree Program', 'Lateral?', 'Start Date', 'End Date', 'Date of Graduation'])
 
-            for sch in faculty.advisees.all():
+            for sch in faculty.advisees.order_by('scholarship_status', 'awardee'):
                 try:
                     writer.writerow([
                         sch.awardee.__str__(), 

@@ -9,6 +9,8 @@ from profiling.models import *
 from suit.widgets import AutosizedTextarea, EnclosedInput, SuitDateWidget
 from django_select2.widgets import Select2Widget
 from django.forms import ModelForm
+from django.http import HttpResponse
+import csv
 
 class MyEquipmentForm(ModelForm):
     class Meta:
@@ -41,6 +43,42 @@ class PurchasedItemAdmin(ERDTModelAdmin):
     exclude = ('item_type',)
 
     list_filter = ('university', 'status', 'surrendered', )
+    actions = ('export_csv',)
+    list_max_show_all = 10000000
+
+    def export_csv(self, request, queryset):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment;filename="equipment_list.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['ERDT Equipment List'])
+        writer.writerow([])
+        writer.writerow(
+            ['Payee', 'Funding Grant', 'Date Released', 'Amount Released', 'Amount Liquidated', 
+             'Description', 'Property no.', 'University', 'Location', 'Status',
+             'Accountable', 'Donated']
+        )
+        for q in queryset:
+            e = Equipment.objects.get(pk=q.pk)
+
+            write = [
+                e.payee.__str__(),
+                e.allocation.__str__(),
+                e.date_released.__str__(),
+                e.amount_released,
+                e.amount_liquidated,
+                e.description,
+                e.property_no,
+                e.university.__str__(),
+                e.location,
+                e.status,
+                e.accountable.__str__(),
+                e.surrendered
+                ]
+            writer.writerow(write)
+        return response
+
+    export_csv.short_description = 'Export selected Equipment to CSV'
 
     def grant_link(self, obj=None):
         return obj.grant.grant_link()
