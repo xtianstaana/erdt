@@ -57,6 +57,58 @@ class ERDTFormApplicationForm(forms.ModelForm):
         )
         return super(ERDTFormApplicationForm, self).__init__(*args, **kwargs)
 
+class UPGradFormApplicationForm(forms.ModelForm):
+
+    class Meta:
+        model = UPGradForm
+        fields = ['scholarship_applied_for', 'program_of_study', 'status']
+
+    def __init__(self, *args, **kwargs):
+
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Fieldset(
+                "Sample Section",
+                'scholarship_applied_for', 
+                'program_of_study'),
+            Fieldset(
+                "Form Details",
+                HTML("""
+                    <p style='color: red;'>If finished, set status to <b>Submitted</b>. Note that you will be unable to edit the form once submitted</p>
+                """),
+                'status'),
+            ButtonHolder(
+                Submit('submit', 'Submit', css_class='button white')
+            )
+        )
+        return super(UPGradFormApplicationForm, self).__init__(*args, **kwargs)
+
+class UPDERDTFormApplicationForm(forms.ModelForm):
+
+    class Meta:
+        model = UPDERDTForm
+        fields = ['scholarship_applied_for', 'program_of_study', 'status']
+
+    def __init__(self, *args, **kwargs):
+
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Fieldset(
+                "Sample Section",
+                'scholarship_applied_for', 
+                'program_of_study'),
+            Fieldset(
+                "Form Details",
+                HTML("""
+                    <p style='color: red;'>If finished, set status to <b>Submitted</b>. Note that you will be unable to edit the form once submitted</p>
+                """),
+                'status'),
+            ButtonHolder(
+                Submit('submit', 'Submit', css_class='button white')
+            )
+        )
+        return super(UPDERDTFormApplicationForm, self).__init__(*args, **kwargs)
+
 
 class RecommendationFormApplicationForm(forms.ModelForm):
 

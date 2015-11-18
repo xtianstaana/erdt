@@ -16,7 +16,9 @@ import uuid
 import datetime
 import time
 
-# Create your views here.
+#######################################################################################
+# Pre-registration
+#######################################################################################
 def confirm_registration_dummy(request):
     return render(request, 'applicationforms/preregistration.html', {})
 
@@ -127,6 +129,20 @@ def index(request):
     except Exception as e:
         erdt_form = None
 
+    # Get UP Grad Form for this application period
+    try:
+        upgrad_form = UPGradForm.objects.get(application_period_id = application_period.pk, created_by_id = current_user.id)
+        print "UP Grad Form retrieved: %d" % upgrad_form.id 
+    except Exception as e:
+        upgrad_form = None
+
+    # Get UPD ERDTForm for this application period
+    try:
+        upderdt_form = UPDERDTForm.objects.get(application_period_id = application_period.pk, created_by_id = current_user.id)
+        print "UPD ERDT Form retrieved: %d" % upderdt_form.id 
+    except Exception as e:
+        upderdt_form = None
+
     # Get Recommendation forms for this application period
     try:
         recommendation_forms = RecommendationForm.objects.filter(application_period_id = application_period.pk, sent_by_id = current_user.id)
@@ -139,9 +155,14 @@ def index(request):
     
 
     return render(request, 'applicationforms/index.html', {'erdt_form' : erdt_form, 
+                                                            'upgrad_form' : upgrad_form, 
+                                                            'upderdt_form' : upderdt_form, 
                                                             'recommendation_forms' : recommendation_forms})
 
 
+#######################################################################################
+# ERDT Application Form
+#######################################################################################
 @login_required
 def edit_erdt_form(request):
     # Get current active application period
@@ -169,7 +190,7 @@ def edit_erdt_form(request):
     if erdt_form.status != 'Submitted':
         return render(request, 'applicationforms/erdt_form.html', {'form' : form})
     else:
-        index(request)
+        return index(request)
 
 @login_required
 def confirm_erdt_form(request):
@@ -185,15 +206,12 @@ def confirm_erdt_form(request):
         erdt_form = ERDTForm.objects.get(application_period_id = application_period.pk, created_by_id = current_user.id)
     except Exception as e:
         erdt_form = None
-
-    print "ERDT Form last modified date: %s" % erdt_form.last_modified_date    
+   
     erdt_form.last_modified_date = datetime.datetime.now() 
     edited_erdt_form = forms.ERDTFormApplicationForm(request.POST, instance = erdt_form)
     
     if edited_erdt_form.is_valid():
         saved_erdt_form = edited_erdt_form.save()
-        print "ERDT Form last modified date saved: %s" % saved_erdt_form.last_modified_date     
-        print "ERDT Form id saved: %d" % saved_erdt_form.id
     else:
 
         return edit_erdt_form(request)
@@ -201,6 +219,126 @@ def confirm_erdt_form(request):
     return index(request)
 
 
+#######################################################################################
+# UP Graduate Application Form
+#######################################################################################
+@login_required
+def edit_upgrad_form(request):
+    # Get current active application period
+    current_date = datetime.date.today()
+    current_user = request.user
+    try:
+        application_period = ApplicationPeriod.objects.get(active = True, start_date__lte = current_date, end_date__gte = current_date)
+    except Exception as e:
+            raise Http404("Error: %s" % e.message)
+
+    # Get ERDTForm for this application period
+    try:
+        upgrad_form = UPGradForm.objects.get(application_period_id = application_period.pk, created_by_id = current_user.id)
+    except Exception as e:
+        upgrad_form = None
+
+    if upgrad_form is None:
+        print "No erdt form yet. Creating"
+        upgrad_form = UPGradForm(application_period_id = application_period.pk, created_by_id = current_user.id, created_date = datetime.datetime.now(), last_modified_date = datetime.datetime.now(), status = 'In Progress')
+        upgrad_form.save()
+
+    form = forms.UPGradFormApplicationForm(instance = upgrad_form)
+
+    if upgrad_form.status != 'Submitted':
+        return render(request, 'applicationforms/upgrad_form.html', {'form' : form})
+    else:
+        return index(request)
+
+@login_required
+def confirm_upgrad_form(request):
+    current_date = datetime.date.today()
+    current_user = request.user
+    try:
+        application_period = ApplicationPeriod.objects.get(active = True, start_date__lte = current_date, end_date__gte = current_date)
+    except Exception as e:
+            raise Http404("Error: %s" % e.message)
+
+    # Get UPGradForm for this application period
+    try:
+        upgrad_form = UPGradForm.objects.get(application_period_id = application_period.pk, created_by_id = current_user.id)
+    except Exception as e:
+        upgrad_form = None
+   
+    upgrad_form.last_modified_date = datetime.datetime.now() 
+    edited_upgrad_form = forms.UPGradFormApplicationForm(request.POST, instance = upgrad_form)
+    
+    if edited_upgrad_form.is_valid():
+        saved_upgrad_form = edited_upgrad_form.save()
+    else:
+
+        return edit_upgrad_form(request)
+
+    return index(request)
+
+
+#######################################################################################
+# UPD - ERDT Application Form
+#######################################################################################
+@login_required
+def edit_upderdt_form(request):
+    # Get current active application period
+    current_date = datetime.date.today()
+    current_user = request.user
+    try:
+        application_period = ApplicationPeriod.objects.get(active = True, start_date__lte = current_date, end_date__gte = current_date)
+    except Exception as e:
+            raise Http404("Error: %s" % e.message)
+
+    # Get ERDTForm for this application period
+    try:
+        upderdt_form = UPDERDTForm.objects.get(application_period_id = application_period.pk, created_by_id = current_user.id)
+    except Exception as e:
+        upderdt_form = None
+
+    if upderdt_form is None:
+        print "No erdt form yet. Creating"
+        upderdt_form = UPDERDTForm(application_period_id = application_period.pk, created_by_id = current_user.id, created_date = datetime.datetime.now(), last_modified_date = datetime.datetime.now(), status = 'In Progress')
+        upderdt_form.save()
+
+    form = forms.UPDERDTFormApplicationForm(instance = upderdt_form)
+
+    if upderdt_form.status != 'Submitted':
+        return render(request, 'applicationforms/upderdt_form.html', {'form' : form})
+    else:
+        return index(request)
+
+@login_required
+def confirm_upderdt_form(request):
+    current_date = datetime.date.today()
+    current_user = request.user
+    try:
+        application_period = ApplicationPeriod.objects.get(active = True, start_date__lte = current_date, end_date__gte = current_date)
+    except Exception as e:
+            raise Http404("Error: %s" % e.message)
+
+    # Get UPDERDTForm for this application period
+    try:
+        upderdt_form = UPDERDTForm.objects.get(application_period_id = application_period.pk, created_by_id = current_user.id)
+    except Exception as e:
+        upderdt_form = None
+
+    upderdt_form.last_modified_date = datetime.datetime.now() 
+    edited_upderdt_form = forms.UPDERDTFormApplicationForm(request.POST, instance = upderdt_form)
+    
+    if edited_upderdt_form.is_valid():
+        saved_upderdt_form = edited_upderdt_form.save()
+    else:
+
+        return edit_upderdt_form(request)
+
+    return index(request)
+
+
+
+#######################################################################################
+# Recommendation Form
+#######################################################################################
 @login_required
 def add_recommendation_form(request):
 
@@ -242,7 +380,8 @@ def send_recommendation_form(request):
         try:
             # generate token
             generated_token = uuid.uuid1()
-            token = Token(created_date = current_date, code = generated_token)
+            security_code = base64.b64encode("%lf" % time.time())[13:19]
+            token = Token(created_date = current_date, code = generated_token, security_code = security_code)
             token.save()
 
             # create recommendation form
@@ -262,7 +401,8 @@ def send_recommendation_form(request):
             edit_link = reverse('edit-recommendation-form', kwargs={'token_str':generated_token})
             #edit_link += generated_token
             
-            body = "Fill recommendation: %s" % (request.build_absolute_uri(edit_link))
+            body = "Fill recommendation: %s \n" % (request.build_absolute_uri(edit_link))
+            body += "Your passcode: %s \n" % security_code
 
             print body
             
@@ -289,6 +429,7 @@ def edit_recommendation_form(request, token_str):
         recommendation_form = RecommendationForm.objects.get(application_period_id = application_period.id, token__code = token_str)
 
         if request.method == 'POST':
+
             edited_recommendation_form = forms.RecommendationFormApplicationForm(request.POST, instance = recommendation_form)
             if edited_recommendation_form.is_valid():
                 saved_recommendation_form = edited_recommendation_form.save()

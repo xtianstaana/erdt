@@ -39,7 +39,63 @@
                 </tr>
             </table>
         {% else %}
-            No ERDT Form created for this Application period yet. Create one <a href="{% url 'edit-erdt-form'%}">here</a>
+            No ERDT Application Form created for this Application period yet. Create one <a href="{% url 'edit-erdt-form'%}">here</a>
+        {% endif %}
+
+        <hr>
+        
+        <h4>UP Graduate Form</h4>
+        {% if upgrad_form != None %}
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                    <th>Last Modified Date</th>
+                </tr>
+                <tr>
+                    <td>
+                    {% if upgrad_form.status == 'In Progress' %}    
+                        <a href="{% url 'edit-upgrad-form'%}">UP Graduate Application Form</a>
+                    {% else %}
+                        UP Graduate Application Form
+                    {% endif %}
+                    </td>
+                    <td>{{ upgrad_form.status }}</td>
+                    <td>{{ upgrad_form.created_date }}</td>
+                    <td>{{ upgrad_form.last_modified_date }}</td>
+                </tr>
+            </table>
+        {% else %}
+            No UP Graduate Application Form created for this Application period yet. Create one <a href="{% url 'edit-upgrad-form'%}">here</a>
+        {% endif %}
+
+        <hr>
+
+        <h4>UPD - ERDT Form</h4>
+        {% if upderdt_form != None %}
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                    <th>Last Modified Date</th>
+                </tr>
+                <tr>
+                    <td>
+                    {% if upderdt_form.status == 'In Progress' %}    
+                        <a href="{% url 'edit-upderdt-form'%}">UPD - ERDT Application Form</a>
+                    {% else %}
+                        UPD - ERDT Application Form
+                    {% endif %}
+                    </td>
+                    <td>{{ upderdt_form.status }}</td>
+                    <td>{{ upderdt_form.created_date }}</td>
+                    <td>{{ upderdt_form.last_modified_date }}</td>
+                </tr>
+            </table>
+        {% else %}
+            No UPD - ERDT Application Form created for this Application period yet. Create one <a href="{% url 'edit-upderdt-form'%}">here</a>
         {% endif %}
 
         <hr>
