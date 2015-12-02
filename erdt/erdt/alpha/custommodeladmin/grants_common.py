@@ -208,6 +208,7 @@ def lineItemInline_factory(choices):
 class ReleaseInline(TabularInline):
     model = Grant_Allocation_Release
     fk = 'grant'
+    template = 'admin/edit_inline_with_link/tabular_with_link.html'
     extra = 0
     max_num = 0
     fields =  ('date_released', 'release_link',  'amount_released', 'amount_liquidated', 'amount_unexpended')
@@ -223,14 +224,16 @@ class ReleaseSummaryInline(TabularInline):
     extra = 0
     max_num = 0
     verbose_name_plural = ''
-    fields =  ('name', 'approved_budget', 'total_released', 'total_expenditure', 'total_unexpended', 'total_unreleased')
+    template = 'admin/edit_inline_with_link/tabular_with_link.html'
+    fields =  ('name', 'total_budget', 'total_released', 'total_expenditure', 'total_unexpended', 'total_unreleased')
     readonly_fields = fields
     suit_classes = 'suit-tab suit-tab-releases'
 
-    def approved_budget(self, obj=None):
+    def total_budget(self, obj=None):
         if obj:
             return obj.amount
         return 0.0
+    total_budget.short_description = 'Unreleased'
 
     def has_delete_permission(self, request, obj=None):
         return False

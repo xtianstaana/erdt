@@ -28,7 +28,7 @@
         {% endif %}
         <tr class="form-row {% cycle "row1" "row2" %} {% if inline_admin_form.original or inline_admin_form.show_url %}has_original{% endif %}{% if forloop.last %} empty-form{% endif %}"
              id="{{ inline_admin_formset.formset.prefix }}-{% if not forloop.last %}{{ forloop.counter0 }}{% else %}empty{% endif %}">
-        {% for fieldset in inline_admin_form %}
+        {% for fieldset in inline_admin_form|slice:"5" %}
           {% for line in fieldset %}
             {% for field in line %}
 
@@ -38,7 +38,11 @@
                  </td>
               {% endif %}
               {% if field.field.name != 'is_active' %}
-                <td{% if field.field.name %} class="field-{{ field.field.name }}{{ field.field.errors|yesno:' control-group error,' }}{{ field.field.errors|yesno:' control-group error,' }}"{% endif %}>
+                {% if 'amount' in field.field.name or 'total' in field.field.name %}
+                  <td{% if field.field.name %} class="numeric field-{{ field.field.name }}{{ field.field.errors|yesno:' control-group error,' }}{{ field.field.errors|yesno:' control-group error,' }}"{% endif %}>
+                {% else %}
+                  <td{% if field.field.name %} class="field-{{ field.field.name }}{{ field.field.errors|yesno:' control-group error,' }}{{ field.field.errors|yesno:' control-group error,' }}"{% endif %}>
+                {% endif %}
 
                 {% if forloop.parentloop.first %}
                   {% if inline_admin_form.has_auto_field or inline_admin_form.needs_explicit_pk_field %}{{ inline_admin_form.pk_field.field }}{% endif %}
