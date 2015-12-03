@@ -312,16 +312,21 @@ class Grant(PolymorphicModel):
 			f_released = float(alloc_comps[0])
 			f_unxpended = float(alloc_comps[2])
 			f_unreleased = float(alloc_comps[3])
- 			out = out + '<tr> %s </tr>' % (_temp % (allocation.get_name_display(), '%.2f' % allocation.amount, 
-				'%.2f' % f_released, '%.2f' % f_unxpended, '%.2f' % f_unreleased))
+ 			out = out + '<tr> %s </tr>' % (_temp % (allocation.get_name_display(), '{:,.2f}'.format(allocation.amount), 
+				'{:,.2f}'.format(f_released), '{:,.2f}'.format(f_unxpended), '{:,.2f}'.format(f_unreleased)))
 
 			t_allotment += allocation.amount
 			t_released += float(alloc_comps[0])
 			t_unexpended += float(alloc_comps[2])
 			t_unreleased += float(alloc_comps[3])
 
-		totals = ('<tr> %s </tr>' % _temp) % ('<b>Total</b>', '<b>%.2f</b>' % t_allotment, 
-			'<b>%.2f</b>' % t_released, '<b>%.2f</b>' % t_unexpended, '<b>%.2f</b>' % t_unreleased)
+		t_allotment = '{:,.2f}'.format(t_allotment)
+		t_released = '{:,.2f}'.format(t_released)
+		t_unexpended = '{:,.2f}'.format(t_unexpended)
+		t_unreleased = '{:,.2f}'.format(t_unreleased)
+
+		totals = ('<tr> %s </tr>' % _temp) % ('<b>Total</b>', '<b>%s</b>' % t_allotment, 
+			'<b>%s</b>' % t_released, '<b>%s</b>' % t_unexpended, '<b>%s</b>' % t_unreleased)
 
 		out = u'<table class="table table-bordered table-condensed table-striped"><thread> %s %s \
 			</thread></table>' % (out, totals)

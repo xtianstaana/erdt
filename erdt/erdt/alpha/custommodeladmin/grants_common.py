@@ -233,7 +233,7 @@ class ReleaseSummaryInline(TabularInline):
         if obj:
             return obj.amount
         return 0.0
-    total_budget.short_description = 'Unreleased'
+    total_budget.short_description = 'Approved budget'
 
     def has_delete_permission(self, request, obj=None):
         return False

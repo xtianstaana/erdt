@@ -1,4 +1,5 @@
 {% load i18n admin_static admin_modify %}
+{% load app_filter %}
 <div class="inline-group {{ inline_admin_formset.opts.suit_classes }}" id="{{ inline_admin_formset.formset.prefix }}-group">
   <div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">
 {{ inline_admin_formset.formset.management_form }}
@@ -28,7 +29,7 @@
         {% endif %}
         <tr class="form-row {% cycle "row1" "row2" %} {% if inline_admin_form.original or inline_admin_form.show_url %}has_original{% endif %}{% if forloop.last %} empty-form{% endif %}"
              id="{{ inline_admin_formset.formset.prefix }}-{% if not forloop.last %}{{ forloop.counter0 }}{% else %}empty{% endif %}">
-        {% for fieldset in inline_admin_form|slice:"5" %}
+        {% for fieldset in inline_admin_form %}
           {% for line in fieldset %}
             {% for field in line %}
 
@@ -60,7 +61,11 @@
 
                 {% block field_content %}
                   {% if field.is_readonly %}
-                      <p> {{ field.contents }}</p>
+                      {% if 'amount' in field.field.name or 'total' in field.field.name %}
+                        <p> {{ field.contents|prettify_currency }} </p>
+                      {% else %}
+                        <p> {{ field.contents }} </p>
+                      {% endif %}
                   {% else %}
                     {% if field.field.errors %}
                       <div class="help-block">
