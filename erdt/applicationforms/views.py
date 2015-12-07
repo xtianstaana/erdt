@@ -91,9 +91,9 @@ def submit_prereg_form(request):
 
 def confirm_registration(request, confirmation_token):
     if confirmation_token is not None:
-        splitted = (base64.b64decode(confirmation_token)).split("-")
-
-        username = splitted[len(splitted)-1]
+        splitted = (confirmation_token).split("-")
+        
+        username = base64.b64decode(splitted[len(splitted)-1])
 
         print "Username: %s" % username
 
