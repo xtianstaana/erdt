@@ -237,7 +237,7 @@ class PersonAdmin(ERDTModelAdmin):
         FRGTInline, FRDGInline, PostdocInline, VisitingInline, EnrolledSubjectInline)
     list_display = ('erdt_id', 'name', 'email_address', 'mobile_number', 'user')
     list_display_links = ('name',)
-    readonly_fields = ('age', 'erdt_id', 'faculty_advisees_link')
+    readonly_fields = ('age', 'erdt_id', 'faculty_advisees_link', 'faculty_accountable_equipment_link')
     list_filter = ('profile__role', 'profile__university', )
     search_fields = ('first_name', 'last_name', 'middle_name', 'user__username', 'erdt_id')
     radio_fields =  {'sex' : HORIZONTAL, 'civil_status' : HORIZONTAL}
@@ -257,7 +257,7 @@ class PersonAdmin(ERDTModelAdmin):
             }),
         ('Exportable CSVs', {
             'classes' : ('suit-tab', 'suit-tab-advisees'),
-            'fields':('faculty_advisees_link',),
+            'fields':('faculty_advisees_link', 'faculty_accountable_equipment_link'),
             }),
     )
 
@@ -270,13 +270,15 @@ class PersonAdmin(ERDTModelAdmin):
             if obj and (obj.id==my_profile.person.id) and my_profile.role in (Profile.STUDENT, Profile.ADVISER):
                 return (
                     'photo', 'first_name', 'middle_name', 'last_name', 
-                    'sex', 'civil_status', 'birthdate', 'user', 'age', 'address', 'erdt_id', 'faculty_advisees_link')
+                    'sex', 'civil_status', 'birthdate', 'user', 'age', 'address', 'erdt_id', 'faculty_advisees_link', 
+                    'faculty_accountable_equipment_link')
         except:
             pass
         return (
             'photo', 'first_name', 'middle_name', 'last_name', 
             'sex', 'civil_status', 'birthdate', 'user', 'age', 'address', 
-            'address2', 'email_address', 'landline_number', 'mobile_number', 'erdt_id', 'faculty_advisees_link')
+            'address2', 'email_address', 'landline_number', 'mobile_number', 'erdt_id', 'faculty_advisees_link'
+            'faculty_accountable_equipment_link')
 
     def get_suit_form_tabs(self, request, obj=None):
         tabs = [('general', 'General')]

@@ -61,7 +61,14 @@ class Person(models.Model):
 			url = '/faculty_advisees/%d' % self.id
 			return format_html(u'<a href="{}">%s</a>' % 'Click to download list of advisees', url)
 		return ''
-	faculty_advisees_link.short_description = 'Link'
+	faculty_advisees_link.short_description = 'List of advisees'
+
+	def faculty_accountable_equipment_link(self):
+		if self.id:
+			url = '/faculty_equipment/%d' % self.id
+			return format_html(u'<a href="{}">%s</a>' % 'Click to download list of equipment', url)
+		return ''
+	faculty_accountable_equipment_link.short_description = 'List of equipment'
 
 	def clean(self):
 		if self.landline_number.strip() == '' and self.mobile_number.strip() == '' and self.email_address.strip() == '':
@@ -550,6 +557,7 @@ class Scholarship(Grant):
 	)
 
 	REG_ONGOING, REG_LOAD, ON_EXT, MONITORING, SUSPENDED, TERMINATED, GRADUATE = 'ONG', 'LOAD', 'EXT', 'MON', 'SUS', 'TERM', 'GRAD'
+	NOT_AVAILING, DEFERRED, LOA, NO_REPORT, NON_COMPLYING, WITHDREW = 'NA', 'D', 'LOA', 'NR', 'NC', 'W'
 	SCHOLARSHIP_STATUS_CHOICES = (
 		(REG_ONGOING, 'Regular - Ongoing'),
 		(REG_LOAD, 'Regular - Load'),
@@ -558,6 +566,12 @@ class Scholarship(Grant):
 		(SUSPENDED, 'Suspended'),
 		(TERMINATED, 'Terminated'),
 		(GRADUATE, 'Graduate'),
+		(NOT_AVAILING, 'Not Availing'),
+		(DEFERRED, 'Deferred'),
+		(LOA, 'Leave of Absence'),
+		(NO_REPORT, 'No Report'),
+		(NON_COMPLYING, 'Non-Complying'),
+		(WITHDREW, 'Withdrew')
 	)
 
 	university = models.ForeignKey(

@@ -71,7 +71,7 @@ class PurchasedItemAdmin(ERDTModelAdmin):
                 e.property_no,
                 e.university.__str__(),
                 e.location,
-                e.status,
+                e.get_status_display(),
                 e.accountable.__str__(),
                 e.surrendered
                 ]

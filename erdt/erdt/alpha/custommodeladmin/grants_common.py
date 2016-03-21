@@ -3,7 +3,8 @@ from profiling.models import Grant, Grant_Allocation, Grant_Allocation_Release, 
 from django.forms import ModelForm
 from suit.widgets import AutosizedTextarea, EnclosedInput, SuitDateWidget
 from django_select2.widgets import Select2Widget
-
+from django.http import HttpResponseRedirect, HttpResponse
+import csv
 from globals import ERDTModelAdmin
 
 
@@ -60,9 +61,11 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
 
         form = GrantForm
         inlines =[LineItemInline, ReleaseSummaryInline, ReleaseInline]
-        list_display = ('awardee', 'start_date', 'end_date', )
-        search_fields = ('start_date',)
-        list_filter = ('record_manager',)
+        list_display = ['awardee', 'start_date', 'end_date']
+        search_fields = ['start_date']
+        list_filter = ['record_manager']
+        actions = ['export_csv']
+        list_max_show_all = 10000000
 
         def get_readonly_fields(self, request, obj=None):
             _ro = super(GrantModelAdmin,self).get_readonly_fields(request, obj)
@@ -88,6 +91,31 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
             else:
                 return queryset, False
 
+        def export_csv(self, request, queryset):
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment;filename="grant_list.csv"'
+            
+            writer = csv.writer(response)
+            writer.writerow(['ERDT {} List'.format(self.model._meta.verbose_name)])
+            writer.writerow([])
+            other_fields = [field for field in self.model._meta.fields if (field not in Grant._meta.fields) and field.name != 'grant_ptr']
+            writer.writerow(
+                ['Name', 'Email', 'Start Date', 'End Date', 'Description', 'Record Manager'] +
+                [field.name.title().replace('_', ' ') for field in other_fields]
+            )
+
+            for q in queryset:
+                write = [
+                    str(q.awardee),
+                    q.awardee.email_address,
+                    str(q.start_date),
+                    str(q.end_date),
+                    str(q.description),
+                    str(q.record_manager),
+                ] + [str(getattr(q, field.name)) for field in other_fields]
+                writer.writerow(write)
+            return response
+        export_csv.short_description = 'Export selected {} to CSV'.format(my_grant._meta.verbose_name)
 
         def get_fieldsets(self, request, obj=None):
             awardee = 'awardee' 
