@@ -1,6 +1,5 @@
 from django.conf.urls import patterns, include, url
 from erdt.alpha import views
-from reporting import views as reporting_views
 
 
 urlpatterns = patterns('',
