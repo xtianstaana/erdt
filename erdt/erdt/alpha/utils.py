@@ -48,10 +48,10 @@ Revisions:
 def create_readonly_permissions():
 
     try:
-        reporting_app = get_app(constants['constants']['apps']['reporting'])
         profiling_app = get_app(constants['constants']['apps']['profiling'])
+        financial_app = get_app(constants['constants']['apps']['financial'])
 
-        models = get_models(reporting_app) + get_models(profiling_app)
+        models = get_models(financial_app) + get_models(profiling_app)
    
 
         # Create permissions for user

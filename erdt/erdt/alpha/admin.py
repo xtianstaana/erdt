@@ -12,13 +12,16 @@ from django.views.decorators.cache import never_cache
 from django.forms.models import model_to_dict
 from forms import *
 
+from financial import models as finmod
+from custommodeladmin.budget import BudgetAdmin
+from custommodeladmin.budgetrelease import BudgetReleaseAdmin
+
+
 # Utility methods
 from utils import *
 
 # Import Profiling Module Models 
 from profiling.models import *
-
-from reporting.models import *
 
 # Import Constants
 from context_processors import constants, external_urls
@@ -40,8 +43,6 @@ from custommodeladmin.grants import *
 from custommodeladmin.scholarship import ScholarshipAdmin
 #from custommodeladmin.visiting_professor import VisitingProfessorAdmin
 
-from custommodeladmin.university_report import UniversityReportAdmin
-from custommodeladmin.individual_report import IndividualReportAdmin
 
 
 """
@@ -123,6 +124,8 @@ admin_site.register(ERDT_Scholarship_Special, Scholarship2Admin)
 admin_site.register(Postdoctoral_Fellowship, PostdoctoralAdmin)
 admin_site.register(FRDG, FRDGAdmin)
 admin_site.register(FRGT, FRGTAdmin)
-admin_site.register(Individual_Report, IndividualReportAdmin)
-admin_site.register(University_Report, UniversityReportAdmin)
 admin_site.register(Fund_Release_Batchtools, FundReleaseBatchtoolsAdmin)
+
+admin_site.register(finmod.Budget, BudgetAdmin)
+admin_site.register(finmod.BudgetRelease, BudgetReleaseAdmin)
+admin_site.register(finmod.Disbursement)

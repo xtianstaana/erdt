@@ -43,7 +43,7 @@ INSTALLED_APPS = (
     'polymorphic',
     'erdt.alpha', #Admin Customization
     'profiling',
-    'reporting',
+    'financial',
     'reportlab',
     'wkhtmltopdf',
     'applicationforms',

@@ -118,22 +118,36 @@
 		"change" : ["CENT", "ADMIN", "DOST"],
 		"delete" : ["CENT", "ADMIN"]
 	},
-
-	"individual_report" : {
-		"add" : ["CENT", "ADMIN"],
-		"change" : ["CENT", "ADMIN", "DOST"],
-		"delete" : ["CENT", "ADMIN"]
-	},
 	
-	"university_report" : {
-		"add" : ["CENT", "ADMIN"],
-		"change" : ["CENT", "ADMIN", "DOST"],
-		"delete" : ["CENT", "ADMIN"]
-	},
 
 	"fund_release_batchtools" : {
 		"add" : ["CENT", "ADMIN"],
 		"change" : ["CENT", "ADMIN", "DOST"],
 		"delete" : []
+	},
+
+	"budget" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST"],
+		"delete" : []
+	},
+
+	"lineitem" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST"],
+		"delete" : []
+	},
+
+	"budgetrelease" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST"],
+		"delete" : []
+	},
+
+	"lineitembudgetrelease" : {
+		"add" : ["CENT", "ADMIN"],
+		"change" : ["CENT", "ADMIN", "DOST"],
+		"delete" : []
 	}
+
 }

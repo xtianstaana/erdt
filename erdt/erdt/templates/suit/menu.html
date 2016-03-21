@@ -18,12 +18,18 @@
       {% for app in app_list %}
         {% if app.separator %}
           <li class="separator"></li>
-        {% elif app.label != 'Reporting' %}
+        {% elif app.label != 'Financial' %}
           <li
             {% if "/auth/user/" in request.get_full_path and app.label == 'Authentication and Authorization' %}
               class="active"
             {% endif %}
             {% if "/profiling/person/" in request.get_full_path and app.label == 'Profiling' %}
+              class="active"
+            {% endif %}
+            {% if "/profiling/university/" in request.get_full_path and app.label == 'Profiling' %}
+              class="active"
+            {% endif %}
+            {% if "/profiling/degree_program/" in request.get_full_path and app.label == 'Profiling' %}
               class="active"
             {% endif %}
           >
@@ -291,54 +297,60 @@
       {% endfor %}
     {% endif %}
 
-    {# FOR REPORTING  #}
+    {# FOR FINANCIAL  #}
 
     {% if app_list %}
       {% for app in app_list %}
         {% if app.separator %}
           <li class="separator"></li>
-        {% elif app.label == 'Reporting' %}
-          <li 
-          {% if "/reporting/university_report/" in request.get_full_path %}
+        {% elif app.label == 'Profiling' %}
+        {% if multi_profile.is_admin %}
+          <li
+          {% if "/financial/budget/" in request.get_full_path %}
             class="active"
           {% endif %}
-          {% if "/reporting/individual_report/" in request.get_full_path %}
+          {% if "/financial/budgetrelease/" in request.get_full_path %}
+            class="active"
+          {% endif %}
+          {% if "/financial/disbursement/" in request.get_full_path %}
             class="active"
           {% endif %}
             >
-            <a href="{% url 'admin:reporting_individual_report_changelist' %}"><i class="icon-chevron-right"></i>Reporting
+            <a href="{% url 'admin:financial_budget_changelist' %}"><i class="icon-chevron-right"></i>Consortium Finance
             </a>
             
               <ul>
-                {% for model in app.models %}
+                {% if "/financial/budget/" in request.get_full_path %} 
+                  <li class="active"> 
+                {% else %}
+                  <li>
+                {% endif %}
+                <a href="{% url 'admin:financial_budget_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>Line Item Budget</a>
+                </li>
+                
+                {% if "/financial/budgetrelease/" in request.get_full_path %} 
+                  <li class="active"> 
+                {% else %}
+                  <li>
+                {% endif %}
+                <a href="{% url 'admin:financial_budgetrelease_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>DOST Fund Releases</a>
+                </li>
 
-                  {% if model.label == 'University Reports' %}  
-                    {% if "/reporting/university_report/" in request.get_full_path %} 
-                    <li class="active"> 
-                    {% else %}
-                    <li>
-                    {% endif %}
-                    <a href="{% url 'admin:reporting_university_report_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
-                    </li>
-                  {% endif %}
-
-                  {% if model.label == 'Individual Reports' %}  
-                    {% if "/reporting/individual_report/" in request.get_full_path %} 
-                    <li class="active"> 
-                    {% else %}
-                    <li>
-                    {% endif %}
-                    <a href="{% url 'admin:reporting_individual_report_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
-                    </li>
-                  {% endif %}
-
-                {% endfor %}
+                {% if "/financial/disbursement/" in request.get_full_path %} 
+                  <li class="active"> 
+                {% else %}
+                  <li>
+                {% endif %}
+                <a href="{% url 'admin:financial_disbursement_changelist' %}"{{ model.blank|yesno:' target=_blank,' }}>Disbursements</a>
+                </li>
               </ul>
             
           </li>
+          {% endif %}
         {% endif %}
       {% endfor %}
     {% endif %}
+
 
   </ul>
 </div>
