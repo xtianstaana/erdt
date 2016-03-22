@@ -1,4 +1,4 @@
-Django
+Django==1.7.1
 django-polymorphic==0.6
 django-autocomplete-light==2.0.3
 django-smart-selects==1.0.9
@@ -8,3 +8,6 @@ Pillow==2.5.1
 django-suit==0.2.9
 Django-Select2==4.2.2
 wsgiref==0.1.2
+six==1.10
+django-uni-form==0.9.0
+django-appconf==1.0.1
