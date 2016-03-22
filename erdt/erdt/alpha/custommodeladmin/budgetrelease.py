@@ -101,4 +101,3 @@ class BudgetReleaseAdmin(ERDTModelAdmin):
         except Exception as e:
             print 'Error at BudgetReleaseAdmin:get_queryset:::', e
         return BudgetRelease.objects.none()
-

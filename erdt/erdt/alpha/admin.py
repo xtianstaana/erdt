@@ -15,6 +15,7 @@ from forms import *
 from financial import models as finmod
 from custommodeladmin.budget import BudgetAdmin
 from custommodeladmin.budgetrelease import BudgetReleaseAdmin
+from custommodeladmin.disbursement import DisbursementAdmin
 
 
 # Utility methods
@@ -128,4 +129,4 @@ admin_site.register(Fund_Release_Batchtools, FundReleaseBatchtoolsAdmin)
 
 admin_site.register(finmod.Budget, BudgetAdmin)
 admin_site.register(finmod.BudgetRelease, BudgetReleaseAdmin)
-admin_site.register(finmod.Disbursement)
+admin_site.register(finmod.Disbursement, DisbursementAdmin)

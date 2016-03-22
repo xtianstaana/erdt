@@ -103,6 +103,7 @@ class Disbursement(models.Model):
     line_item = GF(LineItem, 
                    chained_field='budget', chained_model_field='budget',
                    on_delete=PROTECT)
+    release_date = models.DateField(help_text='Format: YYYY-MM-DD')
     description = models.CharField(max_length=500, blank=True)
     amount = models.FloatField(default=0.0)
 
