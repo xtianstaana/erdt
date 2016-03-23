@@ -145,11 +145,15 @@ class ScholarshipAdmin(ERDTModelAdmin):
                 'classes' : ('suit-tab', 'suit-tab-thesis'),
                 'fields' : ('adviser', 'thesis_status', 'thesis_title', 'thesis_topic'),
                 }),
+            ('Exportable CSVs', {
+                'classes' : ('suit-tab', 'suit-tab-releases'),
+                'fields' : ('grant_financial_release_link',)
+                })
         )
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ('awardee_link', 'university', 'record_manager', 'degree_program')
+            return ('awardee_link', 'university', 'record_manager', 'degree_program', 'grant_financial_release_link')
         return super(ScholarshipAdmin, self).get_readonly_fields(request, obj)
 
     def get_suit_form_tabs(self, request, obj=None):

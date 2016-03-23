@@ -66,6 +66,7 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
         list_filter = ['record_manager']
         actions = ['export_csv']
         list_max_show_all = 10000000
+        readonly_fields = ('grant_financial_release_link',)
 
         def get_readonly_fields(self, request, obj=None):
             _ro = super(GrantModelAdmin,self).get_readonly_fields(request, obj)
@@ -133,6 +134,10 @@ def grantModelAdmin_factory(my_grant, choices, *eligible):
                 (None, {
                     'classes' : ('suit-tab', 'suit-tab-general'),
                     'fields' : (awardee, 'start_date', 'end_date', 'description', 'record_manager')
+                }),
+                ('Exportable CSVs', {
+                    'classes' : ('suit-tab', 'suit-tab-releases'),
+                    'fields' : ('grant_financial_release_link',)
                 }),
             ) + others
 
