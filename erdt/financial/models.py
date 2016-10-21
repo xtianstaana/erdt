@@ -5,6 +5,7 @@ from datetime import datetime, date
 from smart_selects.db_fields import ChainedForeignKey as GF
 from profiling import models as profiling_models
 from django.core.exceptions import ValidationError
+from django.utils.html import format_html, mark_safe
 
 
 class Budget(models.Model):
@@ -20,16 +21,86 @@ class Budget(models.Model):
         verbose_name_plural = 'Line Item Budget'
 
     def release_scholarship_local(self):
-        out = u'<tr> <td><b>Line Item</b></td> <td><b>Budget</b></td>  \
-            <td><b>Released</b></td> <td><b>Unexpended</b></td> <td><b>Unreleased</b></td> </tr>'
+        out = u'<table class="table table-bordered table-condensed table-striped"><thread><tr> <td><b>Line Item</b></td> <td><b>Budget</b></td>' \
+            '<td><b>Released</b></td> <td><b>Unexpended</b></td></tr>'
 
-        _temp =  '<td> %s </td>' + ('<td class="numeric"> %s </td> ' * 4)
+        _temp =  '<td> %s </td>' + ('<td class="numeric"> %s </td> ' * 3)
 
-        t_allotment, t_released, t_unexpended, t_unreleased = (0.0, 0.0, 0.0, 0.0)
+        f_budget, f_released, f_unxpended = self.summary_local_common('Scholarship (Local): Tuition and Fees', 'TUITION')
 
-        
-        # for allocation in self.grant_allocation_set.all():
+        out += '<tr> %s </tr>' % (_temp % ('Tuition and Fees', '{:,.2f}'.format(f_budget), 
+            '{:,.2f}'.format(f_released), '{:,.2f}'.format(f_unxpended)))
 
+
+        f_budget, f_released, f_unxpended = self.summary_local_common('Scholarship (Local): Stipends', 'STIPEND')
+
+        out += '<tr> %s </tr>' % (_temp % ('Stipends', '{:,.2f}'.format(f_budget), 
+            '{:,.2f}'.format(f_released), '{:,.2f}'.format(f_unxpended)))
+
+        f_budget, f_released, f_unxpended = self.summary_local_common('Scholarship (Local): Book Allowance', 'BOOK_ALW')
+
+        out += '<tr> %s </tr>' % (_temp % ('Book Allowance', '{:,.2f}'.format(f_budget), 
+            '{:,.2f}'.format(f_released), '{:,.2f}'.format(f_unxpended)))
+
+        out += '</thread></table>'
+
+        return format_html(mark_safe(out))
+    release_scholarship_local.short_description = 'Scholarship (Local)'
+
+    def release_sandwich(self):
+        out = u'<table class="table table-bordered table-condensed table-striped"><thread><tr> <td><b>Line Item</b></td> <td><b>Budget</b></td>' \
+            '<td><b>Released</b></td> <td><b>Unexpended</b></td></tr>'
+        _temp =  '<td> %s </td>' + ('<td class="numeric"> %s </td> ' * 3)
+
+        f_budget, f_released, f_unxpended = self.summary_sandwich()
+
+        out += '<tr> %s </tr>' % (_temp % ('Sandwich', '{:,.2f}'.format(f_budget), 
+            '{:,.2f}'.format(f_released), '{:,.2f}'.format(f_unxpended)))
+        out += '</thread></table>'
+        print 'xxx',out,'xxx'
+        return format_html(mark_safe(out))
+    release_sandwich.short_description = 'Sandwich Program'
+
+    def summary_sandwich(self):
+        allocation = self.lineitem_set.filter(name='Sandwich Program')
+        if allocation:
+            total_allocation = allocation[0].ammount
+        else:
+            total_allocation = 0.0
+
+        released = profiling_models.Sandwich_Program.objects.filter(start_date__gt=self.start_date, 
+            end_date__lt=self.end_date)
+
+        total_released = 0.0
+
+        for release in released:
+                total_released += release.total_released()
+
+        total_released = 0.0
+        total_unexpended = total_allocation - total_released
+
+        return total_allocation, total_released, total_unexpended
+
+
+    def summary_local_common(self, name, alloc_name):
+        allocation = self.lineitem_set.filter(name=name)
+        if allocation:
+            total_allocation = allocation[0].ammount
+        else:
+            total_allocation = 0.0
+
+        released = profiling_models.Grant_Allocation_Release.objects.filter(date_released__gte=self.start_date, 
+            date_released__lte=self.end_date, allocation__name=alloc_name)
+
+        total_released = 0.0
+
+        for release in released:
+            if isinstance(release.grant, profiling_models.Scholarship):
+                total_released += release.amount_released
+
+        total_unexpended = total_allocation - total_released
+
+        return total_allocation, total_released, total_unexpended
 
     def total_budget(self):
         total_amount = self.lineitem_set.aggregate(Sum('amount')).values()[0]

@@ -125,7 +125,7 @@ class ScholarshipAdmin(ERDTModelAdmin):
         awardee = 'awardee'
         if obj:
             awardee = 'awardee_link'
-        return (
+        fieldset = (
             (None, {
                 'classes' : ('suit-tab', 'suit-tab-general'),
                 'fields' : (awardee, 'start_date', 'end_date', 'description', 
@@ -144,12 +144,19 @@ class ScholarshipAdmin(ERDTModelAdmin):
             (None, {
                 'classes' : ('suit-tab', 'suit-tab-thesis'),
                 'fields' : ('adviser', 'thesis_status', 'thesis_title', 'thesis_topic'),
-                }),
-            ('Exportable CSVs', {
-                'classes' : ('suit-tab', 'suit-tab-releases'),
-                'fields' : ('grant_financial_release_link',)
                 })
         )
+
+        if obj:
+            fieldset += ((
+                'Exportable CSVs', 
+                {
+                    'classes' : ('suit-tab', 'suit-tab-releases'),
+                    'fields' : ('grant_financial_release_link',)
+                }
+            ),)
+        return fieldset
+
 
     def get_readonly_fields(self, request, obj=None):
         if obj:

@@ -46,11 +46,11 @@ class BudgetAdmin(ERDTModelAdmin):
     form = MyForm
     inlines = [LineItemInline]
     list_display = ['period', 'university', 'total_budget']
-    readonly_fields = ('total_budget',)
+    readonly_fields = ('total_budget', 'release_scholarship_local', 'release_sandwich')
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ('university', 'total_budget')
+            return ('university', 'total_budget', 'release_scholarship_local', 'release_sandwich')
         return super(BudgetAdmin, self).get_readonly_fields(request, obj)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    
@@ -85,6 +85,11 @@ class BudgetAdmin(ERDTModelAdmin):
                 'fields' : ('university', 'start_date', 'end_date', 'total_budget')
                 }
             ),
+            (None, {
+                'classes': ('suit-tab', 'suit-tab-releases'),
+                'fields': ('release_scholarship_local', 'release_sandwich') 
+                }
+            )
         )
 
     def get_suit_form_tabs(self, request, obj=None):
